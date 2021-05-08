@@ -8,6 +8,7 @@ pub trait FlUrlAzureExtensions {
         verb: SignVerb,
         connection: &AzureConnection,
         next_marker: Option<String>,
+        azure_rest_version: &str,
     ) -> Self;
 }
 
@@ -17,6 +18,7 @@ impl FlUrlAzureExtensions for FlUrl {
         verb: SignVerb,
         connection: &AzureConnection,
         next_marker: Option<String>,
+        azure_rest_version: &str,
     ) -> Self {
         let now = Utc::now();
 
@@ -26,7 +28,7 @@ impl FlUrlAzureExtensions for FlUrl {
             .append_query_param("timeout", connection.time_out_ms.as_str())
             .append_query_param("maxresults", "100")
             .with_header("x-ms-date", date.as_str())
-            .with_header("x-ms-version", super::sign_utils::AZURE_REST_VERSION);
+            .with_header("x-ms-version", azure_rest_version);
 
         if let Some(next_marker) = next_marker {
             flurl = flurl.append_query_param_string("marker", next_marker);

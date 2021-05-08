@@ -4,6 +4,7 @@ use flurl::FlUrl;
 
 use super::sign_utils::SignVerb;
 
+#[derive(Clone)]
 pub struct AzureConnection {
     pub account_name: String,
     pub account_key: Vec<u8>,

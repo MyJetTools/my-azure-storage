@@ -1,4 +1,5 @@
-mod blobs;
+pub mod blobs;
+
 mod connection;
 mod flurl_ext;
 mod sign_utils;

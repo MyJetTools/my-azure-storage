@@ -1,22 +1,39 @@
+use std::rc::Rc;
+
 use hyper::Error;
+
+use super::super::AzureConnection;
 
 use super::super::FlUrlAzureExtensions;
 use super::blob_models;
 use flurl::FlUrl;
 
-use super::super::AzureConnection;
+pub struct BlockBlob {
+    connection: Rc<AzureConnection>,
+}
 
-impl AzureConnection {
+impl BlockBlob {
+    pub fn new(connection: Rc<AzureConnection>) -> Self {
+        Self {
+            connection: connection.clone(),
+        }
+    }
+
     pub async fn get_list_of_blob_containers(&self) -> Result<Vec<String>, Error> {
         let mut result = vec![];
 
         let mut next_marker: Option<String> = None;
 
         loop {
-            let response = FlUrl::new(self.blobs_api_url.as_str())
+            let response = FlUrl::new(self.connection.blobs_api_url.as_str())
                 .append_query_param("comp", "list")
                 .with_header("Content-Length", "0")
-                .add_azure_headers(super::super::sign_utils::SignVerb::GET, self, next_marker)
+                .add_azure_headers(
+                    super::super::sign_utils::SignVerb::GET,
+                    &self.connection,
+                    next_marker,
+                    AZURE_REST_VERSION,
+                )
                 .get()
                 .await?;
 
@@ -42,12 +59,17 @@ impl AzureConnection {
         let mut next_marker: Option<String> = None;
 
         loop {
-            let response = FlUrl::new(self.blobs_api_url.as_str())
+            let response = FlUrl::new(self.connection.blobs_api_url.as_str())
                 .append_path_segment(container_name)
                 .append_query_param("comp", "list")
                 .append_query_param("restype", "container")
                 .with_header("Content-Length", "0")
-                .add_azure_headers(super::super::SignVerb::GET, self, next_marker)
+                .add_azure_headers(
+                    super::super::SignVerb::GET,
+                    self.connection.as_ref(),
+                    next_marker,
+                    AZURE_REST_VERSION,
+                )
                 .get()
                 .await?;
 
@@ -72,11 +94,16 @@ impl AzureConnection {
         container_name: &str,
         blob_name: &str,
     ) -> Result<Vec<u8>, Error> {
-        let response = FlUrl::new(self.blobs_api_url.as_str())
+        let response = FlUrl::new(self.connection.blobs_api_url.as_str())
             .append_path_segment(container_name)
             .append_path_segment(blob_name)
             .with_header("Content-Length", "0")
-            .add_azure_headers(super::super::SignVerb::GET, self, None)
+            .add_azure_headers(
+                super::super::SignVerb::GET,
+                self.connection.as_ref(),
+                None,
+                AZURE_REST_VERSION,
+            )
             .get()
             .await?;
 
@@ -84,11 +111,16 @@ impl AzureConnection {
     }
 
     pub async fn delete_blob(&self, container_name: &str, blob_name: &str) -> Result<(), Error> {
-        let response = FlUrl::new(self.blobs_api_url.as_str())
+        let response = FlUrl::new(self.connection.blobs_api_url.as_str())
             .append_path_segment(container_name)
             .append_path_segment(blob_name)
             .with_header("Content-Length", "0")
-            .add_azure_headers(super::super::SignVerb::DELETE, self, None)
+            .add_azure_headers(
+                super::super::SignVerb::DELETE,
+                self.connection.as_ref(),
+                None,
+                AZURE_REST_VERSION,
+            )
             .delete()
             .await?;
 
@@ -101,15 +133,22 @@ impl AzureConnection {
         blob_name: &str,
         content: Vec<u8>,
     ) -> Result<(), Error> {
-        FlUrl::new(self.blobs_api_url.as_str())
+        FlUrl::new(self.connection.blobs_api_url.as_str())
             .append_path_segment(container_name)
             .append_path_segment(blob_name)
             .with_header_val_string("Content-Length", content.len().to_string())
             .with_header("x-ms-blob-type", "BlockBlob")
-            .add_azure_headers(super::super::SignVerb::PUT, self, None)
+            .add_azure_headers(
+                super::super::SignVerb::PUT,
+                self.connection.as_ref(),
+                None,
+                AZURE_REST_VERSION,
+            )
             .put(content)
             .await?;
 
         Ok(())
     }
 }
+
+pub const AZURE_REST_VERSION: &str = "2017-07-29";

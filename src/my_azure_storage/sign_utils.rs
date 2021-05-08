@@ -8,8 +8,6 @@ use flurl::FlUrl;
 
 type HmacSha256 = Hmac<Sha256>;
 
-pub const AZURE_REST_VERSION: &str = "2017-07-29";
-
 pub enum SignVerb {
     GET,
     POST,
