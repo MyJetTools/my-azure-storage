@@ -36,7 +36,7 @@ impl PageBlob {
 
         let new_size = pages_amount * PAGE_SIZE;
 
-        let result = FlUrl::new(self.connection.blobs_api_url.as_str())
+        FlUrl::new(self.connection.blobs_api_url.as_str())
             .append_path_segment(container_name)
             .append_path_segment(blob_name)
             .with_header_val_string("x-ms-blob-content-length", new_size.to_string())
@@ -50,10 +50,6 @@ impl PageBlob {
             )
             .put(None)
             .await?;
-
-        let body = result.get_body().await.unwrap();
-
-        println!("{}", String::from_utf8(body).unwrap());
 
         return Ok(true);
     }
@@ -84,7 +80,7 @@ impl PageBlob {
     ) -> Result<(), Error> {
         let new_size = pages_amount * PAGE_SIZE;
 
-        let result = FlUrl::new(self.connection.blobs_api_url.as_str())
+        FlUrl::new(self.connection.blobs_api_url.as_str())
             .append_path_segment(container_name)
             .append_path_segment(blob_name)
             .append_query_param("comp", "properties")
@@ -99,10 +95,6 @@ impl PageBlob {
             )
             .put(None)
             .await?;
-
-        let body = result.get_body().await.unwrap();
-
-        println!("{}", String::from_utf8(body).unwrap());
 
         return Ok(());
     }
