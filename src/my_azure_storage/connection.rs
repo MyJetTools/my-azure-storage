@@ -57,9 +57,26 @@ impl AzureConnection {
         }
     }
 
-    pub fn get_auth_header(&self, verb: SignVerb, flurl: &FlUrl) -> String {
-        let string_to_sign =
-            super::sign_utils::get_auth_header(self.account_name.as_str(), "", verb, flurl);
+    pub fn get_auth_header(
+        &self,
+        verb: SignVerb,
+        content_len: Option<usize>,
+        flurl: &FlUrl,
+    ) -> String {
+        let content_len = match content_len {
+            Some(len) => len.to_string(),
+            None => "".to_string(),
+        };
+
+        let string_to_sign = super::sign_utils::get_auth_header(
+            self.account_name.as_str(),
+            content_len.as_str(),
+            verb,
+            flurl,
+        );
+
+        // println!("string_to_sign: {:?}", string_to_sign);
+
         let signature =
             super::sign_utils::sign_transaction(string_to_sign.as_str(), &self.account_key);
         format!("SharedKey {}:{}", &self.account_name, signature)

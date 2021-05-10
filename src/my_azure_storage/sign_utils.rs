@@ -13,6 +13,7 @@ pub enum SignVerb {
     POST,
     PUT,
     DELETE,
+    HEAD,
 }
 
 impl SignVerb {
@@ -22,6 +23,7 @@ impl SignVerb {
             SignVerb::POST => "POST",
             SignVerb::PUT => "PUT",
             SignVerb::DELETE => "DELETE",
+            SignVerb::HEAD => "HEAD",
         }
     }
 }

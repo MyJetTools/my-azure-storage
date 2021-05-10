@@ -14,3 +14,4 @@ sha2 = "*"
 base64 = "*"
 chrono = "0.4.19"
 hyper = { version = "0.14", features = ["full"] }
+tokio = { version = "*", features = ["macros"] }

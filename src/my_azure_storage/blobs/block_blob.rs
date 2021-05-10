@@ -19,40 +19,6 @@ impl BlockBlob {
         }
     }
 
-    pub async fn get_list_of_blob_containers(&self) -> Result<Vec<String>, Error> {
-        let mut result = vec![];
-
-        let mut next_marker: Option<String> = None;
-
-        loop {
-            let response = FlUrl::new(self.connection.blobs_api_url.as_str())
-                .append_query_param("comp", "list")
-                .with_header("Content-Length", "0")
-                .add_azure_headers(
-                    super::super::sign_utils::SignVerb::GET,
-                    &self.connection,
-                    next_marker,
-                    AZURE_REST_VERSION,
-                )
-                .get()
-                .await?;
-
-            let body = response.get_body().await?;
-
-            let azure_response = blob_models::deserialize_list_of_containers(body.as_ref());
-
-            result.extend(azure_response.items);
-
-            if azure_response.next_marker.is_none() {
-                break;
-            }
-
-            next_marker = azure_response.next_marker;
-        }
-
-        return Ok(result);
-    }
-
     pub async fn get_list_of_blobs(&self, container_name: &str) -> Result<Vec<String>, Error> {
         let mut result = vec![];
 
@@ -63,10 +29,10 @@ impl BlockBlob {
                 .append_path_segment(container_name)
                 .append_query_param("comp", "list")
                 .append_query_param("restype", "container")
-                .with_header("Content-Length", "0")
                 .add_azure_headers(
                     super::super::SignVerb::GET,
                     self.connection.as_ref(),
+                    None,
                     next_marker,
                     AZURE_REST_VERSION,
                 )
@@ -97,10 +63,10 @@ impl BlockBlob {
         let response = FlUrl::new(self.connection.blobs_api_url.as_str())
             .append_path_segment(container_name)
             .append_path_segment(blob_name)
-            .with_header("Content-Length", "0")
             .add_azure_headers(
                 super::super::SignVerb::GET,
                 self.connection.as_ref(),
+                None,
                 None,
                 AZURE_REST_VERSION,
             )
@@ -111,13 +77,13 @@ impl BlockBlob {
     }
 
     pub async fn delete_blob(&self, container_name: &str, blob_name: &str) -> Result<(), Error> {
-        let response = FlUrl::new(self.connection.blobs_api_url.as_str())
+        FlUrl::new(self.connection.blobs_api_url.as_str())
             .append_path_segment(container_name)
             .append_path_segment(blob_name)
-            .with_header("Content-Length", "0")
             .add_azure_headers(
                 super::super::SignVerb::DELETE,
                 self.connection.as_ref(),
+                None,
                 None,
                 AZURE_REST_VERSION,
             )
@@ -136,15 +102,15 @@ impl BlockBlob {
         FlUrl::new(self.connection.blobs_api_url.as_str())
             .append_path_segment(container_name)
             .append_path_segment(blob_name)
-            .with_header_val_string("Content-Length", content.len().to_string())
             .with_header("x-ms-blob-type", "BlockBlob")
             .add_azure_headers(
                 super::super::SignVerb::PUT,
                 self.connection.as_ref(),
+                Some(content.len()),
                 None,
                 AZURE_REST_VERSION,
             )
-            .put(content)
+            .put(Some(content))
             .await?;
 
         Ok(())
