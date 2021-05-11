@@ -34,7 +34,7 @@ impl PageBlob {
             return Ok(false);
         }
 
-        let new_size = pages_amount * PAGE_SIZE;
+        let new_size = pages_amount * BLOB_PAGE_SIZE;
 
         FlUrl::new(self.connection.blobs_api_url.as_str())
             .append_path_segment(container_name)
@@ -78,7 +78,7 @@ impl PageBlob {
         blob_name: &str,
         pages_amount: u64,
     ) -> Result<(), Error> {
-        let new_size = pages_amount * PAGE_SIZE;
+        let new_size = pages_amount * BLOB_PAGE_SIZE;
 
         FlUrl::new(self.connection.blobs_api_url.as_str())
             .append_path_segment(container_name)
@@ -106,7 +106,7 @@ impl PageBlob {
         start_page_no: u64,
         payload: Vec<u8>,
     ) -> Result<(), Error> {
-        let start_bytes = start_page_no * PAGE_SIZE;
+        let start_bytes = start_page_no * BLOB_PAGE_SIZE;
 
         let end_bytes = start_bytes + payload.len() as u64 - 1;
 
@@ -138,7 +138,7 @@ impl PageBlob {
         start_page_no: u64,
         size_to_read: u64,
     ) -> Result<Vec<u8>, Error> {
-        let start_bytes = start_page_no * PAGE_SIZE;
+        let start_bytes = start_page_no * BLOB_PAGE_SIZE;
 
         let end_bytes = start_bytes + size_to_read - 1;
 
@@ -197,7 +197,7 @@ impl PageBlob {
 
 const AZURE_REST_VERSION: &str = "2017-07-29";
 
-const PAGE_SIZE: u64 = 512;
+pub const BLOB_PAGE_SIZE: u64 = 512;
 
 #[cfg(test)]
 mod tests {
