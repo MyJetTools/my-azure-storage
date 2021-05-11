@@ -23,7 +23,7 @@ impl PageBlob {
         &self,
         container_name: &str,
         blob_name: &str,
-        pages_amount: usize,
+        pages_amount: u64,
     ) -> Result<bool, Error> {
         let result = self
             .get_properties(container_name, blob_name)
@@ -58,7 +58,7 @@ impl PageBlob {
         &self,
         container_name: &str,
         blob_name: &str,
-        pages_amount: usize,
+        pages_amount: u64,
     ) -> Result<(), Error> {
         let result = self
             .get_properties(container_name, blob_name)
@@ -76,7 +76,7 @@ impl PageBlob {
         &self,
         container_name: &str,
         blob_name: &str,
-        pages_amount: usize,
+        pages_amount: u64,
     ) -> Result<(), Error> {
         let new_size = pages_amount * PAGE_SIZE;
 
@@ -103,12 +103,12 @@ impl PageBlob {
         &self,
         container_name: &str,
         blob_name: &str,
-        start_page_no: usize,
+        start_page_no: u64,
         payload: Vec<u8>,
     ) -> Result<(), Error> {
         let start_bytes = start_page_no * PAGE_SIZE;
 
-        let end_bytes = start_bytes + payload.len() - 1;
+        let end_bytes = start_bytes + payload.len() as u64 - 1;
 
         let range_header = format!("bytes={}-{}", start_bytes, end_bytes);
 
@@ -135,8 +135,8 @@ impl PageBlob {
         &self,
         container_name: &str,
         blob_name: &str,
-        start_page_no: usize,
-        size_to_read: usize,
+        start_page_no: u64,
+        size_to_read: u64,
     ) -> Result<Vec<u8>, Error> {
         let start_bytes = start_page_no * PAGE_SIZE;
 
@@ -197,7 +197,7 @@ impl PageBlob {
 
 const AZURE_REST_VERSION: &str = "2017-07-29";
 
-const PAGE_SIZE: usize = 512;
+const PAGE_SIZE: u64 = 512;
 
 #[cfg(test)]
 mod tests {
