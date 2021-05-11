@@ -105,7 +105,7 @@ dependencies = [
 [[package]]
 name = "flurl"
 version = "0.1.0"
-source = "git+https://github.com/MyJetTools/fl-url#ae5ac7aa63e65f1fa9f639e8e8920687102f2d6c"
+source = "git+https://github.com/MyJetTools/fl-url#9318b0c2b6c43f8a99ccfbf3caa8aed63db4e235"
 dependencies = [
  "hyper",
  "hyper-tls",

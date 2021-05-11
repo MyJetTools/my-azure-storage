@@ -4,5 +4,5 @@ pub struct AzureItems<T> {
 }
 
 pub struct BlobProperties {
-    pub len: usize,
+    pub blob_size: usize,
 }

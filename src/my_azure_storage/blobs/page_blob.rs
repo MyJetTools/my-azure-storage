@@ -187,13 +187,9 @@ impl PageBlob {
 
         let content_len = headers.get("content-length").unwrap();
 
-        let len = content_len.parse::<usize>().unwrap();
+        let blob_size = content_len.parse::<usize>().unwrap();
 
-        let body = response.get_body().await.unwrap();
-
-        println!("Body: {:?}", String::from_utf8(body).unwrap());
-
-        let result = BlobProperties { len };
+        let result = BlobProperties { blob_size };
 
         Ok(Some(result))
     }
@@ -236,13 +232,13 @@ mod tests {
             .await
             .unwrap();
 
-        let size = page_blob
+        let blob_props = page_blob
             .get_properties("testtest", "test")
             .await
             .unwrap()
             .unwrap();
 
-        println!("Page Len is: {}", size.len);
+        assert_eq!(512 * 4, blob_props.blob_size)
 
         //  let res = page_blob.get("testtest", "test", 2, 2).await.unwrap();
 
