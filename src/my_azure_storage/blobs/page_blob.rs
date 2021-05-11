@@ -187,7 +187,7 @@ impl PageBlob {
 
         let content_len = headers.get("content-length").unwrap();
 
-        let blob_size = content_len.parse::<usize>().unwrap();
+        let blob_size = content_len.parse().unwrap();
 
         let result = BlobProperties { blob_size };
 
