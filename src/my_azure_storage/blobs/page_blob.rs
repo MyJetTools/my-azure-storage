@@ -136,9 +136,11 @@ impl PageBlob {
         container_name: &str,
         blob_name: &str,
         start_page_no: u64,
-        size_to_read: u64,
+        pages_to_read: u64,
     ) -> Result<Vec<u8>, Error> {
         let start_bytes = start_page_no * BLOB_PAGE_SIZE;
+
+        let size_to_read = pages_to_read * BLOB_PAGE_SIZE;
 
         let end_bytes = start_bytes + size_to_read - 1;
 
