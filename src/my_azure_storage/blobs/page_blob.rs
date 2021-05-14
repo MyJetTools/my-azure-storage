@@ -172,6 +172,31 @@ impl PageBlob {
         Ok(response.get_body().await?)
     }
 
+    pub async fn download(
+        &self,
+        container_name: &str,
+        blob_name: &str,
+    ) -> Result<Vec<u8>, AzureStorageError> {
+        let response = FlUrl::new(self.connection.blobs_api_url.as_str())
+            .append_path_segment(container_name)
+            .append_path_segment(blob_name)
+            .add_azure_headers(
+                super::super::SignVerb::GET,
+                self.connection.as_ref(),
+                None,
+                None,
+                AZURE_REST_VERSION,
+            )
+            .get()
+            .await?;
+
+        check_if_there_is_an_error(&response)?;
+
+        let result = response.get_body().await?;
+
+        Ok(result)
+    }
+
     pub async fn get_properties(
         &self,
         container_name: &str,

@@ -60,7 +60,7 @@ impl BlockBlob {
         return Ok(result);
     }
 
-    pub async fn get_blob_content(
+    pub async fn download(
         &self,
         container_name: &str,
         blob_name: &str,
@@ -85,7 +85,7 @@ impl BlockBlob {
         Ok(result)
     }
 
-    pub async fn delete_blob(
+    pub async fn delete(
         &self,
         container_name: &str,
         blob_name: &str,
@@ -108,7 +108,7 @@ impl BlockBlob {
         Ok(())
     }
 
-    pub async fn upload_blob(
+    pub async fn upload(
         &self,
         container_name: &str,
         blob_name: &str,
