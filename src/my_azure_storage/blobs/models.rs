@@ -5,5 +5,5 @@ pub struct AzureItems<T> {
 
 #[derive(Debug)]
 pub struct BlobProperties {
-    pub blob_size: u64,
+    pub blob_size: usize,
 }
