@@ -24,7 +24,7 @@ impl PageBlob {
         &self,
         container_name: &str,
         blob_name: &str,
-        pages_amount: u64,
+        pages_amount: usize,
     ) -> Result<bool, AzureStorageError> {
         let result = self.get_properties(container_name, blob_name).await;
 
@@ -58,7 +58,7 @@ impl PageBlob {
         &self,
         container_name: &str,
         blob_name: &str,
-        pages_amount: u64,
+        pages_amount: usize,
     ) -> Result<(), AzureStorageError> {
         let result = self.get_properties(container_name, blob_name).await;
 
@@ -79,7 +79,7 @@ impl PageBlob {
         &self,
         container_name: &str,
         blob_name: &str,
-        pages_amount: u64,
+        pages_amount: usize,
     ) -> Result<(), AzureStorageError> {
         let new_size = pages_amount * BLOB_PAGE_SIZE;
 
@@ -108,12 +108,12 @@ impl PageBlob {
         &self,
         container_name: &str,
         blob_name: &str,
-        start_page_no: u64,
+        start_page_no: usize,
         payload: Vec<u8>,
     ) -> Result<(), AzureStorageError> {
         let start_bytes = start_page_no * BLOB_PAGE_SIZE;
 
-        let end_bytes = start_bytes + payload.len() as u64 - 1;
+        let end_bytes = start_bytes + payload.len() - 1;
 
         let range_header = format!("bytes={}-{}", start_bytes, end_bytes);
 
@@ -142,8 +142,8 @@ impl PageBlob {
         &self,
         container_name: &str,
         blob_name: &str,
-        start_page_no: u64,
-        pages_to_read: u64,
+        start_page_no: usize,
+        pages_to_read: usize,
     ) -> Result<Vec<u8>, AzureStorageError> {
         let start_bytes = start_page_no * BLOB_PAGE_SIZE;
 
@@ -229,7 +229,7 @@ impl PageBlob {
 
 const AZURE_REST_VERSION: &str = "2017-07-29";
 
-pub const BLOB_PAGE_SIZE: u64 = 512;
+pub const BLOB_PAGE_SIZE: usize = 512;
 
 #[cfg(test)]
 mod tests {
