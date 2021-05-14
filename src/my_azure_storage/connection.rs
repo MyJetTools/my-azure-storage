@@ -75,8 +75,6 @@ impl AzureConnection {
             flurl,
         );
 
-        // println!("string_to_sign: {:?}", string_to_sign);
-
         let signature =
             super::sign_utils::sign_transaction(string_to_sign.as_str(), &self.account_key);
         format!("SharedKey {}:{}", &self.account_name, signature)

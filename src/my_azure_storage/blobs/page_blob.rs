@@ -1,9 +1,11 @@
 use std::rc::Rc;
 
 use flurl::FlUrl;
-use hyper::Error;
 
-use crate::my_azure_storage::{AzureConnection, FlUrlAzureExtensions};
+use crate::my_azure_storage::{
+    errors_handling::check_if_there_is_an_error, AzureConnection, AzureStorageError,
+    FlUrlAzureExtensions,
+};
 
 use super::models::BlobProperties;
 
@@ -18,25 +20,21 @@ impl PageBlob {
         }
     }
 
-    //ToDo - check probably we can try to create blob differently
     pub async fn create(
         &self,
         container_name: &str,
         blob_name: &str,
         pages_amount: u64,
-    ) -> Result<bool, Error> {
-        let result = self
-            .get_properties(container_name, blob_name)
-            .await
-            .unwrap();
+    ) -> Result<bool, AzureStorageError> {
+        let result = self.get_properties(container_name, blob_name).await;
 
-        if result.is_none() {
-            return Ok(false);
+        if let Ok(_) = result {
+            return Err(AzureStorageError::BlobAlreadyExists);
         }
 
         let new_size = pages_amount * BLOB_PAGE_SIZE;
 
-        FlUrl::new(self.connection.blobs_api_url.as_str())
+        let response = FlUrl::new(self.connection.blobs_api_url.as_str())
             .append_path_segment(container_name)
             .append_path_segment(blob_name)
             .with_header_val_string("x-ms-blob-content-length", new_size.to_string())
@@ -51,6 +49,8 @@ impl PageBlob {
             .put(None)
             .await?;
 
+        check_if_there_is_an_error(&response)?;
+
         return Ok(true);
     }
 
@@ -59,17 +59,20 @@ impl PageBlob {
         container_name: &str,
         blob_name: &str,
         pages_amount: u64,
-    ) -> Result<(), Error> {
-        let result = self
-            .get_properties(container_name, blob_name)
-            .await
-            .unwrap();
+    ) -> Result<(), AzureStorageError> {
+        let result = self.get_properties(container_name, blob_name).await;
 
-        if result.is_none() {
-            self.create(container_name, blob_name, pages_amount).await?;
-        }
-
-        Ok(())
+        return match result {
+            Ok(_) => return Ok(()),
+            Err(err) => {
+                if matches!(err, AzureStorageError::BlobNotFound) {
+                    self.create(container_name, blob_name, pages_amount).await?;
+                    return Ok(());
+                } else {
+                    Err(err)
+                }
+            }
+        };
     }
 
     pub async fn resize_blob_size(
@@ -77,10 +80,10 @@ impl PageBlob {
         container_name: &str,
         blob_name: &str,
         pages_amount: u64,
-    ) -> Result<(), Error> {
+    ) -> Result<(), AzureStorageError> {
         let new_size = pages_amount * BLOB_PAGE_SIZE;
 
-        FlUrl::new(self.connection.blobs_api_url.as_str())
+        let response = FlUrl::new(self.connection.blobs_api_url.as_str())
             .append_path_segment(container_name)
             .append_path_segment(blob_name)
             .append_query_param("comp", "properties")
@@ -96,6 +99,8 @@ impl PageBlob {
             .put(None)
             .await?;
 
+        check_if_there_is_an_error(&response)?;
+
         return Ok(());
     }
 
@@ -105,14 +110,14 @@ impl PageBlob {
         blob_name: &str,
         start_page_no: u64,
         payload: Vec<u8>,
-    ) -> Result<(), Error> {
+    ) -> Result<(), AzureStorageError> {
         let start_bytes = start_page_no * BLOB_PAGE_SIZE;
 
         let end_bytes = start_bytes + payload.len() as u64 - 1;
 
         let range_header = format!("bytes={}-{}", start_bytes, end_bytes);
 
-        FlUrl::new(self.connection.blobs_api_url.as_str())
+        let response = FlUrl::new(self.connection.blobs_api_url.as_str())
             .append_path_segment(container_name)
             .append_path_segment(blob_name)
             .append_query_param("comp", "page")
@@ -128,6 +133,8 @@ impl PageBlob {
             .put(Some(payload))
             .await?;
 
+        check_if_there_is_an_error(&response)?;
+
         Ok(())
     }
 
@@ -137,7 +144,7 @@ impl PageBlob {
         blob_name: &str,
         start_page_no: u64,
         pages_to_read: u64,
-    ) -> Result<Vec<u8>, Error> {
+    ) -> Result<Vec<u8>, AzureStorageError> {
         let start_bytes = start_page_no * BLOB_PAGE_SIZE;
 
         let size_to_read = pages_to_read * BLOB_PAGE_SIZE;
@@ -160,6 +167,8 @@ impl PageBlob {
             .get()
             .await?;
 
+        check_if_there_is_an_error(&response)?;
+
         Ok(response.get_body().await?)
     }
 
@@ -167,7 +176,7 @@ impl PageBlob {
         &self,
         container_name: &str,
         blob_name: &str,
-    ) -> Result<Option<BlobProperties>, Error> {
+    ) -> Result<BlobProperties, AzureStorageError> {
         let response = FlUrl::new(self.connection.blobs_api_url.as_str())
             .append_path_segment(container_name)
             .append_path_segment(blob_name)
@@ -181,11 +190,7 @@ impl PageBlob {
             .head()
             .await?;
 
-        if response.get_status_code() == 404 {
-            return Ok(None);
-        }
-
-        let headers = response.get_headers();
+        let headers = check_if_there_is_an_error(&response)?;
 
         let content_len = headers.get("content-length").unwrap();
 
@@ -193,7 +198,7 @@ impl PageBlob {
 
         let result = BlobProperties { blob_size };
 
-        Ok(Some(result))
+        Ok(result)
     }
 }
 
@@ -234,16 +239,52 @@ mod tests {
             .await
             .unwrap();
 
-        let blob_props = page_blob
-            .get_properties("testtest", "test")
-            .await
-            .unwrap()
-            .unwrap();
+        let blob_props = page_blob.get_properties("testtest", "test").await.unwrap();
 
         assert_eq!(512 * 4, blob_props.blob_size)
 
         //  let res = page_blob.get("testtest", "test", 2, 2).await.unwrap();
 
         //println!("{}", hex::encode(res));
+    }
+
+    #[tokio::test]
+    async fn test_container_not_found() {
+        let conn_string = env!("TEST_STORAGE_ACCOUNT");
+
+        let connection = AzureConnection::from_conn_string(conn_string);
+        println!("Name:{}", connection.account_name);
+
+        let connection = Rc::new(connection);
+
+        let page_blob = PageBlob::new(connection);
+
+        let result = page_blob.get_properties("notexists", "notexists").await;
+
+        if let Err(err) = result {
+            assert_eq!(true, matches!(err, AzureStorageError::ContainerNotFound));
+        } else {
+            panic!(format!("Unexpected result type: {:?}", result));
+        }
+    }
+
+    #[tokio::test]
+    async fn test_blob_not_found() {
+        let conn_string = env!("TEST_STORAGE_ACCOUNT");
+
+        let connection = AzureConnection::from_conn_string(conn_string);
+        println!("Name:{}", connection.account_name);
+
+        let connection = Rc::new(connection);
+
+        let page_blob = PageBlob::new(connection);
+
+        let result = page_blob.get_properties("testtest", "notexists").await;
+
+        if let Err(err) = result {
+            assert_eq!(true, matches!(err, AzureStorageError::BlobNotFound));
+        } else {
+            panic!(format!("Unexpected result type: {:?}", result));
+        }
     }
 }

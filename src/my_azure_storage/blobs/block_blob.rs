@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use hyper::Error;
+use crate::my_azure_storage::{errors_handling::check_if_there_is_an_error, AzureStorageError};
 
 use super::super::AzureConnection;
 
@@ -19,7 +19,10 @@ impl BlockBlob {
         }
     }
 
-    pub async fn get_list_of_blobs(&self, container_name: &str) -> Result<Vec<String>, Error> {
+    pub async fn get_list_of_blobs(
+        &self,
+        container_name: &str,
+    ) -> Result<Vec<String>, AzureStorageError> {
         let mut result = vec![];
 
         let mut next_marker: Option<String> = None;
@@ -38,6 +41,8 @@ impl BlockBlob {
                 )
                 .get()
                 .await?;
+
+            check_if_there_is_an_error(&response)?;
 
             let body = response.get_body().await?;
 
@@ -59,7 +64,7 @@ impl BlockBlob {
         &self,
         container_name: &str,
         blob_name: &str,
-    ) -> Result<Vec<u8>, Error> {
+    ) -> Result<Vec<u8>, AzureStorageError> {
         let response = FlUrl::new(self.connection.blobs_api_url.as_str())
             .append_path_segment(container_name)
             .append_path_segment(blob_name)
@@ -73,11 +78,19 @@ impl BlockBlob {
             .get()
             .await?;
 
-        return response.get_body().await;
+        check_if_there_is_an_error(&response)?;
+
+        let result = response.get_body().await?;
+
+        Ok(result)
     }
 
-    pub async fn delete_blob(&self, container_name: &str, blob_name: &str) -> Result<(), Error> {
-        FlUrl::new(self.connection.blobs_api_url.as_str())
+    pub async fn delete_blob(
+        &self,
+        container_name: &str,
+        blob_name: &str,
+    ) -> Result<(), AzureStorageError> {
+        let response = FlUrl::new(self.connection.blobs_api_url.as_str())
             .append_path_segment(container_name)
             .append_path_segment(blob_name)
             .add_azure_headers(
@@ -90,6 +103,8 @@ impl BlockBlob {
             .delete()
             .await?;
 
+        check_if_there_is_an_error(&response)?;
+
         Ok(())
     }
 
@@ -98,8 +113,8 @@ impl BlockBlob {
         container_name: &str,
         blob_name: &str,
         content: Vec<u8>,
-    ) -> Result<(), Error> {
-        FlUrl::new(self.connection.blobs_api_url.as_str())
+    ) -> Result<(), AzureStorageError> {
+        let response = FlUrl::new(self.connection.blobs_api_url.as_str())
             .append_path_segment(container_name)
             .append_path_segment(blob_name)
             .with_header("x-ms-blob-type", "BlockBlob")
@@ -112,6 +127,8 @@ impl BlockBlob {
             )
             .put(Some(content))
             .await?;
+
+        check_if_there_is_an_error(&response)?;
 
         Ok(())
     }

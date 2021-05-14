@@ -3,6 +3,7 @@ pub struct AzureItems<T> {
     pub items: Vec<T>,
 }
 
+#[derive(Debug)]
 pub struct BlobProperties {
     pub blob_size: u64,
 }
