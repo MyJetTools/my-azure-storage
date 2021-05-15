@@ -24,7 +24,7 @@ impl AzureConnection {
             .put(None)
             .await?
             .to_azure_response_handler()
-            .check_if_there_is_an_error_and_ignore_container_already_exists()?;
+            .check_if_there_is_an_error_and_ignore_one(AzureStorageError::ContainerAlreadyExists)?;
 
         return Ok(());
     }

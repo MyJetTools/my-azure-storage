@@ -88,7 +88,7 @@ impl PageBlob {
             .delete()
             .await?
             .to_azure_response_handler()
-            .check_if_there_is_an_error_and_ignore_blob_not_found()?;
+            .check_if_there_is_an_error_and_ignore_one(AzureStorageError::BlobNotFound)?;
 
         Ok(())
     }

@@ -81,6 +81,25 @@ impl<'t> AzureResponseHandler {
         };
     }
 
+    pub fn check_if_there_is_an_error_and_ignore_one(
+        self,
+        error_to_ignore: AzureStorageError,
+    ) -> Result<AzureResponseHandler, AzureStorageError> {
+        let has_error = self.get_azure_error();
+
+        match has_error {
+            Some(_err) => {
+                if matches!(error_to_ignore, _err) {
+                    return Ok(self);
+                }
+
+                return Err(_err);
+            }
+            None => Ok(self),
+        }
+    }
+
+    /*
     pub fn check_if_there_is_an_error_and_ignore_container_already_exists(
         self,
     ) -> Result<AzureResponseHandler, AzureStorageError> {
@@ -122,6 +141,7 @@ impl<'t> AzureResponseHandler {
             None => Ok(self),
         };
     }
+    */
 }
 
 pub trait ToAzureResponseHandler {
