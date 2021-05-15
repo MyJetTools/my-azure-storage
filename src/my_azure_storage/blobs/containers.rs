@@ -1,6 +1,6 @@
 use super::super::AzureConnection;
 use crate::{
-    my_azure_storage::{errors_handling::check_if_there_is_an_error, FlUrlAzureExtensions},
+    my_azure_storage::{azure_response_handler::*, FlUrlAzureExtensions},
     AzureStorageError,
 };
 use flurl::FlUrl;
@@ -11,7 +11,7 @@ impl AzureConnection {
         &self,
         container_name: &str,
     ) -> Result<(), AzureStorageError> {
-        let response = FlUrl::new(self.blobs_api_url.as_str())
+        FlUrl::new(self.blobs_api_url.as_str())
             .append_path_segment(container_name)
             .append_query_param("restype", "container")
             .add_azure_headers(
@@ -22,22 +22,15 @@ impl AzureConnection {
                 AZURE_REST_VERSION,
             )
             .put(None)
-            .await?;
+            .await?
+            .to_azure_response_handler()
+            .check_if_there_is_an_error_and_ignore_container_already_exists()?;
 
-        let possible_error = check_if_there_is_an_error(&response);
-
-        if let Err(err) = possible_error {
-            return match err {
-                AzureStorageError::ContainerAlreadyExists => return Ok(()),
-                _ => Err(err),
-            };
-        }
-
-        Ok(())
+        return Ok(());
     }
 
     pub async fn delete_container(&self, container_name: &str) -> Result<(), AzureStorageError> {
-        let response = FlUrl::new(self.blobs_api_url.as_str())
+        FlUrl::new(self.blobs_api_url.as_str())
             .append_path_segment(container_name)
             .append_query_param("restype", "container")
             .add_azure_headers(
@@ -48,9 +41,9 @@ impl AzureConnection {
                 AZURE_REST_VERSION,
             )
             .delete()
-            .await?;
-
-        check_if_there_is_an_error(&response)?;
+            .await?
+            .to_azure_response_handler()
+            .check_if_there_is_an_error()?;
 
         Ok(())
     }

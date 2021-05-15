@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use crate::my_azure_storage::{errors_handling::check_if_there_is_an_error, AzureStorageError};
+use crate::my_azure_storage::{azure_response_handler::*, AzureStorageError};
 
 use super::super::AzureConnection;
 
@@ -40,9 +40,9 @@ impl BlockBlob {
                     AZURE_REST_VERSION,
                 )
                 .get()
-                .await?;
-
-            check_if_there_is_an_error(&response)?;
+                .await?
+                .to_azure_response_handler()
+                .check_if_there_is_an_error()?;
 
             let body = response.get_body().await?;
 
@@ -76,9 +76,9 @@ impl BlockBlob {
                 AZURE_REST_VERSION,
             )
             .get()
-            .await?;
-
-        check_if_there_is_an_error(&response)?;
+            .await?
+            .to_azure_response_handler()
+            .check_if_there_is_an_error()?;
 
         let result = response.get_body().await?;
 
@@ -90,7 +90,7 @@ impl BlockBlob {
         container_name: &str,
         blob_name: &str,
     ) -> Result<(), AzureStorageError> {
-        let response = FlUrl::new(self.connection.blobs_api_url.as_str())
+        FlUrl::new(self.connection.blobs_api_url.as_str())
             .append_path_segment(container_name)
             .append_path_segment(blob_name)
             .add_azure_headers(
@@ -101,9 +101,9 @@ impl BlockBlob {
                 AZURE_REST_VERSION,
             )
             .delete()
-            .await?;
-
-        check_if_there_is_an_error(&response)?;
+            .await?
+            .to_azure_response_handler()
+            .check_if_there_is_an_error()?;
 
         Ok(())
     }
@@ -114,7 +114,7 @@ impl BlockBlob {
         blob_name: &str,
         content: Vec<u8>,
     ) -> Result<(), AzureStorageError> {
-        let response = FlUrl::new(self.connection.blobs_api_url.as_str())
+        FlUrl::new(self.connection.blobs_api_url.as_str())
             .append_path_segment(container_name)
             .append_path_segment(blob_name)
             .with_header("x-ms-blob-type", "BlockBlob")
@@ -126,9 +126,9 @@ impl BlockBlob {
                 AZURE_REST_VERSION,
             )
             .put(Some(content))
-            .await?;
-
-        check_if_there_is_an_error(&response)?;
+            .await?
+            .to_azure_response_handler()
+            .check_if_there_is_an_error()?;
 
         Ok(())
     }

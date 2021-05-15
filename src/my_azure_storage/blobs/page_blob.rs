@@ -3,8 +3,7 @@ use std::rc::Rc;
 use flurl::FlUrl;
 
 use crate::my_azure_storage::{
-    errors_handling::check_if_there_is_an_error, AzureConnection, AzureStorageError,
-    FlUrlAzureExtensions,
+    azure_response_handler::*, AzureConnection, AzureStorageError, FlUrlAzureExtensions,
 };
 
 use super::models::BlobProperties;
@@ -25,16 +24,10 @@ impl PageBlob {
         container_name: &str,
         blob_name: &str,
         pages_amount: usize,
-    ) -> Result<bool, AzureStorageError> {
-        let result = self.get_properties(container_name, blob_name).await;
-
-        if let Ok(_) = result {
-            return Err(AzureStorageError::BlobAlreadyExists);
-        }
-
+    ) -> Result<(), AzureStorageError> {
         let new_size = pages_amount * BLOB_PAGE_SIZE;
 
-        let response = FlUrl::new(self.connection.blobs_api_url.as_str())
+        FlUrl::new(self.connection.blobs_api_url.as_str())
             .append_path_segment(container_name)
             .append_path_segment(blob_name)
             .with_header_val_string("x-ms-blob-content-length", new_size.to_string())
@@ -47,11 +40,11 @@ impl PageBlob {
                 AZURE_REST_VERSION,
             )
             .put(None)
-            .await?;
+            .await?
+            .to_azure_response_handler()
+            .check_if_there_is_an_error()?;
 
-        check_if_there_is_an_error(&response)?;
-
-        return Ok(true);
+        return Ok(());
     }
 
     pub async fn delete(
@@ -59,7 +52,7 @@ impl PageBlob {
         container_name: &str,
         blob_name: &str,
     ) -> Result<(), AzureStorageError> {
-        let response = FlUrl::new(self.connection.blobs_api_url.as_str())
+        FlUrl::new(self.connection.blobs_api_url.as_str())
             .append_path_segment(container_name)
             .append_path_segment(blob_name)
             .add_azure_headers(
@@ -70,9 +63,32 @@ impl PageBlob {
                 AZURE_REST_VERSION,
             )
             .delete()
-            .await?;
+            .await?
+            .to_azure_response_handler()
+            .check_if_there_is_an_error()?;
 
-        check_if_there_is_an_error(&response)?;
+        Ok(())
+    }
+
+    pub async fn delete_if_exists(
+        &self,
+        container_name: &str,
+        blob_name: &str,
+    ) -> Result<(), AzureStorageError> {
+        FlUrl::new(self.connection.blobs_api_url.as_str())
+            .append_path_segment(container_name)
+            .append_path_segment(blob_name)
+            .add_azure_headers(
+                super::super::SignVerb::DELETE,
+                self.connection.as_ref(),
+                None,
+                None,
+                AZURE_REST_VERSION,
+            )
+            .delete()
+            .await?
+            .to_azure_response_handler()
+            .check_if_there_is_an_error_and_ignore_blob_already_exists()?;
 
         Ok(())
     }
@@ -107,7 +123,7 @@ impl PageBlob {
     ) -> Result<(), AzureStorageError> {
         let new_size = pages_amount * BLOB_PAGE_SIZE;
 
-        let response = FlUrl::new(self.connection.blobs_api_url.as_str())
+        FlUrl::new(self.connection.blobs_api_url.as_str())
             .append_path_segment(container_name)
             .append_path_segment(blob_name)
             .append_query_param("comp", "properties")
@@ -121,11 +137,11 @@ impl PageBlob {
                 AZURE_REST_VERSION,
             )
             .put(None)
-            .await?;
+            .await?
+            .to_azure_response_handler()
+            .check_if_there_is_an_error()?;
 
-        check_if_there_is_an_error(&response)?;
-
-        return Ok(());
+        Ok(())
     }
 
     pub async fn save_pages(
@@ -141,7 +157,7 @@ impl PageBlob {
 
         let range_header = format!("bytes={}-{}", start_bytes, end_bytes);
 
-        let response = FlUrl::new(self.connection.blobs_api_url.as_str())
+        FlUrl::new(self.connection.blobs_api_url.as_str())
             .append_path_segment(container_name)
             .append_path_segment(blob_name)
             .append_query_param("comp", "page")
@@ -155,9 +171,9 @@ impl PageBlob {
                 AZURE_REST_VERSION,
             )
             .put(Some(payload))
-            .await?;
-
-        check_if_there_is_an_error(&response)?;
+            .await?
+            .to_azure_response_handler()
+            .check_if_there_is_an_error()?;
 
         Ok(())
     }
@@ -189,9 +205,9 @@ impl PageBlob {
                 AZURE_REST_VERSION,
             )
             .get()
-            .await?;
-
-        check_if_there_is_an_error(&response)?;
+            .await?
+            .to_azure_response_handler()
+            .check_if_there_is_an_error()?;
 
         Ok(response.get_body().await?)
     }
@@ -212,9 +228,9 @@ impl PageBlob {
                 AZURE_REST_VERSION,
             )
             .get()
-            .await?;
-
-        check_if_there_is_an_error(&response)?;
+            .await?
+            .to_azure_response_handler()
+            .check_if_there_is_an_error()?;
 
         let result = response.get_body().await?;
 
@@ -237,11 +253,11 @@ impl PageBlob {
                 AZURE_REST_VERSION,
             )
             .head()
-            .await?;
+            .await?
+            .to_azure_response_handler()
+            .check_if_there_is_an_error()?;
 
-        let headers = check_if_there_is_an_error(&response)?;
-
-        let content_len = headers.get("content-length").unwrap();
+        let content_len = response.get_header("content-length").unwrap();
 
         let blob_size = content_len.parse().unwrap();
 
