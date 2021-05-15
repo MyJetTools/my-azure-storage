@@ -50,7 +50,7 @@ impl<'t> AzureResponseHandler {
                     "BlobNotFound" => AzureStorageError::BlobNotFound,
                     "ContainerAlreadyExists" => AzureStorageError::ContainerAlreadyExists,
                     _ => {
-                        println!("{:?}", err_header);
+                        println!("Unknown error is found: {:?}", err_header);
                         AzureStorageError::UnknownError {
                             msg: err_header.to_string(),
                         }
