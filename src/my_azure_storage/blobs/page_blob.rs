@@ -59,20 +59,21 @@ impl PageBlob {
         container_name: &str,
         blob_name: &str,
         pages_amount: usize,
-    ) -> Result<(), AzureStorageError> {
-        let result = self.get_properties(container_name, blob_name).await;
+    ) -> Result<BlobProperties, AzureStorageError> {
+        loop {
+            let result = self.get_properties(container_name, blob_name).await;
 
-        return match result {
-            Ok(_) => return Ok(()),
-            Err(err) => {
-                if matches!(err, AzureStorageError::BlobNotFound) {
-                    self.create(container_name, blob_name, pages_amount).await?;
-                    return Ok(());
-                } else {
-                    Err(err)
+            match result {
+                Ok(props) => return Ok(props),
+                Err(err) => {
+                    if matches!(err, AzureStorageError::BlobNotFound) {
+                        self.create(container_name, blob_name, pages_amount).await?;
+                    } else {
+                        return Err(err);
+                    }
                 }
-            }
-        };
+            };
+        }
     }
 
     pub async fn resize_blob_size(
