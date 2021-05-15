@@ -1,5 +1,8 @@
 use super::super::AzureConnection;
-use crate::my_azure_storage::FlUrlAzureExtensions;
+use crate::{
+    my_azure_storage::{errors_handling::check_if_there_is_an_error, FlUrlAzureExtensions},
+    AzureStorageError,
+};
 use flurl::FlUrl;
 use hyper::Error;
 
@@ -7,8 +10,8 @@ impl AzureConnection {
     pub async fn create_container_if_not_exist(
         &self,
         container_name: &str,
-    ) -> Result<Vec<u8>, Error> {
-        let result = FlUrl::new(self.blobs_api_url.as_str())
+    ) -> Result<(), AzureStorageError> {
+        let response = FlUrl::new(self.blobs_api_url.as_str())
             .append_path_segment(container_name)
             .append_query_param("restype", "container")
             .add_azure_headers(
@@ -21,11 +24,13 @@ impl AzureConnection {
             .put(None)
             .await?;
 
-        Ok(result.get_body().await.unwrap())
+        check_if_there_is_an_error(&response)?;
+
+        Ok(())
     }
 
-    pub async fn delete_container(&self, container_name: &str) -> Result<(), Error> {
-        FlUrl::new(self.blobs_api_url.as_str())
+    pub async fn delete_container(&self, container_name: &str) -> Result<(), AzureStorageError> {
+        let response = FlUrl::new(self.blobs_api_url.as_str())
             .append_path_segment(container_name)
             .append_query_param("restype", "container")
             .add_azure_headers(
@@ -37,6 +42,8 @@ impl AzureConnection {
             )
             .delete()
             .await?;
+
+        check_if_there_is_an_error(&response)?;
 
         Ok(())
     }
@@ -79,7 +86,6 @@ impl AzureConnection {
 
 const AZURE_REST_VERSION: &str = "2017-07-29";
 
-/*
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -98,4 +104,3 @@ mod tests {
         connection.delete_container("testtest").await.unwrap();
     }
 }
-*/

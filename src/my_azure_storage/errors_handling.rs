@@ -4,11 +4,11 @@ use std::collections::HashMap;
 use super::AzureStorageError;
 
 pub fn check_if_there_is_an_error<'t>(
-    fl_url: &'t FlUrlResponse,
+    fl_response: &'t FlUrlResponse,
 ) -> Result<HashMap<&'t str, &'t str>, AzureStorageError> {
-    let headers = fl_url.get_headers();
+    let headers = fl_response.get_headers();
 
-    let status_code = fl_url.get_status_code();
+    let status_code = fl_response.get_status_code();
     if status_code >= 300 {
         let err_header_result = headers.get("x-ms-error-code");
 
