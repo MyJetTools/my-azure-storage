@@ -24,7 +24,14 @@ impl AzureConnection {
             .put(None)
             .await?;
 
-        check_if_there_is_an_error(&response)?;
+        let possible_error = check_if_there_is_an_error(&response);
+
+        if let Err(err) = possible_error {
+            return match err {
+                AzureStorageError::ContainerAlreadyExists => return Ok(()),
+                _ => Err(err),
+            };
+        }
 
         Ok(())
     }
