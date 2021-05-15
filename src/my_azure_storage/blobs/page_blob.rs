@@ -10,7 +10,7 @@ use crate::my_azure_storage::{
 use super::models::BlobProperties;
 
 pub struct PageBlob {
-    connection: Rc<AzureConnection>,
+    pub connection: Rc<AzureConnection>,
 }
 
 impl PageBlob {
