@@ -41,8 +41,6 @@ impl<'t> AzureResponseHandler {
         if status_code >= 300 {
             let err_header_result = self.get_header("x-ms-error-code");
 
-            println!("{:?}", err_header_result);
-
             if let Ok(err_header) = err_header_result {
                 let err_header = err_header.as_str();
 
@@ -51,9 +49,12 @@ impl<'t> AzureResponseHandler {
                     "ContainerBeingDeleted" => AzureStorageError::ContainerBeingDeleted,
                     "BlobNotFound" => AzureStorageError::BlobNotFound,
                     "ContainerAlreadyExists" => AzureStorageError::ContainerAlreadyExists,
-                    _ => AzureStorageError::UnknownError {
-                        msg: err_header.to_string(),
-                    },
+                    _ => {
+                        println!("{:?}", err_header);
+                        AzureStorageError::UnknownError {
+                            msg: err_header.to_string(),
+                        }
+                    }
                 };
 
                 return Some(err);
