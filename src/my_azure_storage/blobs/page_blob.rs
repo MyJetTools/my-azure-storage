@@ -88,7 +88,7 @@ impl PageBlob {
             .delete()
             .await?
             .to_azure_response_handler()
-            .check_if_there_is_an_error_and_ignore_blob_already_exists()?;
+            .check_if_there_is_an_error_and_ignore_blob_not_found()?;
 
         Ok(())
     }
@@ -242,20 +242,13 @@ impl PageBlob {
         container_name: &str,
         blob_name: &str,
     ) -> Result<BlobProperties, AzureStorageError> {
-        let response = FlUrl::new(self.connection.blobs_api_url.as_str())
-            .append_path_segment(container_name)
-            .append_path_segment(blob_name)
-            .add_azure_headers(
-                super::super::SignVerb::HEAD,
-                self.connection.as_ref(),
-                None,
-                None,
-                AZURE_REST_VERSION,
-            )
-            .head()
-            .await?
-            .to_azure_response_handler()
-            .check_if_there_is_an_error()?;
+        let response = super::super::fl_requests::blobs::get_blob_properties(
+            self.connection.as_ref(),
+            container_name,
+            blob_name,
+        )
+        .await?
+        .check_if_there_is_an_error()?;
 
         let content_len = response.get_header("content-length").unwrap();
 

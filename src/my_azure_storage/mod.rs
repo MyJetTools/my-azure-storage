@@ -2,6 +2,7 @@ pub mod blobs;
 
 mod azure_response_handler;
 mod connection;
+mod fl_requests;
 mod flurl_ext;
 mod sign_utils;
 mod string_builder;

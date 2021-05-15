@@ -108,6 +108,20 @@ impl<'t> AzureResponseHandler {
             None => Ok(self),
         };
     }
+
+    pub fn check_if_there_is_an_error_and_ignore_blob_not_found(
+        self,
+    ) -> Result<AzureResponseHandler, AzureStorageError> {
+        let has_error = self.get_azure_error();
+
+        return match has_error {
+            Some(err) => match err {
+                AzureStorageError::BlobNotFound => Ok(self),
+                _ => Err(err),
+            },
+            None => Ok(self),
+        };
+    }
 }
 
 pub trait ToAzureResponseHandler {
