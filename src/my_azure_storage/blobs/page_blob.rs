@@ -54,6 +54,29 @@ impl PageBlob {
         return Ok(true);
     }
 
+    pub async fn delete(
+        &self,
+        container_name: &str,
+        blob_name: &str,
+    ) -> Result<(), AzureStorageError> {
+        let response = FlUrl::new(self.connection.blobs_api_url.as_str())
+            .append_path_segment(container_name)
+            .append_path_segment(blob_name)
+            .add_azure_headers(
+                super::super::SignVerb::DELETE,
+                self.connection.as_ref(),
+                None,
+                None,
+                AZURE_REST_VERSION,
+            )
+            .delete()
+            .await?;
+
+        check_if_there_is_an_error(&response)?;
+
+        Ok(())
+    }
+
     pub async fn create_if_not_exists(
         &self,
         container_name: &str,
