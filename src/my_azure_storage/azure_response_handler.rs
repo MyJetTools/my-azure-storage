@@ -49,6 +49,7 @@ impl<'t> AzureResponseHandler {
                     "ContainerBeingDeleted" => AzureStorageError::ContainerBeingDeleted,
                     "BlobNotFound" => AzureStorageError::BlobNotFound,
                     "ContainerAlreadyExists" => AzureStorageError::ContainerAlreadyExists,
+                    "InvalidPageRange" => AzureStorageError::InvalidPageRange,
                     _ => {
                         println!("Unknown error is found: {:?}", err_header);
                         AzureStorageError::UnknownError {

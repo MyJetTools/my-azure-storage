@@ -7,6 +7,7 @@ pub enum AzureStorageError {
     BlobAlreadyExists,
     ContainerBeingDeleted,
     ContainerAlreadyExists,
+    InvalidPageRange,
     UnknownError { msg: String },
     HyperError { err: hyper::Error },
 }
