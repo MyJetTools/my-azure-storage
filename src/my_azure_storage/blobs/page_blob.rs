@@ -322,7 +322,7 @@ mod tests {
         if let Err(err) = result {
             assert_eq!(true, matches!(err, AzureStorageError::ContainerNotFound));
         } else {
-            panic!(format!("Unexpected result type: {:?}", result));
+            panic!("Unexpected result type: {:?}", result);
         }
     }
 
@@ -342,7 +342,7 @@ mod tests {
         if let Err(err) = result {
             assert_eq!(true, matches!(err, AzureStorageError::BlobNotFound));
         } else {
-            panic!(format!("Unexpected result type: {:?}", result));
+            panic!("Unexpected result type: {:?}", result);
         }
     }
 }
