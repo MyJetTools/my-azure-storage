@@ -61,8 +61,6 @@ pub fn deserialize_list_of_containers(xml: &[u8]) -> AzureItems<String> {
 
         let open_node = open_node.unwrap();
 
-        println!("Root Node is: {}", open_node.name);
-
         match open_node.name {
             NEXT_MARKER_NODE => {
                 let next_marker_node = xml_reader.read_the_whole_node(open_node).unwrap();
