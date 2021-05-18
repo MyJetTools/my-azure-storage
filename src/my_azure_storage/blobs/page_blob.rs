@@ -1,5 +1,3 @@
-use std::rc::Rc;
-
 use flurl::FlUrl;
 
 use crate::my_azure_storage::{
@@ -9,11 +7,11 @@ use crate::my_azure_storage::{
 use super::models::BlobProperties;
 
 pub struct PageBlob {
-    pub connection: Rc<AzureConnection>,
+    pub connection: AzureConnection,
 }
 
 impl PageBlob {
-    pub fn new(connection: Rc<AzureConnection>) -> Self {
+    pub fn new(connection: AzureConnection) -> Self {
         Self {
             connection: connection.clone(),
         }
@@ -34,7 +32,7 @@ impl PageBlob {
             .with_header("x-ms-blob-type", "PageBlob")
             .add_azure_headers(
                 super::super::SignVerb::PUT,
-                self.connection.as_ref(),
+                &self.connection,
                 None,
                 None,
                 AZURE_REST_VERSION,
@@ -57,7 +55,7 @@ impl PageBlob {
             .append_path_segment(blob_name)
             .add_azure_headers(
                 super::super::SignVerb::DELETE,
-                self.connection.as_ref(),
+                &self.connection,
                 None,
                 None,
                 AZURE_REST_VERSION,
@@ -80,7 +78,7 @@ impl PageBlob {
             .append_path_segment(blob_name)
             .add_azure_headers(
                 super::super::SignVerb::DELETE,
-                self.connection.as_ref(),
+                &self.connection,
                 None,
                 None,
                 AZURE_REST_VERSION,
@@ -131,7 +129,7 @@ impl PageBlob {
             .with_header("x-ms-blob-type", "PageBlob")
             .add_azure_headers(
                 super::super::SignVerb::PUT,
-                self.connection.as_ref(),
+                &self.connection,
                 None,
                 None,
                 AZURE_REST_VERSION,
@@ -165,7 +163,7 @@ impl PageBlob {
             .with_header_val_string("x-ms-range", range_header)
             .add_azure_headers(
                 super::super::SignVerb::PUT,
-                self.connection.as_ref(),
+                &self.connection,
                 Some(payload.len()),
                 None,
                 AZURE_REST_VERSION,
@@ -199,7 +197,7 @@ impl PageBlob {
             .with_header_val_string("x-ms-range", range_header)
             .add_azure_headers(
                 super::super::SignVerb::GET,
-                self.connection.as_ref(),
+                &self.connection,
                 None,
                 None,
                 AZURE_REST_VERSION,
@@ -222,7 +220,7 @@ impl PageBlob {
             .append_path_segment(blob_name)
             .add_azure_headers(
                 super::super::SignVerb::GET,
-                self.connection.as_ref(),
+                &self.connection,
                 None,
                 None,
                 AZURE_REST_VERSION,
@@ -243,7 +241,7 @@ impl PageBlob {
         blob_name: &str,
     ) -> Result<BlobProperties, AzureStorageError> {
         let response = super::super::fl_requests::blobs::get_blob_properties(
-            self.connection.as_ref(),
+            &self.connection,
             container_name,
             blob_name,
         )
@@ -279,8 +277,6 @@ mod tests {
             .await
             .unwrap();
 
-        let connection = Rc::new(connection);
-
         let page_blob = PageBlob::new(connection);
 
         page_blob.create("testtest", "test", 1).await.unwrap();
@@ -313,8 +309,6 @@ mod tests {
         let connection = AzureConnection::from_conn_string(conn_string);
         println!("Name:{}", connection.account_name);
 
-        let connection = Rc::new(connection);
-
         let page_blob = PageBlob::new(connection);
 
         let result = page_blob.get_properties("notexists", "notexists").await;
@@ -332,8 +326,6 @@ mod tests {
 
         let connection = AzureConnection::from_conn_string(conn_string);
         println!("Name:{}", connection.account_name);
-
-        let connection = Rc::new(connection);
 
         let page_blob = PageBlob::new(connection);
 

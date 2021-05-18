@@ -1,5 +1,3 @@
-use std::rc::Rc;
-
 use crate::my_azure_storage::{azure_response_handler::*, AzureStorageError};
 
 use super::super::AzureConnection;
@@ -9,14 +7,12 @@ use super::blob_models;
 use flurl::FlUrl;
 
 pub struct BlockBlob {
-    connection: Rc<AzureConnection>,
+    connection: AzureConnection,
 }
 
 impl BlockBlob {
-    pub fn new(connection: Rc<AzureConnection>) -> Self {
-        Self {
-            connection: connection.clone(),
-        }
+    pub fn new(connection: AzureConnection) -> Self {
+        Self { connection }
     }
 
     pub async fn get_list_of_blobs(
@@ -34,7 +30,7 @@ impl BlockBlob {
                 .append_query_param("restype", "container")
                 .add_azure_headers(
                     super::super::SignVerb::GET,
-                    self.connection.as_ref(),
+                    &self.connection,
                     None,
                     next_marker,
                     AZURE_REST_VERSION,
@@ -70,7 +66,7 @@ impl BlockBlob {
             .append_path_segment(blob_name)
             .add_azure_headers(
                 super::super::SignVerb::GET,
-                self.connection.as_ref(),
+                &self.connection,
                 None,
                 None,
                 AZURE_REST_VERSION,
@@ -95,7 +91,7 @@ impl BlockBlob {
             .append_path_segment(blob_name)
             .add_azure_headers(
                 super::super::SignVerb::DELETE,
-                self.connection.as_ref(),
+                &self.connection,
                 None,
                 None,
                 AZURE_REST_VERSION,
@@ -120,7 +116,7 @@ impl BlockBlob {
             .with_header("x-ms-blob-type", "BlockBlob")
             .add_azure_headers(
                 super::super::SignVerb::PUT,
-                self.connection.as_ref(),
+                &self.connection,
                 Some(content.len()),
                 None,
                 AZURE_REST_VERSION,
