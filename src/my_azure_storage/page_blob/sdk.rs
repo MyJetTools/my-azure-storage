@@ -166,7 +166,7 @@ impl PageBlobApi for AzureConnection {
 mod tests {
     use super::*;
 
-    use super::super::super::blob_container::api::BlobContainersApi;
+    use super::super::super::blob_container::BlobContainersApi;
 
     #[tokio::test]
     async fn test_page_blob() {
