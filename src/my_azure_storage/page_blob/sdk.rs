@@ -2,16 +2,14 @@ use async_trait::async_trait;
 use flurl::FlUrl;
 
 use crate::my_azure_storage::blob::api::BlobApi;
+use crate::my_azure_storage::consts::AZURE_REST_VERSION;
 use crate::my_azure_storage::{
     azure_response_handler::*, AzureConnection, AzureStorageError, BlobProperties,
     FlUrlAzureExtensions,
 };
 
 use super::api::PageBlobApi;
-
-pub struct PageBlob {
-    pub connection: AzureConnection,
-}
+use super::BLOB_PAGE_SIZE;
 
 #[async_trait]
 impl PageBlobApi for AzureConnection {
@@ -163,10 +161,6 @@ impl PageBlobApi for AzureConnection {
         Ok(response.get_body().await?)
     }
 }
-
-const AZURE_REST_VERSION: &str = "2017-07-29";
-
-pub const BLOB_PAGE_SIZE: usize = 512;
 
 #[cfg(test)]
 mod tests {
