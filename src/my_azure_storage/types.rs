@@ -17,3 +17,8 @@ impl From<Error> for AzureStorageError {
         AzureStorageError::HyperError { err }
     }
 }
+
+pub struct AzureItems<T> {
+    pub next_marker: Option<String>,
+    pub items: Vec<T>,
+}

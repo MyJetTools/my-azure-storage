@@ -1,7 +1,11 @@
 use my_xml_reader::{MyXmlReader, XmlTagInfo};
 
-use super::models::AzureItems;
+use crate::my_azure_storage::types::AzureItems;
+
 const ROOT_NODE_NAME: &str = "EnumerationResults";
+
+const CONTAINERS_ARRAY_NODE: &str = "Containers";
+const CONTAINER_ARRAY_ITEM_NODE: &str = "Container";
 
 const BLOBS_ARRAY_NODE: &str = "Blobs";
 const BLOB_ARRAY_ITEM_NODE: &str = "Blob";
@@ -32,6 +36,54 @@ fn get_array_of_names<'t>(
     }
 
     result
+}
+
+pub fn deserialize_list_of_containers(xml: &[u8]) -> AzureItems<String> {
+    let mut xml_reader = MyXmlReader::from_slice(xml).unwrap();
+
+    let root_node = xml_reader
+        .find_the_open_node(ROOT_NODE_NAME)
+        .unwrap()
+        .unwrap();
+
+    let mut blobs: Option<Vec<String>> = None;
+
+    let mut next_marker: Option<String> = None;
+
+    loop {
+        let open_node = xml_reader
+            .find_any_of_these_nodes_inside_parent(
+                &root_node,
+                vec![CONTAINERS_ARRAY_NODE, NEXT_MARKER_NODE].as_slice(),
+            )
+            .unwrap();
+
+        if open_node.is_none() {
+            break;
+        }
+
+        let open_node = open_node.unwrap();
+
+        match open_node.name {
+            NEXT_MARKER_NODE => {
+                let next_marker_node = xml_reader.read_the_whole_node(open_node).unwrap();
+                next_marker = next_marker_node.get_value();
+            }
+            CONTAINERS_ARRAY_NODE => {
+                blobs = Some(get_array_of_names(
+                    &mut xml_reader,
+                    open_node,
+                    CONTAINER_ARRAY_ITEM_NODE,
+                ))
+            }
+            _ => {}
+        }
+    }
+
+    return AzureItems {
+        next_marker,
+        items: blobs.unwrap(),
+    };
 }
 
 pub fn deserialize_list_of_blobs(xml: &[u8]) -> AzureItems<String> {

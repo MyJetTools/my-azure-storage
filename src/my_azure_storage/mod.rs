@@ -1,7 +1,8 @@
-pub mod blobs;
+pub mod blob;
 
 mod azure_response_handler;
 mod connection;
+mod consts;
 mod fl_requests;
 mod flurl_ext;
 mod sign_utils;
@@ -14,5 +15,8 @@ pub use sign_utils::SignVerb;
 use string_builder::StringBuilder;
 pub use types::AzureStorageError;
 
-pub use blobs::AzureItems;
-pub use blobs::BlobProperties;
+pub use blob::BlobProperties;
+
+pub mod blob_container;
+pub mod block_blob;
+pub mod page_blob;
