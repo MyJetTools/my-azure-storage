@@ -366,15 +366,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "my-xml-reader"
-version = "0.1.0"
-source = "git+https://github.com/MyJetTools/my-xml-reader#2431491449273674e34c13bf17f693d83d9c5a4a"
-dependencies = [
- "lazy_static",
-]
-
-[[package]]
-name = "my_azure_storage"
+name = "my-azure-storage"
 version = "0.1.0"
 dependencies = [
  "base64",
@@ -385,6 +377,14 @@ dependencies = [
  "my-xml-reader",
  "sha2",
  "tokio",
+]
+
+[[package]]
+name = "my-xml-reader"
+version = "0.1.0"
+source = "git+https://github.com/MyJetTools/my-xml-reader#2431491449273674e34c13bf17f693d83d9c5a4a"
+dependencies = [
+ "lazy_static",
 ]
 
 [[package]]
