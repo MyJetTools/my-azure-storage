@@ -20,5 +20,3 @@ pub use blob::BlobProperties;
 pub mod blob_container;
 pub mod block_blob;
 pub mod page_blob;
-
-pub use page_blob::BLOB_PAGE_SIZE;

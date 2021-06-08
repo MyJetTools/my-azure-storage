@@ -9,7 +9,7 @@ use crate::my_azure_storage::{
 };
 
 use super::api::PageBlobApi;
-use super::BLOB_PAGE_SIZE;
+use super::consts::BLOB_PAGE_SIZE;
 
 #[async_trait]
 impl PageBlobApi for AzureConnection {
