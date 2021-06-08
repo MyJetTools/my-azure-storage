@@ -134,7 +134,7 @@ const AZURE_REST_VERSION: &str = "2017-07-29";
 
 #[cfg(test)]
 mod tests {
-    use super::super::super::blob::api::BlobApi;
+    use super::super::super::blob::BlobApi;
     use super::*;
 
     #[tokio::test]
