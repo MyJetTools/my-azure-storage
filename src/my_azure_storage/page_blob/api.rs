@@ -33,7 +33,7 @@ pub trait PageBlobApi {
         payload: Vec<u8>,
     ) -> Result<(), AzureStorageError>;
 
-    async fn get(
+    async fn get_pages(
         &self,
         container_name: &str,
         blob_name: &str,

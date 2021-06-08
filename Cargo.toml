@@ -1,5 +1,5 @@
 [package]
-name = "my-azure-storage"
+name = "my-azure-storage-sdk"
 version = "0.1.0"
 authors = ["Andrey <amigin@gmail.com>"]
 edition = "2018"

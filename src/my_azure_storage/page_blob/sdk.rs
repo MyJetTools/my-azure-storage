@@ -127,7 +127,7 @@ impl PageBlobApi for AzureConnection {
         Ok(())
     }
 
-    async fn get(
+    async fn get_pages(
         &self,
         container_name: &str,
         blob_name: &str,
