@@ -1,7 +1,7 @@
 use async_trait::async_trait;
 use flurl::FlUrl;
 
-use crate::my_azure_storage::blob::BlobApi;
+use crate::my_azure_storage::blob::api::BlobApi;
 use crate::my_azure_storage::consts::AZURE_REST_VERSION;
 use crate::my_azure_storage::{
     azure_response_handler::*, AzureConnection, AzureStorageError, BlobProperties,
@@ -166,7 +166,7 @@ impl PageBlobApi for AzureConnection {
 mod tests {
     use super::*;
 
-    use super::super::super::blob_container::BlobContainersApi;
+    use super::super::super::blob_container::api::BlobContainersApi;
 
     #[tokio::test]
     async fn test_page_blob() {
