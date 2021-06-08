@@ -189,10 +189,10 @@ mod tests {
             .await
             .unwrap();
 
-        let vec: Vec<u8> = vec![33; 512];
+        let my_vec: Vec<u8> = vec![33; 512];
 
         connection
-            .save_pages("testtest", "test", 1, vec)
+            .save_pages("testtest", "test", 1, my_vec)
             .await
             .unwrap();
 
