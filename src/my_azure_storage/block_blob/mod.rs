@@ -1,2 +1,3 @@
-pub mod api;
+mod api;
 pub mod sdk;
+pub use api::BlockBlobApi;
