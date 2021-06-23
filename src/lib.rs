@@ -10,4 +10,5 @@ pub use my_azure_storage::page_blob;
 pub use my_azure_storage::blob::BlobApi;
 pub use my_azure_storage::blob::BlobProperties;
 pub use my_azure_storage::blob_container::BlobContainersApi;
+pub use my_azure_storage::block_blob::BlockBlobApi;
 pub use my_azure_storage::page_blob::PageBlobApi;
