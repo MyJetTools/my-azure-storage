@@ -12,6 +12,11 @@ pub trait BlobContainersApi {
 
     async fn delete_container(&self, container_name: &str) -> Result<(), AzureStorageError>;
 
+    async fn delete_container_if_exists(
+        &self,
+        container_name: &str,
+    ) -> Result<(), AzureStorageError>;
+
     async fn get_list_of_blob_containers(&self) -> Result<Vec<String>, Error>;
 
     async fn get_list_of_blobs(

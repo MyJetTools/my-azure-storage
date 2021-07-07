@@ -54,6 +54,28 @@ impl BlobContainersApi for AzureConnection {
         Ok(())
     }
 
+    async fn delete_container_if_exists(
+        &self,
+        container_name: &str,
+    ) -> Result<(), AzureStorageError> {
+        FlUrl::new(self.blobs_api_url.as_str())
+            .append_path_segment(container_name)
+            .append_query_param("restype", "container")
+            .add_azure_headers(
+                super::super::SignVerb::DELETE,
+                self,
+                None,
+                None,
+                AZURE_REST_VERSION,
+            )
+            .delete()
+            .await?
+            .to_azure_response_handler()
+            .check_if_there_is_an_error_and_ignore_one(AzureStorageError::ContainerNotFound)?;
+
+        Ok(())
+    }
+
     async fn get_list_of_blob_containers(&self) -> Result<Vec<String>, Error> {
         let mut result = vec![];
 
