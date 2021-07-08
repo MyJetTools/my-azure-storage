@@ -43,22 +43,7 @@ impl<'t> AzureResponseHandler {
 
             if let Ok(err_header) = err_header_result {
                 let err_header = err_header.as_str();
-
-                let err = match err_header {
-                    "ContainerNotFound" => AzureStorageError::ContainerNotFound,
-                    "ContainerBeingDeleted" => AzureStorageError::ContainerBeingDeleted,
-                    "BlobNotFound" => AzureStorageError::BlobNotFound,
-                    "ContainerAlreadyExists" => AzureStorageError::ContainerAlreadyExists,
-                    "InvalidPageRange" => AzureStorageError::InvalidPageRange,
-                    _ => {
-                        println!("Unknown error is found: {:?}", err_header);
-                        AzureStorageError::UnknownError {
-                            msg: err_header.to_string(),
-                        }
-                    }
-                };
-
-                return Some(err);
+                return Some(AzureStorageError::parse(err_header));
             }
         }
 
@@ -99,50 +84,6 @@ impl<'t> AzureResponseHandler {
             None => Ok(self),
         }
     }
-
-    /*
-    pub fn check_if_there_is_an_error_and_ignore_container_already_exists(
-        self,
-    ) -> Result<AzureResponseHandler, AzureStorageError> {
-        let has_error = self.get_azure_error();
-
-        return match has_error {
-            Some(err) => match err {
-                AzureStorageError::ContainerAlreadyExists => Ok(self),
-                _ => Err(err),
-            },
-            None => Ok(self),
-        };
-    }
-
-    pub fn check_if_there_is_an_error_and_ignore_blob_already_exists(
-        self,
-    ) -> Result<AzureResponseHandler, AzureStorageError> {
-        let has_error = self.get_azure_error();
-
-        return match has_error {
-            Some(err) => match err {
-                AzureStorageError::BlobAlreadyExists => Ok(self),
-                _ => Err(err),
-            },
-            None => Ok(self),
-        };
-    }
-
-    pub fn check_if_there_is_an_error_and_ignore_blob_not_found(
-        self,
-    ) -> Result<AzureResponseHandler, AzureStorageError> {
-        let has_error = self.get_azure_error();
-
-        return match has_error {
-            Some(err) => match err {
-                AzureStorageError::BlobNotFound => Ok(self),
-                _ => Err(err),
-            },
-            None => Ok(self),
-        };
-    }
-    */
 }
 
 pub trait ToAzureResponseHandler {

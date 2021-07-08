@@ -8,8 +8,28 @@ pub enum AzureStorageError {
     ContainerBeingDeleted,
     ContainerAlreadyExists,
     InvalidPageRange,
+    RequestBodyTooLarge,
     UnknownError { msg: String },
     HyperError { err: hyper::Error },
+}
+
+impl AzureStorageError {
+    pub fn parse(str: &str) -> Self {
+        match str {
+            "ContainerNotFound" => AzureStorageError::ContainerNotFound,
+            "ContainerBeingDeleted" => AzureStorageError::ContainerBeingDeleted,
+            "BlobNotFound" => AzureStorageError::BlobNotFound,
+            "ContainerAlreadyExists" => AzureStorageError::ContainerAlreadyExists,
+            "InvalidPageRange" => AzureStorageError::InvalidPageRange,
+            "RequestBodyTooLarge" => AzureStorageError::RequestBodyTooLarge,
+            _ => {
+                println!("Unknown error is found: {:?}", str);
+                AzureStorageError::UnknownError {
+                    msg: str.to_string(),
+                }
+            }
+        }
+    }
 }
 
 impl From<Error> for AzureStorageError {
