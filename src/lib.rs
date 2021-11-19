@@ -13,3 +13,5 @@ mod types;
 pub use connection::{
     AzureConnection, AzureConnectionInfo, AzureConnectionWithTelemetry, GetAzureConnectionInfo,
 };
+
+pub use types::AzureStorageError;
