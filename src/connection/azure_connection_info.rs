@@ -2,10 +2,9 @@ use std::collections::HashMap;
 
 use flurl::FlUrl;
 
-use super::sign_utils::SignVerb;
+use crate::sign_utils::{self, SignVerb};
 
-#[derive(Clone)]
-pub struct AzureConnection {
+pub struct AzureConnectionInfo {
     pub account_name: String,
     pub account_key: Vec<u8>,
     pub endpoint_suffix: String,
@@ -14,7 +13,7 @@ pub struct AzureConnection {
     pub time_out_ms: String,
 }
 
-impl AzureConnection {
+impl AzureConnectionInfo {
     pub fn from_conn_string(conn_string: &str) -> Self {
         let key_values = conn_string.split(";");
 
@@ -68,15 +67,14 @@ impl AzureConnection {
             None => "".to_string(),
         };
 
-        let string_to_sign = super::sign_utils::get_auth_header(
+        let string_to_sign = sign_utils::get_auth_header(
             self.account_name.as_str(),
             content_len.as_str(),
             verb,
             flurl,
         );
 
-        let signature =
-            super::sign_utils::sign_transaction(string_to_sign.as_str(), &self.account_key);
+        let signature = sign_utils::sign_transaction(string_to_sign.as_str(), &self.account_key);
         format!("SharedKey {}:{}", &self.account_name, signature)
     }
 }

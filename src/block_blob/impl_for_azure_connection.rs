@@ -1,0 +1,21 @@
+use async_trait::async_trait;
+
+use crate::{
+    connection::{AzureConnection, GetAzureConnectionInfo},
+    types::AzureStorageError,
+};
+
+use super::api::BlockBlobApi;
+
+#[async_trait]
+impl BlockBlobApi for AzureConnection {
+    async fn upload(
+        &self,
+        container_name: &str,
+        blob_name: &str,
+        content: Vec<u8>,
+    ) -> Result<(), AzureStorageError> {
+        let connection = self.get_connection_info();
+        super::sdk::upload(connection, container_name, blob_name, content).await
+    }
+}

@@ -9,6 +9,8 @@ edition = "2018"
 [dependencies]
 my-xml-reader = { branch = "main", git = "https://github.com/MyJetTools/my-xml-reader" }
 flurl = { branch = "main", git = "https://github.com/MyJetTools/fl-url" }
+my-telemetry = { branch = "main", git = "https://github.com/MyJetTools/my-telemetry.git" }
+rust-extensions = { branch = "main", git = "https://github.com/MyJetTools/rust-extensions.git" }
 hmac = "*"
 sha2 = "*"
 base64 = "*"

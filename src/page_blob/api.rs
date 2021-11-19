@@ -1,6 +1,6 @@
 use async_trait::async_trait;
 
-use crate::{my_azure_storage::BlobProperties, AzureStorageError};
+use crate::{blob::BlobProperties, types::AzureStorageError};
 
 #[async_trait]
 pub trait PageBlobApi {

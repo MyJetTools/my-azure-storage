@@ -1,6 +1,6 @@
 use my_xml_reader::{MyXmlReader, XmlTagInfo};
 
-use crate::my_azure_storage::types::AzureItems;
+use crate::types::AzureItems;
 
 const ROOT_NODE_NAME: &str = "EnumerationResults";
 

@@ -1,4 +1,4 @@
-use super::{connection::AzureConnection, sign_utils::SignVerb};
+use super::{connection::AzureConnectionInfo, sign_utils::SignVerb};
 use chrono::Utc;
 use flurl::FlUrl;
 
@@ -6,7 +6,7 @@ pub trait FlUrlAzureExtensions {
     fn add_azure_headers(
         self,
         verb: SignVerb,
-        connection: &AzureConnection,
+        connection: &AzureConnectionInfo,
         content_len: Option<usize>,
         next_marker: Option<String>,
         azure_rest_version: &str,
@@ -17,7 +17,7 @@ impl FlUrlAzureExtensions for FlUrl {
     fn add_azure_headers(
         mut self,
         verb: SignVerb,
-        connection: &AzureConnection,
+        connection: &AzureConnectionInfo,
         content_len: Option<usize>,
         next_marker: Option<String>,
         azure_rest_version: &str,

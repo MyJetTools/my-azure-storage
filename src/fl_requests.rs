@@ -2,15 +2,15 @@ pub mod blobs {
     use flurl::FlUrl;
 
     use crate::{
-        my_azure_storage::{
-            azure_response_handler::{AzureResponseHandler, ToAzureResponseHandler},
-            FlUrlAzureExtensions,
-        },
-        AzureConnection, AzureStorageError,
+        azure_response_handler::{AzureResponseHandler, ToAzureResponseHandler},
+        connection::AzureConnectionInfo,
+        flurl_ext::FlUrlAzureExtensions,
+        sign_utils::SignVerb,
+        types::AzureStorageError,
     };
 
     pub async fn get_blob_properties(
-        connection: &AzureConnection,
+        connection: &AzureConnectionInfo,
         container_name: &str,
         blob_name: &str,
     ) -> Result<AzureResponseHandler, AzureStorageError> {
@@ -18,7 +18,7 @@ pub mod blobs {
             .append_path_segment(container_name)
             .append_path_segment(blob_name)
             .add_azure_headers(
-                super::super::SignVerb::HEAD,
+                SignVerb::HEAD,
                 connection,
                 None,
                 None,

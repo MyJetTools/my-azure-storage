@@ -1,9 +1,9 @@
 use std::collections::BTreeMap;
 
 use hmac::{Hmac, Mac, NewMac};
+use rust_extensions::StringBuilder;
 use sha2::Sha256;
 
-use super::StringBuilder;
 use flurl::FlUrl;
 
 type HmacSha256 = Hmac<Sha256>;

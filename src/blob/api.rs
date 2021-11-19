@@ -1,6 +1,6 @@
 use async_trait::async_trait;
 
-use crate::AzureStorageError;
+use crate::types::AzureStorageError;
 
 use super::BlobProperties;
 
