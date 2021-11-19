@@ -1,4 +1,4 @@
-use std::time::Duration;
+use std::{sync::Arc, time::Duration};
 
 use my_telemetry::MyTelemetry;
 
@@ -6,11 +6,11 @@ use super::{azure_connection_trait::GetAzureConnectionInfo, AzureConnectionInfo}
 
 pub struct AzureConnectionWithTelemetry<TMyTelemetry: MyTelemetry + Send + Sync + 'static> {
     info: AzureConnectionInfo,
-    pub telemetry: Option<TMyTelemetry>,
+    pub telemetry: Option<Arc<TMyTelemetry>>,
 }
 
 impl<TMyTelemetry: MyTelemetry + Send + Sync + 'static> AzureConnectionWithTelemetry<TMyTelemetry> {
-    pub fn from_conn_string(conn_string: &str, telemetry: Option<TMyTelemetry>) -> Self {
+    pub fn from_conn_string(conn_string: &str, telemetry: Option<Arc<TMyTelemetry>>) -> Self {
         Self {
             info: AzureConnectionInfo::from_conn_string(conn_string),
             telemetry,
