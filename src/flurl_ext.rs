@@ -1,6 +1,7 @@
 use super::{connection::AzureConnectionInfo, sign_utils::SignVerb};
 use chrono::Utc;
-use flurl::FlUrl;
+use flurl::FlUrlWithTelemetry;
+use my_telemetry::MyTelemetry;
 
 pub trait FlUrlAzureExtensions {
     fn add_azure_headers(
@@ -13,7 +14,7 @@ pub trait FlUrlAzureExtensions {
     ) -> Self;
 }
 
-impl FlUrlAzureExtensions for FlUrl {
+impl<TMyTelemetry: MyTelemetry> FlUrlAzureExtensions for FlUrlWithTelemetry<TMyTelemetry> {
     fn add_azure_headers(
         mut self,
         verb: SignVerb,
@@ -41,7 +42,7 @@ impl FlUrlAzureExtensions for FlUrl {
             flurl = flurl.append_query_param_string("marker", next_marker);
         }
 
-        let auth_key = connection.get_auth_header(verb, content_len, &flurl);
+        let auth_key = connection.get_auth_header(verb, content_len, &flurl.fl_url);
 
         flurl.with_header_val_string("Authorization", auth_key)
     }

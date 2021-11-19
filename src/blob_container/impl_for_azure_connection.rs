@@ -7,6 +7,7 @@ use super::api::BlobContainersApi;
 
 use async_trait::async_trait;
 use hyper::Error;
+use my_telemetry::MyTelemetryToConsole;
 
 #[async_trait]
 impl BlobContainersApi for AzureConnection {
@@ -15,12 +16,17 @@ impl BlobContainersApi for AzureConnection {
         container_name: &str,
     ) -> Result<(), AzureStorageError> {
         let connection = self.get_connection_info();
-        super::sdk::create_container_if_not_exist(connection, container_name).await
+        super::sdk::create_container_if_not_exist::<MyTelemetryToConsole>(
+            connection,
+            container_name,
+            None,
+        )
+        .await
     }
 
     async fn delete_container(&self, container_name: &str) -> Result<(), AzureStorageError> {
         let connection = self.get_connection_info();
-        super::sdk::delete_container(connection, container_name).await
+        super::sdk::delete_container::<MyTelemetryToConsole>(connection, container_name, None).await
     }
 
     async fn delete_container_if_exists(
@@ -28,12 +34,17 @@ impl BlobContainersApi for AzureConnection {
         container_name: &str,
     ) -> Result<(), AzureStorageError> {
         let connection = self.get_connection_info();
-        super::sdk::delete_container_if_exists(connection, container_name).await
+        super::sdk::delete_container_if_exists::<MyTelemetryToConsole>(
+            connection,
+            container_name,
+            None,
+        )
+        .await
     }
 
     async fn get_list_of_blob_containers(&self) -> Result<Vec<String>, Error> {
         let connection = self.get_connection_info();
-        super::sdk::get_list_of_blob_containers(connection).await
+        super::sdk::get_list_of_blob_containers::<MyTelemetryToConsole>(connection, None).await
     }
 
     async fn get_list_of_blobs(
@@ -41,6 +52,7 @@ impl BlobContainersApi for AzureConnection {
         container_name: &str,
     ) -> Result<Vec<String>, AzureStorageError> {
         let connection = self.get_connection_info();
-        super::sdk::get_list_of_blobs(connection, container_name).await
+        super::sdk::get_list_of_blobs::<MyTelemetryToConsole>(connection, container_name, None)
+            .await
     }
 }

@@ -71,7 +71,7 @@ impl AzureConnectionInfo {
             self.account_name.as_str(),
             content_len.as_str(),
             verb,
-            flurl,
+            &flurl,
         );
 
         let signature = sign_utils::sign_transaction(string_to_sign.as_str(), &self.account_key);

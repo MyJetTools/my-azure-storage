@@ -4,7 +4,6 @@ use crate::{
 };
 use async_trait::async_trait;
 use my_telemetry::MyTelemetry;
-use rust_extensions::StopWatch;
 
 use super::{api::BlobApi, BlobProperties};
 
@@ -19,18 +18,13 @@ impl<TMyTelemetry: MyTelemetry + Send + Sync + 'static> BlobApi
     ) -> Result<BlobProperties, AzureStorageError> {
         let connection = self.get_connection_info();
 
-        let mut sw = StopWatch::new();
-        sw.start();
-        let result = super::sdk::get_blob_properties(connection, container_name, blob_name).await;
-        sw.pause();
-
-        let success = result.is_ok();
-
-        self.track_dependency_duration(
-            "blob/get_blob_properties".to_string(),
-            success,
-            sw.duration(),
-        );
+        let result = super::sdk::get_blob_properties(
+            connection,
+            container_name,
+            blob_name,
+            self.telemetry.clone(),
+        )
+        .await;
 
         return result;
     }
@@ -41,14 +35,14 @@ impl<TMyTelemetry: MyTelemetry + Send + Sync + 'static> BlobApi
         blob_name: &str,
     ) -> Result<Vec<u8>, AzureStorageError> {
         let connection = self.get_connection_info();
-        let mut sw = StopWatch::new();
-        sw.start();
-        let result = super::sdk::download_blob(connection, container_name, blob_name).await;
-        sw.pause();
 
-        let success = result.is_ok();
-
-        self.track_dependency_duration("blob/download_blob".to_string(), success, sw.duration());
+        let result = super::sdk::download_blob(
+            connection,
+            container_name,
+            blob_name,
+            self.telemetry.clone(),
+        )
+        .await;
 
         return result;
     }
@@ -59,15 +53,14 @@ impl<TMyTelemetry: MyTelemetry + Send + Sync + 'static> BlobApi
         blob_name: &str,
     ) -> Result<(), AzureStorageError> {
         let connection = self.get_connection_info();
-        let mut sw = StopWatch::new();
-        sw.start();
-        let result = super::sdk::delete_blob(connection, container_name, blob_name).await;
 
-        sw.pause();
-
-        let success = result.is_ok();
-
-        self.track_dependency_duration("blob/delete_blob".to_string(), success, sw.duration());
+        let result = super::sdk::delete_blob(
+            connection,
+            container_name,
+            blob_name,
+            self.telemetry.clone(),
+        )
+        .await;
 
         return result;
     }
@@ -79,19 +72,13 @@ impl<TMyTelemetry: MyTelemetry + Send + Sync + 'static> BlobApi
     ) -> Result<(), AzureStorageError> {
         let connection = self.get_connection_info();
 
-        let mut sw = StopWatch::new();
-        sw.start();
-        let result = super::sdk::delete_blob_if_exists(connection, container_name, blob_name).await;
-
-        sw.pause();
-
-        let success = result.is_ok();
-
-        self.track_dependency_duration(
-            "blob/delete_blob_if_exists".to_string(),
-            success,
-            sw.duration(),
-        );
+        let result = super::sdk::delete_blob_if_exists(
+            connection,
+            container_name,
+            blob_name,
+            self.telemetry.clone(),
+        )
+        .await;
 
         return result;
     }

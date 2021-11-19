@@ -1,4 +1,5 @@
 use async_trait::async_trait;
+use my_telemetry::MyTelemetryToConsole;
 
 use crate::{
     connection::{AzureConnection, GetAzureConnectionInfo},
@@ -16,6 +17,13 @@ impl BlockBlobApi for AzureConnection {
         content: Vec<u8>,
     ) -> Result<(), AzureStorageError> {
         let connection = self.get_connection_info();
-        super::sdk::upload(connection, container_name, blob_name, content).await
+        super::sdk::upload::<MyTelemetryToConsole>(
+            connection,
+            container_name,
+            blob_name,
+            content,
+            None,
+        )
+        .await
     }
 }

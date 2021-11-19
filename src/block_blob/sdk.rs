@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use crate::{
     azure_response_handler::ToAzureResponseHandler, connection::AzureConnectionInfo,
     flurl_ext::FlUrlAzureExtensions, sign_utils::SignVerb, types::AzureStorageError,
@@ -5,15 +7,17 @@ use crate::{
 
 use super::super::consts::AZURE_REST_VERSION;
 
-use flurl::FlUrl;
+use flurl::FlUrlWithTelemetry;
+use my_telemetry::MyTelemetry;
 
-pub async fn upload(
+pub async fn upload<TMyTelemetry: MyTelemetry>(
     connection: &AzureConnectionInfo,
     container_name: &str,
     blob_name: &str,
     content: Vec<u8>,
+    telemetry: Option<Arc<TMyTelemetry>>,
 ) -> Result<(), AzureStorageError> {
-    FlUrl::new(connection.blobs_api_url.as_str())
+    FlUrlWithTelemetry::new(connection.blobs_api_url.as_str(), telemetry)
         .append_path_segment(container_name)
         .append_path_segment(blob_name)
         .with_header("x-ms-blob-type", "BlockBlob")

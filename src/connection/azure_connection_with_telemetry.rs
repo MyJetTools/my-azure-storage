@@ -1,4 +1,4 @@
-use std::{sync::Arc, time::Duration};
+use std::sync::Arc;
 
 use my_telemetry::MyTelemetry;
 
@@ -14,18 +14,6 @@ impl<TMyTelemetry: MyTelemetry + Send + Sync + 'static> AzureConnectionWithTelem
         Self {
             info: AzureConnectionInfo::from_conn_string(conn_string),
             telemetry,
-        }
-    }
-
-    pub fn track_dependency_duration(&self, resource: String, success: bool, duration: Duration) {
-        if let Some(telemetry) = &self.telemetry {
-            telemetry.track_dependency_duration(
-                self.info.blobs_api_url.to_string(),
-                "HTTP".to_string(),
-                resource,
-                success,
-                duration,
-            );
         }
     }
 }

@@ -1,4 +1,5 @@
 use async_trait::async_trait;
+use my_telemetry::MyTelemetryToConsole;
 
 use crate::{
     blob::BlobProperties,
@@ -17,8 +18,14 @@ impl PageBlobApi for AzureConnection {
         pages_amount: usize,
     ) -> Result<(), AzureStorageError> {
         let connection = self.get_connection_info();
-        return super::sdk::create_page_blob(connection, container_name, blob_name, pages_amount)
-            .await;
+        return super::sdk::create_page_blob::<MyTelemetryToConsole>(
+            connection,
+            container_name,
+            blob_name,
+            pages_amount,
+            None,
+        )
+        .await;
     }
 
     async fn create_page_blob_if_not_exists(
@@ -28,11 +35,12 @@ impl PageBlobApi for AzureConnection {
         pages_amount: usize,
     ) -> Result<BlobProperties, AzureStorageError> {
         let connection = self.get_connection_info();
-        return super::sdk::create_page_blob_if_not_exists(
+        return super::sdk::create_page_blob_if_not_exists::<MyTelemetryToConsole>(
             connection,
             container_name,
             blob_name,
             pages_amount,
+            None,
         )
         .await;
     }
@@ -44,8 +52,14 @@ impl PageBlobApi for AzureConnection {
         pages_amount: usize,
     ) -> Result<(), AzureStorageError> {
         let connection = self.get_connection_info();
-        return super::sdk::resize_page_blob(connection, container_name, blob_name, pages_amount)
-            .await;
+        return super::sdk::resize_page_blob::<MyTelemetryToConsole>(
+            connection,
+            container_name,
+            blob_name,
+            pages_amount,
+            None,
+        )
+        .await;
     }
 
     async fn save_pages(
@@ -56,12 +70,13 @@ impl PageBlobApi for AzureConnection {
         payload: Vec<u8>,
     ) -> Result<(), AzureStorageError> {
         let connection = self.get_connection_info();
-        return super::sdk::save_pages(
+        return super::sdk::save_pages::<MyTelemetryToConsole>(
             connection,
             container_name,
             blob_name,
             start_page_no,
             payload,
+            None,
         )
         .await;
     }
@@ -74,12 +89,13 @@ impl PageBlobApi for AzureConnection {
         pages_to_read: usize,
     ) -> Result<Vec<u8>, AzureStorageError> {
         let connection = self.get_connection_info();
-        return super::sdk::get_pages(
+        return super::sdk::get_pages::<MyTelemetryToConsole>(
             connection,
             container_name,
             blob_name,
             start_page_no,
             pages_to_read,
+            None,
         )
         .await;
     }

@@ -1,5 +1,8 @@
 pub mod blobs {
-    use flurl::FlUrl;
+    use std::sync::Arc;
+
+    use flurl::FlUrlWithTelemetry;
+    use my_telemetry::MyTelemetry;
 
     use crate::{
         azure_response_handler::{AzureResponseHandler, ToAzureResponseHandler},
@@ -9,12 +12,13 @@ pub mod blobs {
         types::AzureStorageError,
     };
 
-    pub async fn get_blob_properties(
+    pub async fn get_blob_properties<TMyTelemetry: MyTelemetry>(
         connection: &AzureConnectionInfo,
         container_name: &str,
         blob_name: &str,
+        telemetry: Option<Arc<TMyTelemetry>>,
     ) -> Result<AzureResponseHandler, AzureStorageError> {
-        let resp = FlUrl::new(connection.blobs_api_url.as_str())
+        let resp = FlUrlWithTelemetry::new(connection.blobs_api_url.as_str(), telemetry)
             .append_path_segment(container_name)
             .append_path_segment(blob_name)
             .add_azure_headers(

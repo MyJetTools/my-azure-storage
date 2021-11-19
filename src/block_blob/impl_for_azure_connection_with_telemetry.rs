@@ -1,6 +1,5 @@
 use async_trait::async_trait;
 use my_telemetry::MyTelemetry;
-use rust_extensions::StopWatch;
 
 use crate::{
     connection::{AzureConnectionWithTelemetry, GetAzureConnectionInfo},
@@ -21,13 +20,14 @@ impl<TMyTelemetry: MyTelemetry + Send + Sync + 'static> BlockBlobApi
     ) -> Result<(), AzureStorageError> {
         let connection = self.get_connection_info();
 
-        let mut sw = StopWatch::new();
-        sw.start();
-        let result = super::sdk::upload(connection, container_name, blob_name, content).await;
-
-        let success = result.is_ok();
-
-        self.track_dependency_duration("block_blob/upload".to_string(), success, sw.duration());
+        let result = super::sdk::upload(
+            connection,
+            container_name,
+            blob_name,
+            content,
+            self.telemetry.clone(),
+        )
+        .await;
 
         return result;
     }

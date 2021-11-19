@@ -1,20 +1,24 @@
+use std::sync::Arc;
+
 use crate::azure_response_handler::ToAzureResponseHandler;
 use crate::types::AzureStorageError;
 use crate::{
     connection::AzureConnectionInfo, flurl_ext::FlUrlAzureExtensions, sign_utils::SignVerb,
 };
 
-use flurl::FlUrl;
+use flurl::FlUrlWithTelemetry;
+use my_telemetry::MyTelemetry;
 
 use super::super::consts::AZURE_REST_VERSION;
 use super::BlobProperties;
 
-pub async fn delete_blob_if_exists(
+pub async fn delete_blob_if_exists<TMyTelemetry: MyTelemetry>(
     connection: &AzureConnectionInfo,
     container_name: &str,
     blob_name: &str,
+    telemetry: Option<Arc<TMyTelemetry>>,
 ) -> Result<(), AzureStorageError> {
-    FlUrl::new(connection.blobs_api_url.as_str())
+    FlUrlWithTelemetry::new(connection.blobs_api_url.as_str(), telemetry)
         .append_path_segment(container_name)
         .append_path_segment(blob_name)
         .add_azure_headers(SignVerb::DELETE, connection, None, None, AZURE_REST_VERSION)
@@ -26,15 +30,17 @@ pub async fn delete_blob_if_exists(
     Ok(())
 }
 
-pub async fn get_blob_properties(
+pub async fn get_blob_properties<TMyTelemetry: MyTelemetry>(
     connection: &AzureConnectionInfo,
     container_name: &str,
     blob_name: &str,
+    telemetry: Option<Arc<TMyTelemetry>>,
 ) -> Result<BlobProperties, AzureStorageError> {
     let response = super::super::fl_requests::blobs::get_blob_properties(
         connection,
         container_name,
         blob_name,
+        telemetry,
     )
     .await?
     .check_if_there_is_an_error()?;
@@ -48,12 +54,13 @@ pub async fn get_blob_properties(
     Ok(result)
 }
 
-pub async fn download_blob(
+pub async fn download_blob<TMyTelemetry: MyTelemetry>(
     connection: &AzureConnectionInfo,
     container_name: &str,
     blob_name: &str,
+    telemetry: Option<Arc<TMyTelemetry>>,
 ) -> Result<Vec<u8>, AzureStorageError> {
-    let response = FlUrl::new(connection.blobs_api_url.as_str())
+    let response = FlUrlWithTelemetry::new(connection.blobs_api_url.as_str(), telemetry)
         .append_path_segment(container_name)
         .append_path_segment(blob_name)
         .add_azure_headers(SignVerb::GET, connection, None, None, AZURE_REST_VERSION)
@@ -67,12 +74,13 @@ pub async fn download_blob(
     Ok(result)
 }
 
-pub async fn delete_blob(
+pub async fn delete_blob<TMyTelemetry: MyTelemetry>(
     connection: &AzureConnectionInfo,
     container_name: &str,
     blob_name: &str,
+    telemetry: Option<Arc<TMyTelemetry>>,
 ) -> Result<(), AzureStorageError> {
-    FlUrl::new(connection.blobs_api_url.as_str())
+    FlUrlWithTelemetry::new(connection.blobs_api_url.as_str(), telemetry)
         .append_path_segment(container_name)
         .append_path_segment(blob_name)
         .add_azure_headers(SignVerb::DELETE, connection, None, None, AZURE_REST_VERSION)
@@ -87,6 +95,8 @@ pub async fn delete_blob(
 #[cfg(test)]
 mod tests {
 
+    use my_telemetry::MyTelemetryToConsole;
+
     use super::*;
 
     #[tokio::test]
@@ -96,7 +106,9 @@ mod tests {
         let connection = AzureConnectionInfo::from_conn_string(conn_string);
         println!("Name:{}", connection.account_name);
 
-        let result = get_blob_properties(&connection, "testtest", "notexists").await;
+        let result =
+            get_blob_properties::<MyTelemetryToConsole>(&connection, "testtest", "notexists", None)
+                .await;
 
         if let Err(err) = result {
             assert_eq!(true, matches!(err, AzureStorageError::BlobNotFound));

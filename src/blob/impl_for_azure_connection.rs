@@ -3,6 +3,7 @@ use crate::{
     types::AzureStorageError,
 };
 use async_trait::async_trait;
+use my_telemetry::MyTelemetryToConsole;
 
 use super::{api::BlobApi, BlobProperties};
 
@@ -15,7 +16,13 @@ impl BlobApi for AzureConnection {
     ) -> Result<BlobProperties, AzureStorageError> {
         let connection = self.get_connection_info();
 
-        return super::sdk::get_blob_properties(connection, container_name, blob_name).await;
+        return super::sdk::get_blob_properties::<MyTelemetryToConsole>(
+            connection,
+            container_name,
+            blob_name,
+            None,
+        )
+        .await;
     }
 
     async fn download_blob(
@@ -24,7 +31,13 @@ impl BlobApi for AzureConnection {
         blob_name: &str,
     ) -> Result<Vec<u8>, AzureStorageError> {
         let connection = self.get_connection_info();
-        return super::sdk::download_blob(connection, container_name, blob_name).await;
+        return super::sdk::download_blob::<MyTelemetryToConsole>(
+            connection,
+            container_name,
+            blob_name,
+            None,
+        )
+        .await;
     }
 
     async fn delete_blob(
@@ -33,7 +46,13 @@ impl BlobApi for AzureConnection {
         blob_name: &str,
     ) -> Result<(), AzureStorageError> {
         let connection = self.get_connection_info();
-        return super::sdk::delete_blob(connection, container_name, blob_name).await;
+        return super::sdk::delete_blob::<MyTelemetryToConsole>(
+            connection,
+            container_name,
+            blob_name,
+            None,
+        )
+        .await;
     }
 
     async fn delete_blob_if_exists(
@@ -42,6 +61,12 @@ impl BlobApi for AzureConnection {
         blob_name: &str,
     ) -> Result<(), AzureStorageError> {
         let connection = self.get_connection_info();
-        return super::sdk::delete_blob_if_exists(connection, container_name, blob_name).await;
+        return super::sdk::delete_blob_if_exists::<MyTelemetryToConsole>(
+            connection,
+            container_name,
+            blob_name,
+            None,
+        )
+        .await;
     }
 }
