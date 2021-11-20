@@ -61,11 +61,11 @@ fn get_canonicalized_resourse(flurl: &FlUrl, account_name: &str) -> String {
 
     sb.append_str(account_name);
 
-    sb.append_str(flurl.get_path().as_str());
+    sb.append_str(flurl.url.get_path().as_str());
 
     let mut sorted_query: BTreeMap<&str, &str> = BTreeMap::new();
 
-    for (key, value) in &flurl.query {
+    for (key, value) in &flurl.url.query {
         sorted_query.insert(key, value);
     }
 
