@@ -7,6 +7,7 @@ pub mod blobs {
     use crate::{
         azure_response_handler::{AzureResponseHandler, ToAzureResponseHandler},
         connection::AzureConnectionInfo,
+        consts::DEPENDENCY_TYPE,
         flurl_ext::FlUrlAzureExtensions,
         sign_utils::SignVerb,
         types::AzureStorageError,
@@ -18,19 +19,23 @@ pub mod blobs {
         blob_name: &str,
         telemetry: Option<Arc<TMyTelemetry>>,
     ) -> Result<AzureResponseHandler, AzureStorageError> {
-        let resp = FlUrlWithTelemetry::new(connection.blobs_api_url.as_str(), telemetry)
-            .append_path_segment(container_name)
-            .append_path_segment(blob_name)
-            .add_azure_headers(
-                SignVerb::HEAD,
-                connection,
-                None,
-                None,
-                super::AZURE_REST_VERSION,
-            )
-            .head()
-            .await?
-            .to_azure_response_handler();
+        let resp = FlUrlWithTelemetry::new(
+            connection.blobs_api_url.as_str(),
+            telemetry,
+            DEPENDENCY_TYPE.to_string(),
+        )
+        .append_path_segment(container_name)
+        .append_path_segment(blob_name)
+        .add_azure_headers(
+            SignVerb::HEAD,
+            connection,
+            None,
+            None,
+            super::AZURE_REST_VERSION,
+        )
+        .head()
+        .await?
+        .to_azure_response_handler();
 
         Ok(resp)
     }

@@ -7,7 +7,8 @@ use my_telemetry::MyTelemetry;
 use crate::{
     azure_response_handler::ToAzureResponseHandler,
     blob_container::models::deserialize_list_of_blobs, connection::AzureConnectionInfo,
-    flurl_ext::FlUrlAzureExtensions, sign_utils::SignVerb, types::AzureStorageError,
+    consts::DEPENDENCY_TYPE, flurl_ext::FlUrlAzureExtensions, sign_utils::SignVerb,
+    types::AzureStorageError,
 };
 
 pub async fn create_container_if_not_exist<TMyTelemetry: MyTelemetry>(
@@ -15,14 +16,18 @@ pub async fn create_container_if_not_exist<TMyTelemetry: MyTelemetry>(
     container_name: &str,
     telemetry: Option<Arc<TMyTelemetry>>,
 ) -> Result<(), AzureStorageError> {
-    FlUrlWithTelemetry::new(connection.blobs_api_url.as_str(), telemetry)
-        .append_path_segment(container_name)
-        .append_query_param("restype", "container")
-        .add_azure_headers(SignVerb::PUT, connection, None, None, AZURE_REST_VERSION)
-        .put(None)
-        .await?
-        .to_azure_response_handler()
-        .check_if_there_is_an_error_and_ignore_one(AzureStorageError::ContainerAlreadyExists)?;
+    FlUrlWithTelemetry::new(
+        connection.blobs_api_url.as_str(),
+        telemetry,
+        DEPENDENCY_TYPE.to_string(),
+    )
+    .append_path_segment(container_name)
+    .append_query_param("restype", "container")
+    .add_azure_headers(SignVerb::PUT, connection, None, None, AZURE_REST_VERSION)
+    .put(None)
+    .await?
+    .to_azure_response_handler()
+    .check_if_there_is_an_error_and_ignore_one(AzureStorageError::ContainerAlreadyExists)?;
 
     return Ok(());
 }
@@ -32,14 +37,18 @@ pub async fn delete_container<TMyTelemetry: MyTelemetry>(
     container_name: &str,
     telemetry: Option<Arc<TMyTelemetry>>,
 ) -> Result<(), AzureStorageError> {
-    FlUrlWithTelemetry::new(connection.blobs_api_url.as_str(), telemetry)
-        .append_path_segment(container_name)
-        .append_query_param("restype", "container")
-        .add_azure_headers(SignVerb::DELETE, connection, None, None, AZURE_REST_VERSION)
-        .delete()
-        .await?
-        .to_azure_response_handler()
-        .check_if_there_is_an_error()?;
+    FlUrlWithTelemetry::new(
+        connection.blobs_api_url.as_str(),
+        telemetry,
+        DEPENDENCY_TYPE.to_string(),
+    )
+    .append_path_segment(container_name)
+    .append_query_param("restype", "container")
+    .add_azure_headers(SignVerb::DELETE, connection, None, None, AZURE_REST_VERSION)
+    .delete()
+    .await?
+    .to_azure_response_handler()
+    .check_if_there_is_an_error()?;
 
     Ok(())
 }
@@ -49,14 +58,18 @@ pub async fn delete_container_if_exists<TMyTelemetry: MyTelemetry>(
     container_name: &str,
     telemetry: Option<Arc<TMyTelemetry>>,
 ) -> Result<(), AzureStorageError> {
-    FlUrlWithTelemetry::new(connection.blobs_api_url.as_str(), telemetry)
-        .append_path_segment(container_name)
-        .append_query_param("restype", "container")
-        .add_azure_headers(SignVerb::DELETE, connection, None, None, AZURE_REST_VERSION)
-        .delete()
-        .await?
-        .to_azure_response_handler()
-        .check_if_there_is_an_error_and_ignore_one(AzureStorageError::ContainerNotFound)?;
+    FlUrlWithTelemetry::new(
+        connection.blobs_api_url.as_str(),
+        telemetry,
+        DEPENDENCY_TYPE.to_string(),
+    )
+    .append_path_segment(container_name)
+    .append_query_param("restype", "container")
+    .add_azure_headers(SignVerb::DELETE, connection, None, None, AZURE_REST_VERSION)
+    .delete()
+    .await?
+    .to_azure_response_handler()
+    .check_if_there_is_an_error_and_ignore_one(AzureStorageError::ContainerNotFound)?;
 
     Ok(())
 }
@@ -70,18 +83,21 @@ pub async fn get_list_of_blob_containers<TMyTelemetry: MyTelemetry>(
     let mut next_marker: Option<String> = None;
 
     loop {
-        let response =
-            FlUrlWithTelemetry::new(connection.blobs_api_url.as_str(), telemetry.clone())
-                .append_query_param("comp", "list")
-                .add_azure_headers(
-                    super::super::sign_utils::SignVerb::GET,
-                    &connection,
-                    None,
-                    next_marker,
-                    AZURE_REST_VERSION,
-                )
-                .get()
-                .await?;
+        let response = FlUrlWithTelemetry::new(
+            connection.blobs_api_url.as_str(),
+            telemetry.clone(),
+            DEPENDENCY_TYPE.to_string(),
+        )
+        .append_query_param("comp", "list")
+        .add_azure_headers(
+            super::super::sign_utils::SignVerb::GET,
+            &connection,
+            None,
+            next_marker,
+            AZURE_REST_VERSION,
+        )
+        .get()
+        .await?;
 
         let body = response.get_body().await?;
 
@@ -109,22 +125,25 @@ pub async fn get_list_of_blobs<TMyTelemetry: MyTelemetry>(
     let mut next_marker: Option<String> = None;
 
     loop {
-        let response =
-            FlUrlWithTelemetry::new(connection.blobs_api_url.as_str(), telemetry.clone())
-                .append_path_segment(container_name)
-                .append_query_param("comp", "list")
-                .append_query_param("restype", "container")
-                .add_azure_headers(
-                    SignVerb::GET,
-                    &connection,
-                    None,
-                    next_marker,
-                    AZURE_REST_VERSION,
-                )
-                .get()
-                .await?
-                .to_azure_response_handler()
-                .check_if_there_is_an_error()?;
+        let response = FlUrlWithTelemetry::new(
+            connection.blobs_api_url.as_str(),
+            telemetry.clone(),
+            DEPENDENCY_TYPE.to_string(),
+        )
+        .append_path_segment(container_name)
+        .append_query_param("comp", "list")
+        .append_query_param("restype", "container")
+        .add_azure_headers(
+            SignVerb::GET,
+            &connection,
+            None,
+            next_marker,
+            AZURE_REST_VERSION,
+        )
+        .get()
+        .await?
+        .to_azure_response_handler()
+        .check_if_there_is_an_error()?;
 
         let body = response.get_body().await?;
 

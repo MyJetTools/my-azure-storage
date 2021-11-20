@@ -7,7 +7,7 @@ use crate::azure_response_handler::ToAzureResponseHandler;
 use crate::blob::sdk::get_blob_properties;
 use crate::blob::BlobProperties;
 use crate::connection::AzureConnectionInfo;
-use crate::consts::AZURE_REST_VERSION;
+use crate::consts::{AZURE_REST_VERSION, DEPENDENCY_TYPE};
 use crate::flurl_ext::FlUrlAzureExtensions;
 
 use crate::sign_utils::SignVerb;
@@ -55,17 +55,21 @@ pub async fn resize_page_blob<TMyTelemetry: MyTelemetry>(
 ) -> Result<(), AzureStorageError> {
     let new_size = pages_amount * BLOB_PAGE_SIZE;
 
-    FlUrlWithTelemetry::new(connection.blobs_api_url.as_str(), telemetry)
-        .append_path_segment(container_name)
-        .append_path_segment(blob_name)
-        .append_query_param("comp", "properties")
-        .with_header_val_string("x-ms-blob-content-length", new_size.to_string())
-        .with_header("x-ms-blob-type", "PageBlob")
-        .add_azure_headers(SignVerb::PUT, &connection, None, None, AZURE_REST_VERSION)
-        .put(None)
-        .await?
-        .to_azure_response_handler()
-        .check_if_there_is_an_error()?;
+    FlUrlWithTelemetry::new(
+        connection.blobs_api_url.as_str(),
+        telemetry,
+        DEPENDENCY_TYPE.to_string(),
+    )
+    .append_path_segment(container_name)
+    .append_path_segment(blob_name)
+    .append_query_param("comp", "properties")
+    .with_header_val_string("x-ms-blob-content-length", new_size.to_string())
+    .with_header("x-ms-blob-type", "PageBlob")
+    .add_azure_headers(SignVerb::PUT, &connection, None, None, AZURE_REST_VERSION)
+    .put(None)
+    .await?
+    .to_azure_response_handler()
+    .check_if_there_is_an_error()?;
 
     Ok(())
 }
@@ -84,23 +88,27 @@ pub async fn save_pages<TMyTelemetry: MyTelemetry>(
 
     let range_header = format!("bytes={}-{}", start_bytes, end_bytes);
 
-    FlUrlWithTelemetry::new(connection.blobs_api_url.as_str(), telemetry)
-        .append_path_segment(container_name)
-        .append_path_segment(blob_name)
-        .append_query_param("comp", "page")
-        .with_header("x-ms-page-write", "update")
-        .with_header_val_string("x-ms-range", range_header)
-        .add_azure_headers(
-            SignVerb::PUT,
-            &connection,
-            Some(payload.len()),
-            None,
-            AZURE_REST_VERSION,
-        )
-        .put(Some(payload))
-        .await?
-        .to_azure_response_handler()
-        .check_if_there_is_an_error()?;
+    FlUrlWithTelemetry::new(
+        connection.blobs_api_url.as_str(),
+        telemetry,
+        DEPENDENCY_TYPE.to_string(),
+    )
+    .append_path_segment(container_name)
+    .append_path_segment(blob_name)
+    .append_query_param("comp", "page")
+    .with_header("x-ms-page-write", "update")
+    .with_header_val_string("x-ms-range", range_header)
+    .add_azure_headers(
+        SignVerb::PUT,
+        &connection,
+        Some(payload.len()),
+        None,
+        AZURE_REST_VERSION,
+    )
+    .put(Some(payload))
+    .await?
+    .to_azure_response_handler()
+    .check_if_there_is_an_error()?;
 
     Ok(())
 }
@@ -121,15 +129,19 @@ pub async fn get_pages<TMyTelemetry: MyTelemetry>(
 
     let range_header = format!("bytes={}-{}", start_bytes, end_bytes);
 
-    let response = FlUrlWithTelemetry::new(connection.blobs_api_url.as_str(), telemetry)
-        .append_path_segment(container_name)
-        .append_path_segment(blob_name)
-        .with_header_val_string("x-ms-range", range_header)
-        .add_azure_headers(SignVerb::GET, &connection, None, None, AZURE_REST_VERSION)
-        .get()
-        .await?
-        .to_azure_response_handler()
-        .check_if_there_is_an_error()?;
+    let response = FlUrlWithTelemetry::new(
+        connection.blobs_api_url.as_str(),
+        telemetry,
+        DEPENDENCY_TYPE.to_string(),
+    )
+    .append_path_segment(container_name)
+    .append_path_segment(blob_name)
+    .with_header_val_string("x-ms-range", range_header)
+    .add_azure_headers(SignVerb::GET, &connection, None, None, AZURE_REST_VERSION)
+    .get()
+    .await?
+    .to_azure_response_handler()
+    .check_if_there_is_an_error()?;
 
     Ok(response.get_body().await?)
 }
@@ -143,16 +155,20 @@ pub async fn create_page_blob<TMyTelemetry: MyTelemetry>(
 ) -> Result<(), AzureStorageError> {
     let new_size = pages_amount * BLOB_PAGE_SIZE;
 
-    FlUrlWithTelemetry::new(connection.blobs_api_url.as_str(), telemetry)
-        .append_path_segment(container_name)
-        .append_path_segment(blob_name)
-        .with_header_val_string("x-ms-blob-content-length", new_size.to_string())
-        .with_header("x-ms-blob-type", "PageBlob")
-        .add_azure_headers(SignVerb::PUT, &connection, None, None, AZURE_REST_VERSION)
-        .put(None)
-        .await?
-        .to_azure_response_handler()
-        .check_if_there_is_an_error()?;
+    FlUrlWithTelemetry::new(
+        connection.blobs_api_url.as_str(),
+        telemetry,
+        DEPENDENCY_TYPE.to_string(),
+    )
+    .append_path_segment(container_name)
+    .append_path_segment(blob_name)
+    .with_header_val_string("x-ms-blob-content-length", new_size.to_string())
+    .with_header("x-ms-blob-type", "PageBlob")
+    .add_azure_headers(SignVerb::PUT, &connection, None, None, AZURE_REST_VERSION)
+    .put(None)
+    .await?
+    .to_azure_response_handler()
+    .check_if_there_is_an_error()?;
 
     return Ok(());
 }

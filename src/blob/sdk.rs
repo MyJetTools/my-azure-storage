@@ -1,6 +1,7 @@
 use std::sync::Arc;
 
 use crate::azure_response_handler::ToAzureResponseHandler;
+use crate::consts::DEPENDENCY_TYPE;
 use crate::types::AzureStorageError;
 use crate::{
     connection::AzureConnectionInfo, flurl_ext::FlUrlAzureExtensions, sign_utils::SignVerb,
@@ -18,14 +19,18 @@ pub async fn delete_blob_if_exists<TMyTelemetry: MyTelemetry>(
     blob_name: &str,
     telemetry: Option<Arc<TMyTelemetry>>,
 ) -> Result<(), AzureStorageError> {
-    FlUrlWithTelemetry::new(connection.blobs_api_url.as_str(), telemetry)
-        .append_path_segment(container_name)
-        .append_path_segment(blob_name)
-        .add_azure_headers(SignVerb::DELETE, connection, None, None, AZURE_REST_VERSION)
-        .delete()
-        .await?
-        .to_azure_response_handler()
-        .check_if_there_is_an_error_and_ignore_one(AzureStorageError::BlobNotFound)?;
+    FlUrlWithTelemetry::new(
+        connection.blobs_api_url.as_str(),
+        telemetry,
+        DEPENDENCY_TYPE.to_string(),
+    )
+    .append_path_segment(container_name)
+    .append_path_segment(blob_name)
+    .add_azure_headers(SignVerb::DELETE, connection, None, None, AZURE_REST_VERSION)
+    .delete()
+    .await?
+    .to_azure_response_handler()
+    .check_if_there_is_an_error_and_ignore_one(AzureStorageError::BlobNotFound)?;
 
     Ok(())
 }
@@ -60,14 +65,18 @@ pub async fn download_blob<TMyTelemetry: MyTelemetry>(
     blob_name: &str,
     telemetry: Option<Arc<TMyTelemetry>>,
 ) -> Result<Vec<u8>, AzureStorageError> {
-    let response = FlUrlWithTelemetry::new(connection.blobs_api_url.as_str(), telemetry)
-        .append_path_segment(container_name)
-        .append_path_segment(blob_name)
-        .add_azure_headers(SignVerb::GET, connection, None, None, AZURE_REST_VERSION)
-        .get()
-        .await?
-        .to_azure_response_handler()
-        .check_if_there_is_an_error()?;
+    let response = FlUrlWithTelemetry::new(
+        connection.blobs_api_url.as_str(),
+        telemetry,
+        DEPENDENCY_TYPE.to_string(),
+    )
+    .append_path_segment(container_name)
+    .append_path_segment(blob_name)
+    .add_azure_headers(SignVerb::GET, connection, None, None, AZURE_REST_VERSION)
+    .get()
+    .await?
+    .to_azure_response_handler()
+    .check_if_there_is_an_error()?;
 
     let result = response.get_body().await?;
 
@@ -80,14 +89,18 @@ pub async fn delete_blob<TMyTelemetry: MyTelemetry>(
     blob_name: &str,
     telemetry: Option<Arc<TMyTelemetry>>,
 ) -> Result<(), AzureStorageError> {
-    FlUrlWithTelemetry::new(connection.blobs_api_url.as_str(), telemetry)
-        .append_path_segment(container_name)
-        .append_path_segment(blob_name)
-        .add_azure_headers(SignVerb::DELETE, connection, None, None, AZURE_REST_VERSION)
-        .delete()
-        .await?
-        .to_azure_response_handler()
-        .check_if_there_is_an_error()?;
+    FlUrlWithTelemetry::new(
+        connection.blobs_api_url.as_str(),
+        telemetry,
+        DEPENDENCY_TYPE.to_string(),
+    )
+    .append_path_segment(container_name)
+    .append_path_segment(blob_name)
+    .add_azure_headers(SignVerb::DELETE, connection, None, None, AZURE_REST_VERSION)
+    .delete()
+    .await?
+    .to_azure_response_handler()
+    .check_if_there_is_an_error()?;
 
     Ok(())
 }
