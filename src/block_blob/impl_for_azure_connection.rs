@@ -1,15 +1,12 @@
 use async_trait::async_trait;
 use my_telemetry::MyTelemetryToConsole;
 
-use crate::{
-    connection::{AzureConnection, GetAzureConnectionInfo},
-    types::AzureStorageError,
-};
+use crate::{connection::AzureStorageConnection, types::AzureStorageError};
 
 use super::api::BlockBlobApi;
 
 #[async_trait]
-impl BlockBlobApi for AzureConnection {
+impl BlockBlobApi for AzureStorageConnection {
     async fn upload(
         &self,
         container_name: &str,

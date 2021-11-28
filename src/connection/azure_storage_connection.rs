@@ -1,10 +1,17 @@
-use std::sync::Arc;
+use super::AzureStorageConnectionInfo;
 
-use my_telemetry::MyTelemetry;
+pub struct AzureStorageConnection {
+    info: AzureStorageConnectionInfo,
+}
 
-use crate::AzureConnectionInfo;
+impl AzureStorageConnection {
+    pub fn from_conn_string(conn_string: &str) -> Self {
+        Self {
+            info: AzureStorageConnectionInfo::from_conn_string(conn_string),
+        }
+    }
 
-pub trait AzureStorageConnection {
-    fn get_conneciton_info(&self) -> &AzureConnectionInfo;
-    fn get_telemetry<TMyTelemetry: MyTelemetry>(&self) -> Option<Arc<TMyTelemetry>>;
+    pub fn get_connection_info(&self) -> &AzureStorageConnectionInfo {
+        &self.info
+    }
 }

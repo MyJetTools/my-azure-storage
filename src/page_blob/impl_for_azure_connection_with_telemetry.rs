@@ -2,16 +2,14 @@ use async_trait::async_trait;
 use my_telemetry::MyTelemetry;
 
 use crate::{
-    blob::BlobProperties,
-    connection::{AzureConnectionWithTelemetry, GetAzureConnectionInfo},
-    types::AzureStorageError,
+    blob::BlobProperties, connection::AzureStorageConnectionWithTelemetry, types::AzureStorageError,
 };
 
 use super::PageBlobApi;
 
 #[async_trait]
 impl<TMyTelemetry: MyTelemetry + Send + Sync + 'static> PageBlobApi
-    for AzureConnectionWithTelemetry<TMyTelemetry>
+    for AzureStorageConnectionWithTelemetry<TMyTelemetry>
 {
     async fn create_page_blob(
         &self,

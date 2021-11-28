@@ -1,7 +1,4 @@
-use crate::{
-    connection::{AzureConnectionWithTelemetry, GetAzureConnectionInfo},
-    types::AzureStorageError,
-};
+use crate::{connection::AzureStorageConnectionWithTelemetry, types::AzureStorageError};
 use async_trait::async_trait;
 use my_telemetry::MyTelemetry;
 
@@ -9,7 +6,7 @@ use super::{api::BlobApi, BlobProperties};
 
 #[async_trait]
 impl<TMyTelemetry: MyTelemetry + Send + Sync + 'static> BlobApi
-    for AzureConnectionWithTelemetry<TMyTelemetry>
+    for AzureStorageConnectionWithTelemetry<TMyTelemetry>
 {
     async fn get_blob_properties(
         &self,

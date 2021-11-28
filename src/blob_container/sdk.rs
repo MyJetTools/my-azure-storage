@@ -6,13 +6,13 @@ use my_telemetry::MyTelemetry;
 
 use crate::{
     azure_response_handler::ToAzureResponseHandler,
-    blob_container::models::deserialize_list_of_blobs, connection::AzureConnectionInfo,
+    blob_container::models::deserialize_list_of_blobs, connection::AzureStorageConnectionInfo,
     consts::DEPENDENCY_TYPE, flurl_ext::FlUrlAzureExtensions, sign_utils::SignVerb,
     types::AzureStorageError,
 };
 
 pub async fn create_container_if_not_exist<TMyTelemetry: MyTelemetry>(
-    connection: &AzureConnectionInfo,
+    connection: &AzureStorageConnectionInfo,
     container_name: &str,
     telemetry: Option<Arc<TMyTelemetry>>,
 ) -> Result<(), AzureStorageError> {
@@ -33,7 +33,7 @@ pub async fn create_container_if_not_exist<TMyTelemetry: MyTelemetry>(
 }
 
 pub async fn delete_container<TMyTelemetry: MyTelemetry>(
-    connection: &AzureConnectionInfo,
+    connection: &AzureStorageConnectionInfo,
     container_name: &str,
     telemetry: Option<Arc<TMyTelemetry>>,
 ) -> Result<(), AzureStorageError> {
@@ -54,7 +54,7 @@ pub async fn delete_container<TMyTelemetry: MyTelemetry>(
 }
 
 pub async fn delete_container_if_exists<TMyTelemetry: MyTelemetry>(
-    connection: &AzureConnectionInfo,
+    connection: &AzureStorageConnectionInfo,
     container_name: &str,
     telemetry: Option<Arc<TMyTelemetry>>,
 ) -> Result<(), AzureStorageError> {
@@ -75,7 +75,7 @@ pub async fn delete_container_if_exists<TMyTelemetry: MyTelemetry>(
 }
 
 pub async fn get_list_of_blob_containers<TMyTelemetry: MyTelemetry>(
-    connection: &AzureConnectionInfo,
+    connection: &AzureStorageConnectionInfo,
     telemetry: Option<Arc<TMyTelemetry>>,
 ) -> Result<Vec<String>, Error> {
     let mut result = vec![];
@@ -116,7 +116,7 @@ pub async fn get_list_of_blob_containers<TMyTelemetry: MyTelemetry>(
 }
 
 pub async fn get_list_of_blobs<TMyTelemetry: MyTelemetry>(
-    connection: &AzureConnectionInfo,
+    connection: &AzureStorageConnectionInfo,
     container_name: &str,
     telemetry: Option<Arc<TMyTelemetry>>,
 ) -> Result<Vec<String>, AzureStorageError> {
@@ -176,7 +176,7 @@ mod tests {
     async fn test_create_and_delete_container() {
         let conn_string = env!("TEST_STORAGE_ACCOUNT");
 
-        let connection = AzureConnectionInfo::from_conn_string(conn_string);
+        let connection = AzureStorageConnectionInfo::from_conn_string(conn_string);
 
         super::create_container_if_not_exist::<MyTelemetryToConsole>(&connection, "testtest", None)
             .await
@@ -191,7 +191,7 @@ mod tests {
     async fn test_container_not_found() {
         let conn_string = env!("TEST_STORAGE_ACCOUNT");
 
-        let connection = AzureConnectionInfo::from_conn_string(conn_string);
+        let connection = AzureStorageConnectionInfo::from_conn_string(conn_string);
         println!("Name:{}", connection.account_name);
 
         let result = get_blob_properties::<MyTelemetryToConsole>(

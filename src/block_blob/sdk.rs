@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use crate::{
-    azure_response_handler::ToAzureResponseHandler, connection::AzureConnectionInfo,
+    azure_response_handler::ToAzureResponseHandler, connection::AzureStorageConnectionInfo,
     consts::DEPENDENCY_TYPE, flurl_ext::FlUrlAzureExtensions, sign_utils::SignVerb,
     types::AzureStorageError,
 };
@@ -12,7 +12,7 @@ use flurl::FlUrlWithTelemetry;
 use my_telemetry::MyTelemetry;
 
 pub async fn upload<TMyTelemetry: MyTelemetry>(
-    connection: &AzureConnectionInfo,
+    connection: &AzureStorageConnectionInfo,
     container_name: &str,
     blob_name: &str,
     content: Vec<u8>,

@@ -6,7 +6,7 @@ pub mod blobs {
 
     use crate::{
         azure_response_handler::{AzureResponseHandler, ToAzureResponseHandler},
-        connection::AzureConnectionInfo,
+        connection::AzureStorageConnectionInfo,
         consts::DEPENDENCY_TYPE,
         flurl_ext::FlUrlAzureExtensions,
         sign_utils::SignVerb,
@@ -14,7 +14,7 @@ pub mod blobs {
     };
 
     pub async fn get_blob_properties<TMyTelemetry: MyTelemetry>(
-        connection: &AzureConnectionInfo,
+        connection: &AzureStorageConnectionInfo,
         container_name: &str,
         blob_name: &str,
         telemetry: Option<Arc<TMyTelemetry>>,

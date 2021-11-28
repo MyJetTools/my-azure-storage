@@ -1,11 +1,7 @@
-mod azure_connection;
-mod azure_connection_info;
-mod azure_connection_trait;
-mod azure_connection_with_telemetry;
 mod azure_storage_connection;
+mod azure_storage_connection_with_telemetry;
+mod connection_info;
 
-pub use azure_connection::AzureConnection;
-pub use azure_connection_info::AzureConnectionInfo;
-pub use azure_connection_trait::GetAzureConnectionInfo;
-pub use azure_connection_with_telemetry::AzureConnectionWithTelemetry;
 pub use azure_storage_connection::AzureStorageConnection;
+pub use azure_storage_connection_with_telemetry::AzureStorageConnectionWithTelemetry;
+pub use connection_info::AzureStorageConnectionInfo;

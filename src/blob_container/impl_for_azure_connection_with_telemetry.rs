@@ -1,7 +1,4 @@
-use crate::{
-    connection::{AzureConnectionWithTelemetry, GetAzureConnectionInfo},
-    types::AzureStorageError,
-};
+use crate::{connection::AzureStorageConnectionWithTelemetry, types::AzureStorageError};
 
 use super::api::BlobContainersApi;
 
@@ -11,7 +8,7 @@ use my_telemetry::MyTelemetry;
 
 #[async_trait]
 impl<TMyTelemetry: MyTelemetry + Send + Sync + 'static> BlobContainersApi
-    for AzureConnectionWithTelemetry<TMyTelemetry>
+    for AzureStorageConnectionWithTelemetry<TMyTelemetry>
 {
     async fn create_container_if_not_exist(
         &self,

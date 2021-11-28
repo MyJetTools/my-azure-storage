@@ -4,7 +4,7 @@ use flurl::FlUrl;
 
 use crate::sign_utils::{self, SignVerb};
 
-pub struct AzureConnectionInfo {
+pub struct AzureStorageConnectionInfo {
     pub account_name: String,
     pub account_key: Vec<u8>,
     pub endpoint_suffix: String,
@@ -13,7 +13,7 @@ pub struct AzureConnectionInfo {
     pub time_out_ms: String,
 }
 
-impl AzureConnectionInfo {
+impl AzureStorageConnectionInfo {
     pub fn from_conn_string(conn_string: &str) -> Self {
         let key_values = conn_string.split(";");
 

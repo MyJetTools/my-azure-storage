@@ -1,4 +1,4 @@
-use super::{connection::AzureConnectionInfo, sign_utils::SignVerb};
+use super::{connection::AzureStorageConnectionInfo, sign_utils::SignVerb};
 use chrono::Utc;
 use flurl::FlUrlWithTelemetry;
 use my_telemetry::MyTelemetry;
@@ -7,7 +7,7 @@ pub trait FlUrlAzureExtensions {
     fn add_azure_headers(
         self,
         verb: SignVerb,
-        connection: &AzureConnectionInfo,
+        connection: &AzureStorageConnectionInfo,
         content_len: Option<usize>,
         next_marker: Option<String>,
         azure_rest_version: &str,
@@ -18,7 +18,7 @@ impl<TMyTelemetry: MyTelemetry> FlUrlAzureExtensions for FlUrlWithTelemetry<TMyT
     fn add_azure_headers(
         mut self,
         verb: SignVerb,
-        connection: &AzureConnectionInfo,
+        connection: &AzureStorageConnectionInfo,
         content_len: Option<usize>,
         next_marker: Option<String>,
         azure_rest_version: &str,

@@ -11,8 +11,7 @@ mod sign_utils;
 mod types;
 
 pub use connection::{
-    AzureConnection, AzureConnectionInfo, AzureConnectionWithTelemetry, AzureStorageConnection,
-    GetAzureConnectionInfo,
+    AzureStorageConnection, AzureStorageConnectionInfo, AzureStorageConnectionWithTelemetry,
 };
 
 pub use types::AzureStorageError;

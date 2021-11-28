@@ -4,7 +4,7 @@ use crate::azure_response_handler::ToAzureResponseHandler;
 use crate::consts::DEPENDENCY_TYPE;
 use crate::types::AzureStorageError;
 use crate::{
-    connection::AzureConnectionInfo, flurl_ext::FlUrlAzureExtensions, sign_utils::SignVerb,
+    connection::AzureStorageConnectionInfo, flurl_ext::FlUrlAzureExtensions, sign_utils::SignVerb,
 };
 
 use flurl::FlUrlWithTelemetry;
@@ -14,7 +14,7 @@ use super::super::consts::AZURE_REST_VERSION;
 use super::BlobProperties;
 
 pub async fn delete_blob_if_exists<TMyTelemetry: MyTelemetry>(
-    connection: &AzureConnectionInfo,
+    connection: &AzureStorageConnectionInfo,
     container_name: &str,
     blob_name: &str,
     telemetry: Option<Arc<TMyTelemetry>>,
@@ -36,7 +36,7 @@ pub async fn delete_blob_if_exists<TMyTelemetry: MyTelemetry>(
 }
 
 pub async fn get_blob_properties<TMyTelemetry: MyTelemetry>(
-    connection: &AzureConnectionInfo,
+    connection: &AzureStorageConnectionInfo,
     container_name: &str,
     blob_name: &str,
     telemetry: Option<Arc<TMyTelemetry>>,
@@ -60,7 +60,7 @@ pub async fn get_blob_properties<TMyTelemetry: MyTelemetry>(
 }
 
 pub async fn download_blob<TMyTelemetry: MyTelemetry>(
-    connection: &AzureConnectionInfo,
+    connection: &AzureStorageConnectionInfo,
     container_name: &str,
     blob_name: &str,
     telemetry: Option<Arc<TMyTelemetry>>,
@@ -84,7 +84,7 @@ pub async fn download_blob<TMyTelemetry: MyTelemetry>(
 }
 
 pub async fn delete_blob<TMyTelemetry: MyTelemetry>(
-    connection: &AzureConnectionInfo,
+    connection: &AzureStorageConnectionInfo,
     container_name: &str,
     blob_name: &str,
     telemetry: Option<Arc<TMyTelemetry>>,
@@ -116,7 +116,7 @@ mod tests {
     async fn test_blob_not_found() {
         let conn_string = env!("TEST_STORAGE_ACCOUNT");
 
-        let connection = AzureConnectionInfo::from_conn_string(conn_string);
+        let connection = AzureStorageConnectionInfo::from_conn_string(conn_string);
         println!("Name:{}", connection.account_name);
 
         let result =

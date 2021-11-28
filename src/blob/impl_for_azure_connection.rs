@@ -1,14 +1,11 @@
-use crate::{
-    connection::{AzureConnection, GetAzureConnectionInfo},
-    types::AzureStorageError,
-};
+use crate::{connection::AzureStorageConnection, types::AzureStorageError};
 use async_trait::async_trait;
 use my_telemetry::MyTelemetryToConsole;
 
 use super::{api::BlobApi, BlobProperties};
 
 #[async_trait]
-impl BlobApi for AzureConnection {
+impl BlobApi for AzureStorageConnection {
     async fn get_blob_properties(
         &self,
         container_name: &str,
