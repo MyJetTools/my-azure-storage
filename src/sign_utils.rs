@@ -1,6 +1,6 @@
 use std::collections::BTreeMap;
 
-use hmac::{Hmac, Mac, NewMac};
+use hmac::{Hmac, Mac};
 use rust_extensions::StringBuilder;
 use sha2::Sha256;
 
