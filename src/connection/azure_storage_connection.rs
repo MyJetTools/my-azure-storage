@@ -5,6 +5,7 @@ use my_telemetry::MyTelemetry;
 
 use crate::sign_utils::{self, SignVerb};
 
+#[derive(Clone)]
 pub struct AzureStorageConnection {
     pub account_name: String,
     pub account_key: Vec<u8>,
