@@ -1,41 +1,35 @@
 pub mod blobs {
-    use std::sync::Arc;
 
-    use flurl::FlUrlWithTelemetry;
-    use my_telemetry::MyTelemetry;
+    use flurl::FlUrl;
 
     use crate::{
         azure_response_handler::{AzureResponseHandler, ToAzureResponseHandler},
-        connection::AzureStorageConnectionInfo,
-        consts::DEPENDENCY_TYPE,
         flurl_ext::FlUrlAzureExtensions,
         sign_utils::SignVerb,
         types::AzureStorageError,
+        AzureStorageConnection,
     };
 
-    pub async fn get_blob_properties<TMyTelemetry: MyTelemetry>(
-        connection: &AzureStorageConnectionInfo,
+    pub async fn get_blob_properties(
+        connection: &AzureStorageConnection,
         container_name: &str,
         blob_name: &str,
-        telemetry: Option<Arc<TMyTelemetry>>,
     ) -> Result<AzureResponseHandler, AzureStorageError> {
-        let resp = FlUrlWithTelemetry::new(
-            connection.blobs_api_url.as_str(),
-            telemetry,
-            DEPENDENCY_TYPE.to_string(),
-        )
-        .append_path_segment(container_name)
-        .append_path_segment(blob_name)
-        .add_azure_headers(
-            SignVerb::HEAD,
-            connection,
-            None,
-            None,
-            super::AZURE_REST_VERSION,
-        )
-        .head()
-        .await?
-        .to_azure_response_handler();
+        let fl_url: FlUrl = connection.into();
+
+        let resp = fl_url
+            .append_path_segment(container_name)
+            .append_path_segment(blob_name)
+            .add_azure_headers(
+                SignVerb::HEAD,
+                connection,
+                None,
+                None,
+                super::AZURE_REST_VERSION,
+            )
+            .head()
+            .await?
+            .to_azure_response_handler();
 
         Ok(resp)
     }

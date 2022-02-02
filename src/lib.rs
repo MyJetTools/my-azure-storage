@@ -10,8 +10,6 @@ pub mod page_blob;
 mod sign_utils;
 mod types;
 
-pub use connection::{
-    AzureStorageConnection, AzureStorageConnectionInfo, AzureStorageConnectionWithTelemetry,
-};
+pub use connection::AzureStorageConnection;
 
 pub use types::AzureStorageError;

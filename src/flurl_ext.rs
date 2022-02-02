@@ -1,24 +1,25 @@
-use super::{connection::AzureStorageConnectionInfo, sign_utils::SignVerb};
+use crate::AzureStorageConnection;
+
+use super::sign_utils::SignVerb;
 use chrono::Utc;
-use flurl::FlUrlWithTelemetry;
-use my_telemetry::MyTelemetry;
+use flurl::FlUrl;
 
 pub trait FlUrlAzureExtensions {
     fn add_azure_headers(
         self,
         verb: SignVerb,
-        connection: &AzureStorageConnectionInfo,
+        connection: &AzureStorageConnection,
         content_len: Option<usize>,
         next_marker: Option<String>,
         azure_rest_version: &str,
     ) -> Self;
 }
 
-impl<TMyTelemetry: MyTelemetry> FlUrlAzureExtensions for FlUrlWithTelemetry<TMyTelemetry> {
+impl FlUrlAzureExtensions for FlUrl {
     fn add_azure_headers(
         mut self,
         verb: SignVerb,
-        connection: &AzureStorageConnectionInfo,
+        connection: &AzureStorageConnection,
         content_len: Option<usize>,
         next_marker: Option<String>,
         azure_rest_version: &str,
@@ -42,7 +43,7 @@ impl<TMyTelemetry: MyTelemetry> FlUrlAzureExtensions for FlUrlWithTelemetry<TMyT
             flurl = flurl.append_query_param_string("marker", next_marker);
         }
 
-        let auth_key = connection.get_auth_header(verb, content_len, &flurl.fl_url);
+        let auth_key = connection.get_auth_header(verb, content_len, &flurl);
 
         flurl.with_header_val_string("Authorization", auth_key)
     }
