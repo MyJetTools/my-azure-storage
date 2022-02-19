@@ -1,6 +1,9 @@
-mod api;
+mod azure_page_blob_storage;
 pub mod consts;
-pub mod impl_for_azure_connection;
+mod mock;
+mod my_azure_page_blob_storage;
 pub mod sdk;
 
-pub use api::PageBlobApi;
+pub use azure_page_blob_storage::AzurePageBlobStorage;
+pub use mock::AzurePageBlobMock;
+pub use my_azure_page_blob_storage::MyAzurePageBlobStorage;
