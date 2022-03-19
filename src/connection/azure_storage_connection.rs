@@ -1,3 +1,7 @@
+use std::sync::Arc;
+
+use my_telemetry::MyTelemetry;
+
 use super::{AzureStorageConnectionData, FileConnectionData};
 
 pub enum AzureStorageConnection {
@@ -32,6 +36,15 @@ impl AzureStorageConnection {
         match self {
             AzureStorageConnection::File(_) => true,
             _ => false,
+        }
+    }
+
+    pub fn set_telemetry(&mut self, telemetry: Arc<dyn MyTelemetry + Send + Sync + 'static>) {
+        match self {
+            AzureStorageConnection::AzureStorage(data) => {
+                data.telemetry = Some(telemetry);
+            }
+            AzureStorageConnection::File(_) => {}
         }
     }
 }
