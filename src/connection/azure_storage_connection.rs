@@ -23,7 +23,13 @@ impl AzureStorageConnection {
             || connection_string.starts_with("/")
             || connection_string.starts_with(".")
         {
-            let connection_data = FileConnectionData::new(connection_string.to_string());
+            let connection_string = if connection_string.starts_with("~") {
+                format!("{}{}", env!("HOME"), &connection_string[1..])
+            } else {
+                connection_string.to_string()
+            };
+
+            let connection_data = FileConnectionData::new(connection_string);
 
             return Self::File(connection_data);
         }
