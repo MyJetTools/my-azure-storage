@@ -1,5 +1,3 @@
-use hyper::Error;
-
 #[derive(Debug)]
 pub enum AzureStorageError {
     ContainerNotFound,
@@ -32,8 +30,8 @@ impl AzureStorageError {
     }
 }
 
-impl From<Error> for AzureStorageError {
-    fn from(err: Error) -> Self {
+impl From<hyper::Error> for AzureStorageError {
+    fn from(err: hyper::Error) -> Self {
         AzureStorageError::HyperError { err }
     }
 }
@@ -41,4 +39,12 @@ impl From<Error> for AzureStorageError {
 pub struct AzureItems<T> {
     pub next_marker: Option<String>,
     pub items: Vec<T>,
+}
+
+impl From<std::io::Error> for AzureStorageError {
+    fn from(src: std::io::Error) -> Self {
+        AzureStorageError::UnknownError {
+            msg: format!("I/O error: {}", src),
+        }
+    }
 }

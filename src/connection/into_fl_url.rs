@@ -1,8 +1,10 @@
 use flurl::{FlUrl, FlUrlTelemetry};
 
-use crate::{consts::DEPENDENCY_TYPE, AzureStorageConnection};
+use crate::consts::DEPENDENCY_TYPE;
 
-impl Into<FlUrl> for &AzureStorageConnection {
+use super::AzureStorageConnectionData;
+
+impl Into<FlUrl> for &AzureStorageConnectionData {
     fn into(self) -> FlUrl {
         let mut fl_url = FlUrl::new(self.blobs_api_url.as_str());
 
@@ -14,6 +16,6 @@ impl Into<FlUrl> for &AzureStorageConnection {
             .into()
         }
 
-        fl_url
+        return fl_url;
     }
 }

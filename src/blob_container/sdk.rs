@@ -1,13 +1,13 @@
 use crate::{
     azure_response_handler::ToAzureResponseHandler,
-    blob_container::models::deserialize_list_of_blobs, flurl_ext::FlUrlAzureExtensions,
-    sign_utils::SignVerb, types::AzureStorageError, AzureStorageConnection,
+    blob_container::models::deserialize_list_of_blobs, connection::AzureStorageConnectionData,
+    flurl_ext::FlUrlAzureExtensions, sign_utils::SignVerb, types::AzureStorageError,
 };
 use flurl::FlUrl;
 use hyper::Error;
 
 pub async fn create_container_if_not_exist(
-    connection: &AzureStorageConnection,
+    connection: &AzureStorageConnectionData,
     container_name: &str,
 ) -> Result<(), AzureStorageError> {
     let fl_url: FlUrl = connection.into();
@@ -25,7 +25,7 @@ pub async fn create_container_if_not_exist(
 }
 
 pub async fn delete_container(
-    connection: &AzureStorageConnection,
+    connection: &AzureStorageConnectionData,
     container_name: &str,
 ) -> Result<(), AzureStorageError> {
     let fl_url: FlUrl = connection.into();
@@ -43,7 +43,7 @@ pub async fn delete_container(
 }
 
 pub async fn delete_container_if_exists(
-    connection: &AzureStorageConnection,
+    connection: &AzureStorageConnectionData,
     container_name: &str,
 ) -> Result<(), AzureStorageError> {
     let fl_url: FlUrl = connection.into();
@@ -61,7 +61,7 @@ pub async fn delete_container_if_exists(
 }
 
 pub async fn get_list_of_blob_containers(
-    connection: &AzureStorageConnection,
+    connection: &AzureStorageConnectionData,
 ) -> Result<Vec<String>, Error> {
     let mut result = vec![];
 
@@ -99,7 +99,7 @@ pub async fn get_list_of_blob_containers(
 }
 
 pub async fn get_list_of_blobs(
-    connection: &AzureStorageConnection,
+    connection: &AzureStorageConnectionData,
     container_name: &str,
 ) -> Result<Vec<String>, AzureStorageError> {
     let mut result = vec![];
@@ -154,7 +154,7 @@ mod tests {
     async fn test_create_and_delete_container() {
         let conn_string = env!("TEST_STORAGE_ACCOUNT");
 
-        let connection = AzureStorageConnection::from_conn_string(conn_string);
+        let connection = AzureStorageConnectionData::from_conn_string(conn_string);
 
         super::create_container_if_not_exist(&connection, "testtest")
             .await
@@ -169,7 +169,7 @@ mod tests {
     async fn test_container_not_found() {
         let conn_string = env!("TEST_STORAGE_ACCOUNT");
 
-        let connection = AzureStorageConnection::from_conn_string(conn_string);
+        let connection = AzureStorageConnectionData::from_conn_string(conn_string);
         println!("Name:{}", connection.account_name);
 
         let result = get_blob_properties(&connection, "notexists", "notexists").await;

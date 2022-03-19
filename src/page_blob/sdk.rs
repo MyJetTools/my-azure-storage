@@ -3,9 +3,9 @@ use flurl::FlUrl;
 use crate::azure_response_handler::ToAzureResponseHandler;
 use crate::blob::sdk::get_blob_properties;
 use crate::blob::BlobProperties;
+use crate::connection::AzureStorageConnectionData;
 use crate::consts::AZURE_REST_VERSION;
 use crate::flurl_ext::FlUrlAzureExtensions;
-use crate::AzureStorageConnection;
 
 use crate::sign_utils::SignVerb;
 use crate::types::AzureStorageError;
@@ -13,7 +13,7 @@ use crate::types::AzureStorageError;
 use super::consts::BLOB_PAGE_SIZE;
 
 pub async fn create_page_blob_if_not_exists(
-    connection: &AzureStorageConnection,
+    connection: &AzureStorageConnectionData,
     container_name: &str,
     blob_name: &str,
     pages_amount: usize,
@@ -35,7 +35,7 @@ pub async fn create_page_blob_if_not_exists(
 }
 
 pub async fn resize_page_blob(
-    connection: &AzureStorageConnection,
+    connection: &AzureStorageConnectionData,
     container_name: &str,
     blob_name: &str,
     pages_amount: usize,
@@ -60,7 +60,7 @@ pub async fn resize_page_blob(
 }
 
 pub async fn save_pages(
-    connection: &AzureStorageConnection,
+    connection: &AzureStorageConnectionData,
     container_name: &str,
     blob_name: &str,
     start_page_no: usize,
@@ -96,7 +96,7 @@ pub async fn save_pages(
 }
 
 pub async fn get_pages(
-    connection: &AzureStorageConnection,
+    connection: &AzureStorageConnectionData,
     container_name: &str,
     blob_name: &str,
     start_page_no: usize,
@@ -126,7 +126,7 @@ pub async fn get_pages(
 }
 
 pub async fn create_page_blob(
-    connection: &AzureStorageConnection,
+    connection: &AzureStorageConnectionData,
     container_name: &str,
     blob_name: &str,
     pages_amount: usize,
@@ -161,7 +161,7 @@ mod tests {
     async fn test_page_blob() {
         let conn_string = env!("TEST_STORAGE_ACCOUNT");
 
-        let connection = AzureStorageConnection::from_conn_string(conn_string);
+        let connection = AzureStorageConnectionData::from_conn_string(conn_string);
 
         create_container_if_not_exist(&connection, "testtest")
             .await

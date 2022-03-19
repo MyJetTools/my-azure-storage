@@ -1,6 +1,6 @@
 use crate::azure_response_handler::ToAzureResponseHandler;
+use crate::connection::AzureStorageConnectionData;
 use crate::types::AzureStorageError;
-use crate::AzureStorageConnection;
 use crate::{flurl_ext::FlUrlAzureExtensions, sign_utils::SignVerb};
 
 use flurl::FlUrl;
@@ -9,7 +9,7 @@ use super::super::consts::AZURE_REST_VERSION;
 use super::BlobProperties;
 
 pub async fn delete_blob_if_exists(
-    connection: &AzureStorageConnection,
+    connection: &AzureStorageConnectionData,
     container_name: &str,
     blob_name: &str,
 ) -> Result<(), AzureStorageError> {
@@ -28,7 +28,7 @@ pub async fn delete_blob_if_exists(
 }
 
 pub async fn get_blob_properties(
-    connection: &AzureStorageConnection,
+    connection: &AzureStorageConnectionData,
     container_name: &str,
     blob_name: &str,
 ) -> Result<BlobProperties, AzureStorageError> {
@@ -50,7 +50,7 @@ pub async fn get_blob_properties(
 }
 
 pub async fn download_blob(
-    connection: &AzureStorageConnection,
+    connection: &AzureStorageConnectionData,
     container_name: &str,
     blob_name: &str,
 ) -> Result<Vec<u8>, AzureStorageError> {
@@ -71,7 +71,7 @@ pub async fn download_blob(
 }
 
 pub async fn delete_blob(
-    connection: &AzureStorageConnection,
+    connection: &AzureStorageConnectionData,
     container_name: &str,
     blob_name: &str,
 ) -> Result<(), AzureStorageError> {
@@ -97,7 +97,7 @@ mod tests {
     async fn test_blob_not_found() {
         let conn_string = env!("TEST_STORAGE_ACCOUNT");
 
-        let connection = AzureStorageConnection::from_conn_string(conn_string);
+        let connection = AzureStorageConnectionData::from_conn_string(conn_string);
         println!("Name:{}", connection.account_name);
 
         let result = get_blob_properties(&connection, "testtest", "notexists").await;

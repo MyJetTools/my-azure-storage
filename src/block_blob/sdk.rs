@@ -1,6 +1,6 @@
 use crate::{
-    azure_response_handler::ToAzureResponseHandler, flurl_ext::FlUrlAzureExtensions,
-    sign_utils::SignVerb, types::AzureStorageError, AzureStorageConnection,
+    azure_response_handler::ToAzureResponseHandler, connection::AzureStorageConnectionData,
+    flurl_ext::FlUrlAzureExtensions, sign_utils::SignVerb, types::AzureStorageError,
 };
 
 use super::super::consts::AZURE_REST_VERSION;
@@ -8,7 +8,7 @@ use super::super::consts::AZURE_REST_VERSION;
 use flurl::FlUrl;
 
 pub async fn upload(
-    connection: &AzureStorageConnection,
+    connection: &AzureStorageConnectionData,
     container_name: &str,
     blob_name: &str,
     content: Vec<u8>,

@@ -4,14 +4,14 @@ pub mod blobs {
 
     use crate::{
         azure_response_handler::{AzureResponseHandler, ToAzureResponseHandler},
+        connection::AzureStorageConnectionData,
         flurl_ext::FlUrlAzureExtensions,
         sign_utils::SignVerb,
         types::AzureStorageError,
-        AzureStorageConnection,
     };
 
     pub async fn get_blob_properties(
-        connection: &AzureStorageConnection,
+        connection: &AzureStorageConnectionData,
         container_name: &str,
         blob_name: &str,
     ) -> Result<AzureResponseHandler, AzureStorageError> {

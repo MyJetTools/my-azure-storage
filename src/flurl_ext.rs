@@ -1,4 +1,4 @@
-use crate::AzureStorageConnection;
+use crate::connection::AzureStorageConnectionData;
 
 use super::sign_utils::SignVerb;
 use chrono::Utc;
@@ -8,7 +8,7 @@ pub trait FlUrlAzureExtensions {
     fn add_azure_headers(
         self,
         verb: SignVerb,
-        connection: &AzureStorageConnection,
+        connection: &AzureStorageConnectionData,
         content_len: Option<usize>,
         next_marker: Option<String>,
         azure_rest_version: &str,
@@ -19,7 +19,7 @@ impl FlUrlAzureExtensions for FlUrl {
     fn add_azure_headers(
         mut self,
         verb: SignVerb,
-        connection: &AzureStorageConnection,
+        connection: &AzureStorageConnectionData,
         content_len: Option<usize>,
         next_marker: Option<String>,
         azure_rest_version: &str,
