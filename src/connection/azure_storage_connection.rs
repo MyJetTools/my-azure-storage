@@ -10,13 +10,12 @@ pub enum AzureStorageConnection {
 }
 
 impl AzureStorageConnection {
-    pub fn from_conn_string(connection_string: String) -> Self {
+    pub fn from_conn_string(connection_string: &str) -> Self {
         if connection_string.contains("DefaultEndpointsProtocol")
             && connection_string.contains("AccountName")
             && connection_string.contains("AccountKey")
         {
-            let connection_data =
-                AzureStorageConnectionData::from_conn_string(connection_string.as_str());
+            let connection_data = AzureStorageConnectionData::from_conn_string(connection_string);
             return Self::AzureStorage(connection_data);
         }
 
@@ -24,7 +23,7 @@ impl AzureStorageConnection {
             || connection_string.starts_with("/")
             || connection_string.starts_with(".")
         {
-            let connection_data = FileConnectionData::new(connection_string);
+            let connection_data = FileConnectionData::new(connection_string.to_string());
 
             return Self::File(connection_data);
         }
