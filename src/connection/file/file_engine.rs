@@ -4,8 +4,8 @@ use tokio::fs::{self, File};
 use tokio::io::{AsyncReadExt, AsyncSeekExt, AsyncWriteExt};
 
 use crate::blob::BlobProperties;
-use crate::file_utils::FileConnectionInfo;
 use crate::page_blob::consts::BLOB_PAGE_SIZE;
+use crate::sdk_files::utils::FileConnectionInfo;
 use crate::AzureStorageError;
 
 pub struct PageBlobFileEngine {
@@ -48,13 +48,13 @@ impl PageBlobFileEngine {
         }
 
         let folder_name =
-            crate::file_utils::compile_container_path(self, self.container_name.as_str());
+            crate::sdk_files::utils::compile_container_path(self, self.container_name.as_str());
 
         if !fs::metadata(folder_name.as_str()).await.is_ok() {
             return Err(AzureStorageError::ContainerNotFound);
         }
 
-        let file_name = crate::file_utils::compile_blob_path(
+        let file_name = crate::sdk_files::utils::compile_blob_path(
             self,
             self.container_name.as_str(),
             self.blob_name.as_str(),
@@ -106,27 +106,14 @@ impl PageBlobFileEngine {
             return Ok(());
         }
 
-        let folder_name =
-            crate::file_utils::compile_container_path(self, self.container_name.as_str());
-
-        match tokio::fs::create_dir(folder_name.as_str()).await {
-            Ok(_) => Ok(()),
-            Err(err) => match err.kind() {
-                std::io::ErrorKind::AlreadyExists => Ok(()),
-                _ => {
-                    return Err(AzureStorageError::UnknownError {
-                        msg: format!("{:?}", err),
-                    });
-                }
-            },
-        }
+        crate::sdk_files::containers::create_if_not_exists(self, self.container_name.as_str()).await
     }
 
     pub async fn delete_container_if_exists(&mut self) -> Result<(), AzureStorageError> {
         self.file = None;
 
         let folder_name =
-            crate::file_utils::compile_container_path(self, self.container_name.as_str());
+            crate::sdk_files::utils::compile_container_path(self, self.container_name.as_str());
 
         match tokio::fs::remove_dir_all(folder_name.as_str()).await {
             Ok(_) => Ok(()),
@@ -147,13 +134,13 @@ impl PageBlobFileEngine {
         }
 
         let folder_name =
-            crate::file_utils::compile_container_path(self, self.container_name.as_str());
+            crate::sdk_files::utils::compile_container_path(self, self.container_name.as_str());
 
         if tokio::fs::metadata(folder_name.as_str()).await.is_err() {
             return Err(AzureStorageError::ContainerNotFound);
         }
 
-        let file_name = crate::file_utils::compile_blob_path(
+        let file_name = crate::sdk_files::utils::compile_blob_path(
             self,
             self.container_name.as_str(),
             self.blob_name.as_str(),
@@ -181,20 +168,20 @@ impl PageBlobFileEngine {
         }
 
         let folder_name =
-            crate::file_utils::compile_container_path(self, self.container_name.as_str());
+            crate::sdk_files::utils::compile_container_path(self, self.container_name.as_str());
 
         if tokio::fs::metadata(folder_name.as_str()).await.is_err() {
             return Err(AzureStorageError::ContainerNotFound);
         }
 
-        let file_name = crate::file_utils::compile_blob_path(
+        let file_name = crate::sdk_files::utils::compile_blob_path(
             self,
             self.container_name.as_str(),
             self.blob_name.as_str(),
         );
 
         if self.get_file_mut().await.is_ok() {
-            return crate::file_utils::get_blob_properties(file_name.as_str()).await;
+            return crate::sdk_files::utils::get_blob_properties(file_name.as_str()).await;
         }
 
         let file = tokio::fs::File::create(file_name.as_str()).await?;
@@ -203,7 +190,7 @@ impl PageBlobFileEngine {
 
         self.resize(pages_amount).await?;
 
-        return crate::file_utils::get_blob_properties(file_name.as_str()).await;
+        return crate::sdk_files::utils::get_blob_properties(file_name.as_str()).await;
     }
 
     pub async fn get(
@@ -242,7 +229,7 @@ impl PageBlobFileEngine {
 
     pub async fn delete_blob(&mut self) -> Result<(), AzureStorageError> {
         self.file = None;
-        let file_name = crate::file_utils::compile_blob_path(
+        let file_name = crate::sdk_files::utils::compile_blob_path(
             self,
             self.container_name.as_str(),
             self.blob_name.as_str(),
@@ -253,7 +240,7 @@ impl PageBlobFileEngine {
 
     pub async fn delete_blob_if_exists(&mut self) -> Result<(), AzureStorageError> {
         self.file = None;
-        let file_name = crate::file_utils::compile_blob_path(
+        let file_name = crate::sdk_files::utils::compile_blob_path(
             self,
             self.container_name.as_str(),
             self.blob_name.as_str(),
@@ -270,22 +257,10 @@ impl PageBlobFileEngine {
 mod test {
     use crate::connection::FileConnectionData;
 
-    const ROOT_URL: &str = "azure-storage-tests";
-
-    fn get_test_folder() -> String {
-        let folder_separator = std::path::MAIN_SEPARATOR;
-        let folder = format!(
-            "{home}{folder_separator}{ROOT_URL}{folder_separator}",
-            home = env!("HOME"),
-        );
-
-        folder
-    }
-
     #[tokio::test]
     async fn test_create_delete_container() {
         const CONTAINER_NAME: &str = "test-container";
-        let folder = get_test_folder();
+        let folder = crate::sdk_files::test_utils::get_test_folder();
 
         let connection_data = FileConnectionData::new(folder);
         let id = "AAA";
@@ -312,7 +287,7 @@ mod test {
     #[tokio::test]
     async fn test_create_blob() {
         const CONTAINER_NAME: &str = "test-create-blob";
-        let folder = get_test_folder();
+        let folder = crate::sdk_files::test_utils::get_test_folder();
 
         let connection_data = FileConnectionData::new(folder);
         let id = "AAA";

@@ -1,16 +1,14 @@
 use flurl::FlUrl;
 
 use crate::azure_response_handler::ToAzureResponseHandler;
-use crate::blob::sdk::get_blob_properties;
 use crate::blob::BlobProperties;
 use crate::connection::AzureStorageConnectionData;
 use crate::consts::AZURE_REST_VERSION;
 use crate::flurl_ext::FlUrlAzureExtensions;
 
+use crate::page_blob::consts::BLOB_PAGE_SIZE;
 use crate::sign_utils::SignVerb;
 use crate::types::AzureStorageError;
-
-use super::consts::BLOB_PAGE_SIZE;
 
 pub async fn create_page_blob_if_not_exists(
     connection: &AzureStorageConnectionData,
@@ -19,7 +17,9 @@ pub async fn create_page_blob_if_not_exists(
     pages_amount: usize,
 ) -> Result<BlobProperties, AzureStorageError> {
     loop {
-        let result = get_blob_properties(connection, container_name, blob_name).await;
+        let result =
+            crate::sdk_azure::blobs::get_blob_properties(connection, container_name, blob_name)
+                .await;
 
         match result {
             Ok(props) => return Ok(props),
@@ -152,9 +152,6 @@ pub async fn create_page_blob(
 #[cfg(test)]
 mod tests {
 
-    use crate::blob::sdk::get_blob_properties;
-    use crate::blob_container::sdk::create_container_if_not_exist;
-
     use super::*;
 
     #[tokio::test]
@@ -163,7 +160,7 @@ mod tests {
 
         let connection = AzureStorageConnectionData::from_conn_string(conn_string);
 
-        create_container_if_not_exist(&connection, "testtest")
+        crate::sdk_azure::containers::create_if_not_exists(&connection, "testtest")
             .await
             .unwrap();
 
@@ -181,9 +178,10 @@ mod tests {
             .await
             .unwrap();
 
-        let blob_props = get_blob_properties(&connection, "testtest", "test")
-            .await
-            .unwrap();
+        let blob_props =
+            crate::sdk_azure::blobs::get_blob_properties(&connection, "testtest", "test")
+                .await
+                .unwrap();
 
         assert_eq!(512 * 4, blob_props.blob_size)
 

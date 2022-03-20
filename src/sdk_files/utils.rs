@@ -34,3 +34,28 @@ pub async fn get_blob_properties(file_name: &str) -> Result<BlobProperties, Azur
         blob_size: metadata.len() as usize,
     })
 }
+
+pub fn extract_file_name(full_path: &str, separator: char) -> &str {
+    let full_path_as_bytes = full_path.as_bytes();
+
+    for index in (0..full_path_as_bytes.len()).rev() {
+        if full_path_as_bytes[index] == separator as u8 {
+            return &full_path[index + 1..];
+        }
+    }
+
+    panic!("Can not extract filename from fullpath [{}]", full_path);
+}
+
+#[cfg(test)]
+mod test {
+
+    use super::*;
+
+    #[test]
+    fn test_extract_file_name() {
+        let src_path = "/Users/Folder/FileName";
+        let result = extract_file_name(src_path, '/');
+        assert_eq!("FileName", result);
+    }
+}

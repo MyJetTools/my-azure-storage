@@ -1,4 +1,5 @@
 use crate::azure_response_handler::ToAzureResponseHandler;
+use crate::blob::BlobProperties;
 use crate::connection::AzureStorageConnectionData;
 use crate::types::AzureStorageError;
 use crate::{flurl_ext::FlUrlAzureExtensions, sign_utils::SignVerb};
@@ -6,25 +7,49 @@ use crate::{flurl_ext::FlUrlAzureExtensions, sign_utils::SignVerb};
 use flurl::FlUrl;
 
 use super::super::consts::AZURE_REST_VERSION;
-use super::BlobProperties;
+use super::models::deserialize_list_of_blobs;
 
-pub async fn delete_blob_if_exists(
+pub async fn get_list(
     connection: &AzureStorageConnectionData,
     container_name: &str,
-    blob_name: &str,
-) -> Result<(), AzureStorageError> {
-    let fl_url: FlUrl = connection.into();
+) -> Result<Vec<String>, AzureStorageError> {
+    let mut result = vec![];
 
-    fl_url
-        .append_path_segment(container_name)
-        .append_path_segment(blob_name)
-        .add_azure_headers(SignVerb::DELETE, connection, None, None, AZURE_REST_VERSION)
-        .delete()
-        .await?
-        .to_azure_response_handler()
-        .check_if_there_is_an_error_and_ignore_one(AzureStorageError::BlobNotFound)?;
+    let mut next_marker: Option<String> = None;
 
-    Ok(())
+    loop {
+        let fl_url: FlUrl = connection.into();
+
+        let response = fl_url
+            .append_path_segment(container_name)
+            .append_query_param("comp", "list")
+            .append_query_param("restype", "container")
+            .add_azure_headers(
+                SignVerb::GET,
+                &connection,
+                None,
+                next_marker,
+                AZURE_REST_VERSION,
+            )
+            .get()
+            .await?
+            .to_azure_response_handler()
+            .check_if_there_is_an_error()?;
+
+        let body = response.get_body().await?;
+
+        let azure_response = deserialize_list_of_blobs(body.as_ref());
+
+        result.extend(azure_response.items);
+
+        if azure_response.next_marker.is_none() {
+            break;
+        }
+
+        next_marker = azure_response.next_marker;
+    }
+
+    return Ok(result);
 }
 
 pub async fn get_blob_properties(
@@ -49,7 +74,44 @@ pub async fn get_blob_properties(
     Ok(result)
 }
 
-pub async fn download_blob(
+pub async fn delete_if_exists(
+    connection: &AzureStorageConnectionData,
+    container_name: &str,
+    blob_name: &str,
+) -> Result<(), AzureStorageError> {
+    let fl_url: FlUrl = connection.into();
+
+    fl_url
+        .append_path_segment(container_name)
+        .append_path_segment(blob_name)
+        .add_azure_headers(SignVerb::DELETE, connection, None, None, AZURE_REST_VERSION)
+        .delete()
+        .await?
+        .to_azure_response_handler()
+        .check_if_there_is_an_error_and_ignore_one(AzureStorageError::BlobNotFound)?;
+
+    Ok(())
+}
+
+pub async fn delete(
+    connection: &AzureStorageConnectionData,
+    container_name: &str,
+    blob_name: &str,
+) -> Result<(), AzureStorageError> {
+    let fl_url: FlUrl = connection.into();
+    fl_url
+        .append_path_segment(container_name)
+        .append_path_segment(blob_name)
+        .add_azure_headers(SignVerb::DELETE, connection, None, None, AZURE_REST_VERSION)
+        .delete()
+        .await?
+        .to_azure_response_handler()
+        .check_if_there_is_an_error()?;
+
+    Ok(())
+}
+
+pub async fn download(
     connection: &AzureStorageConnectionData,
     container_name: &str,
     blob_name: &str,
@@ -68,24 +130,6 @@ pub async fn download_blob(
     let result = response.get_body().await?;
 
     Ok(result)
-}
-
-pub async fn delete_blob(
-    connection: &AzureStorageConnectionData,
-    container_name: &str,
-    blob_name: &str,
-) -> Result<(), AzureStorageError> {
-    let fl_url: FlUrl = connection.into();
-    fl_url
-        .append_path_segment(container_name)
-        .append_path_segment(blob_name)
-        .add_azure_headers(SignVerb::DELETE, connection, None, None, AZURE_REST_VERSION)
-        .delete()
-        .await?
-        .to_azure_response_handler()
-        .check_if_there_is_an_error()?;
-
-    Ok(())
 }
 
 #[cfg(test)]

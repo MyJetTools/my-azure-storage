@@ -67,7 +67,7 @@ impl AzurePageBlobStorage for MyAzurePageBlobStorage {
     async fn resize(&self, pages_amount: usize) -> Result<(), AzureStorageError> {
         match self.connection.as_ref() {
             AzureStorageConnection::AzureStorage(connection_data) => {
-                super::sdk::resize_page_blob(
+                crate::sdk_azure::page_blobs::resize_page_blob(
                     connection_data,
                     self.container_name.as_str(),
                     self.blob_name.as_str(),
@@ -88,7 +88,7 @@ impl AzurePageBlobStorage for MyAzurePageBlobStorage {
     async fn create_container_if_not_exist(&self) -> Result<(), AzureStorageError> {
         match self.connection.as_ref() {
             AzureStorageConnection::AzureStorage(connection_data) => {
-                crate::blob_container::sdk::create_container_if_not_exist(
+                crate::sdk_azure::containers::create_if_not_exists(
                     connection_data,
                     self.container_name.as_str(),
                 )
@@ -107,7 +107,7 @@ impl AzurePageBlobStorage for MyAzurePageBlobStorage {
     async fn get_available_pages_amount(&self) -> Result<usize, AzureStorageError> {
         let props = match self.connection.as_ref() {
             AzureStorageConnection::AzureStorage(connection_data) => {
-                crate::blob::sdk::get_blob_properties(
+                crate::sdk_azure::blobs::get_blob_properties(
                     connection_data,
                     self.container_name.as_str(),
                     self.blob_name.as_str(),
@@ -115,13 +115,13 @@ impl AzurePageBlobStorage for MyAzurePageBlobStorage {
                 .await?
             }
             AzureStorageConnection::File(connection_data) => {
-                let file_name = crate::file_utils::compile_blob_path(
+                let file_name = crate::sdk_files::utils::compile_blob_path(
                     connection_data,
                     self.container_name.as_str(),
                     self.blob_name.as_str(),
                 );
 
-                crate::file_utils::get_blob_properties(file_name.as_str()).await?
+                crate::sdk_files::utils::get_blob_properties(file_name.as_str()).await?
             }
         };
 
@@ -131,7 +131,7 @@ impl AzurePageBlobStorage for MyAzurePageBlobStorage {
     async fn create(&self, pages_amount: usize) -> Result<(), AzureStorageError> {
         match self.connection.as_ref() {
             AzureStorageConnection::AzureStorage(connection_data) => {
-                crate::page_blob::sdk::create_page_blob(
+                crate::sdk_azure::page_blobs::create_page_blob(
                     connection_data,
                     self.container_name.as_str(),
                     &self.blob_name,
@@ -150,7 +150,7 @@ impl AzurePageBlobStorage for MyAzurePageBlobStorage {
     async fn create_if_not_exists(&self, pages_amount: usize) -> Result<usize, AzureStorageError> {
         let props = match self.connection.as_ref() {
             AzureStorageConnection::AzureStorage(connection_data) => {
-                crate::page_blob::sdk::create_page_blob_if_not_exists(
+                crate::sdk_azure::page_blobs::create_page_blob_if_not_exists(
                     connection_data,
                     self.container_name.as_str(),
                     &self.blob_name,
@@ -175,7 +175,7 @@ impl AzurePageBlobStorage for MyAzurePageBlobStorage {
     ) -> Result<Vec<u8>, AzureStorageError> {
         match self.connection.as_ref() {
             AzureStorageConnection::AzureStorage(connection_data) => {
-                crate::page_blob::sdk::get_pages(
+                crate::sdk_azure::page_blobs::get_pages(
                     connection_data,
                     self.container_name.as_str(),
                     self.blob_name.as_str(),
@@ -199,7 +199,7 @@ impl AzurePageBlobStorage for MyAzurePageBlobStorage {
     ) -> Result<(), AzureStorageError> {
         match self.connection.as_ref() {
             AzureStorageConnection::AzureStorage(connection_data) => {
-                crate::page_blob::sdk::save_pages(
+                crate::sdk_azure::page_blobs::save_pages(
                     connection_data,
                     self.container_name.as_str(),
                     self.blob_name.as_str(),
@@ -219,7 +219,7 @@ impl AzurePageBlobStorage for MyAzurePageBlobStorage {
     async fn delete(&self) -> Result<(), AzureStorageError> {
         match self.connection.as_ref() {
             AzureStorageConnection::AzureStorage(connection_data) => {
-                crate::blob::sdk::delete_blob(
+                crate::sdk_azure::blobs::delete(
                     connection_data,
                     self.container_name.as_str(),
                     self.blob_name.as_str(),
@@ -235,7 +235,7 @@ impl AzurePageBlobStorage for MyAzurePageBlobStorage {
     async fn delete_if_exists(&self) -> Result<(), AzureStorageError> {
         match self.connection.as_ref() {
             AzureStorageConnection::AzureStorage(connection_data) => {
-                crate::blob::sdk::delete_blob_if_exists(
+                crate::sdk_azure::blobs::delete_if_exists(
                     connection_data,
                     self.container_name.as_str(),
                     self.blob_name.as_str(),
@@ -253,7 +253,7 @@ impl AzurePageBlobStorage for MyAzurePageBlobStorage {
     async fn download(&self) -> Result<Vec<u8>, AzureStorageError> {
         match self.connection.as_ref() {
             AzureStorageConnection::AzureStorage(connection_data) => {
-                crate::blob::sdk::download_blob(
+                crate::sdk_azure::blobs::download(
                     connection_data,
                     self.container_name.as_str(),
                     self.blob_name.as_str(),
@@ -270,7 +270,7 @@ impl AzurePageBlobStorage for MyAzurePageBlobStorage {
     async fn get_blob_properties(&self) -> Result<BlobProperties, AzureStorageError> {
         match self.connection.as_ref() {
             AzureStorageConnection::AzureStorage(connection_data) => {
-                crate::blob::sdk::get_blob_properties(
+                crate::sdk_azure::blobs::get_blob_properties(
                     connection_data,
                     self.container_name.as_ref(),
                     self.blob_name.as_ref(),
@@ -278,13 +278,13 @@ impl AzurePageBlobStorage for MyAzurePageBlobStorage {
                 .await
             }
             AzureStorageConnection::File(connection_data) => {
-                let file_name = crate::file_utils::compile_blob_path(
+                let file_name = crate::sdk_files::utils::compile_blob_path(
                     connection_data,
                     self.container_name.as_str(),
                     self.blob_name.as_str(),
                 );
 
-                crate::file_utils::get_blob_properties(file_name.as_str()).await
+                crate::sdk_files::utils::get_blob_properties(file_name.as_str()).await
             }
         }
     }

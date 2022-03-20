@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use tokio::sync::Mutex;
 
-use crate::{blob::BlobProperties, file_utils::FileConnectionInfo, AzureStorageError};
+use crate::{blob::BlobProperties, sdk_files::utils::FileConnectionInfo, AzureStorageError};
 
 use super::PageBlobFileEngine;
 
