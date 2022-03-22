@@ -20,6 +20,10 @@ impl BlobContainersApi for AzureStorageConnection {
                 crate::sdk_files::containers::create_if_not_exists(connection_data, container_name)
                     .await
             }
+            AzureStorageConnection::InMemory(connection_data) => {
+                connection_data.create(container_name).await;
+                Ok(())
+            }
         }
     }
 
@@ -30,6 +34,13 @@ impl BlobContainersApi for AzureStorageConnection {
             }
             AzureStorageConnection::File(connection_data) => {
                 crate::sdk_files::containers::delete(connection_data, container_name).await
+            }
+            AzureStorageConnection::InMemory(connection_data) => {
+                if connection_data.delete(container_name).await {
+                    Ok(())
+                } else {
+                    Err(AzureStorageError::ContainerNotFound)
+                }
             }
         }
     }
@@ -47,6 +58,10 @@ impl BlobContainersApi for AzureStorageConnection {
                 crate::sdk_files::containers::delete_if_exists(connection_data, container_name)
                     .await
             }
+            AzureStorageConnection::InMemory(connection_data) => {
+                connection_data.delete(container_name).await;
+                Ok(())
+            }
         }
     }
 
@@ -57,6 +72,9 @@ impl BlobContainersApi for AzureStorageConnection {
             }
             AzureStorageConnection::File(connection_data) => {
                 crate::sdk_files::containers::get_list(connection_data).await
+            }
+            AzureStorageConnection::InMemory(connection_data) => {
+                Ok(connection_data.get_list().await)
             }
         }
     }
@@ -71,6 +89,15 @@ impl BlobContainersApi for AzureStorageConnection {
             }
             AzureStorageConnection::File(connection_data) => {
                 crate::sdk_files::blobs::get_list(connection_data, container_name).await
+            }
+            AzureStorageConnection::InMemory(connection_data) => {
+                let container = crate::connection::in_mem::operations::get_container(
+                    connection_data,
+                    container_name,
+                )
+                .await?;
+
+                Ok(container.get_list_of_blobs().await)
             }
         }
     }

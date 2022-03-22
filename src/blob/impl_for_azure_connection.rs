@@ -27,6 +27,15 @@ impl BlobApi for AzureStorageConnection {
                 )
                 .await
             }
+            AzureStorageConnection::InMemory(connection_data) => {
+                let container = crate::connection::in_mem::operations::get_container(
+                    connection_data,
+                    container_name,
+                )
+                .await?;
+
+                container.get_blob_properties(blob_name).await
+            }
         }
     }
 
@@ -42,6 +51,15 @@ impl BlobApi for AzureStorageConnection {
             AzureStorageConnection::File(connection_data) => {
                 crate::sdk_files::blobs::download(connection_data, container_name, blob_name).await
             }
+            AzureStorageConnection::InMemory(connection_data) => {
+                let container = crate::connection::in_mem::operations::get_container(
+                    connection_data,
+                    container_name,
+                )
+                .await?;
+
+                container.download(blob_name).await
+            }
         }
     }
 
@@ -56,6 +74,19 @@ impl BlobApi for AzureStorageConnection {
             }
             AzureStorageConnection::File(connection_data) => {
                 crate::sdk_files::blobs::delete(connection_data, container_name, blob_name).await
+            }
+            AzureStorageConnection::InMemory(connection_data) => {
+                let container = crate::connection::in_mem::operations::get_container(
+                    connection_data,
+                    container_name,
+                )
+                .await?;
+
+                if container.delete(blob_name).await {
+                    return Ok(());
+                }
+
+                return Err(AzureStorageError::BlobNotFound);
             }
         }
     }
@@ -81,6 +112,17 @@ impl BlobApi for AzureStorageConnection {
                     blob_name,
                 )
                 .await
+            }
+            AzureStorageConnection::InMemory(connection_data) => {
+                let container = crate::connection::in_mem::operations::get_container(
+                    connection_data,
+                    container_name,
+                )
+                .await?;
+
+                container.delete(blob_name).await;
+
+                return Err(AzureStorageError::BlobNotFound);
             }
         }
     }

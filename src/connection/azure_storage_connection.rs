@@ -2,14 +2,18 @@ use std::sync::Arc;
 
 use my_telemetry::MyTelemetry;
 
-use super::{AzureStorageConnectionData, FileConnectionData};
+use super::{in_mem::MemStorageData, AzureStorageConnectionData, FileConnectionData};
 
 pub enum AzureStorageConnection {
     AzureStorage(AzureStorageConnectionData),
     File(FileConnectionData),
+    InMemory(MemStorageData),
 }
 
 impl AzureStorageConnection {
+    pub fn new_in_memory() -> Self {
+        Self::InMemory(MemStorageData::new())
+    }
     pub fn from_conn_string(connection_string: &str) -> Self {
         if connection_string.contains("DefaultEndpointsProtocol")
             && connection_string.contains("AccountName")
@@ -50,6 +54,7 @@ impl AzureStorageConnection {
                 data.telemetry = Some(telemetry);
             }
             AzureStorageConnection::File(_) => {}
+            AzureStorageConnection::InMemory(_) => {}
         }
     }
 }

@@ -25,6 +25,17 @@ impl BlockBlobApi for AzureStorageConnection {
                 )
                 .await
             }
+            AzureStorageConnection::InMemory(connection_data) => {
+                let container = connection_data.get_container(container_name).await;
+                if container.is_none() {
+                    return Err(AzureStorageError::ContainerNotFound);
+                }
+                container
+                    .unwrap()
+                    .upload_block_blob(blob_name.to_string(), content)
+                    .await;
+                Ok(())
+            }
         }
     }
 }
