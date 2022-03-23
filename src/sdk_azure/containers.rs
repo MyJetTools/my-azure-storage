@@ -4,21 +4,47 @@ use crate::{
 };
 use flurl::FlUrl;
 
-pub async fn get_list(
-    connection: &AzureStorageConnectionData,
-) -> Result<Vec<String>, hyper::Error> {
-    let mut result = vec![];
+use super::models::NextMarkerToRead;
 
-    let mut next_marker: Option<String> = None;
+pub struct AzureContainersListReader<'s> {
+    connection: &'s AzureStorageConnectionData,
+    next_marker: NextMarkerToRead,
+}
 
-    loop {
-        let fl_url: FlUrl = connection.into();
+impl<'s> AzureContainersListReader<'s> {
+    pub fn new(connection: &'s AzureStorageConnectionData) -> Self {
+        Self {
+            connection,
+            next_marker: NextMarkerToRead::Start,
+        }
+    }
+
+    fn get_next_marker(&mut self) -> Option<String> {
+        let mut result = NextMarkerToRead::End;
+
+        std::mem::swap(&mut result, &mut self.next_marker);
+
+        if let NextMarkerToRead::Next(marker) = result {
+            Some(marker)
+        } else {
+            None
+        }
+    }
+
+    pub async fn get_next(&mut self) -> Result<Option<Vec<String>>, hyper::Error> {
+        if let NextMarkerToRead::End = &self.next_marker {
+            return Ok(None);
+        }
+
+        let fl_url: FlUrl = self.connection.into();
+
+        let next_marker = self.get_next_marker();
 
         let response = fl_url
             .append_query_param("comp", "list")
             .add_azure_headers(
                 super::super::sign_utils::SignVerb::GET,
-                &connection,
+                self.connection,
                 None,
                 next_marker,
                 AZURE_REST_VERSION,
@@ -30,16 +56,26 @@ pub async fn get_list(
 
         let azure_response = super::models::deserialize_list_of_containers(body.as_ref());
 
-        result.extend(azure_response.items);
-
-        if azure_response.next_marker.is_none() {
-            break;
+        if let Some(marker) = azure_response.next_marker {
+            self.next_marker = NextMarkerToRead::Next(marker);
         }
 
-        next_marker = azure_response.next_marker;
+        Ok(Some(azure_response.items))
+    }
+}
+
+pub async fn get_list(
+    connection: &AzureStorageConnectionData,
+) -> Result<Vec<String>, hyper::Error> {
+    let mut result = vec![];
+
+    let mut reader = AzureContainersListReader::new(connection);
+
+    while let Some(chunk) = reader.get_next().await? {
+        result.extend(chunk);
     }
 
-    return Ok(result);
+    Ok(result)
 }
 
 pub async fn create_if_not_exists(

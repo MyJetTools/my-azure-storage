@@ -7,26 +7,51 @@ use crate::{flurl_ext::FlUrlAzureExtensions, sign_utils::SignVerb};
 use flurl::FlUrl;
 
 use super::super::consts::AZURE_REST_VERSION;
-use super::models::deserialize_list_of_blobs;
+use super::models::{deserialize_list_of_blobs, NextMarkerToRead};
 
-pub async fn get_list(
-    connection: &AzureStorageConnectionData,
-    container_name: &str,
-) -> Result<Vec<String>, AzureStorageError> {
-    let mut result = vec![];
+pub struct AzureBlobsListReader<'s> {
+    connection: &'s AzureStorageConnectionData,
+    next_marker: NextMarkerToRead,
+    container_name: &'s str,
+}
 
-    let mut next_marker: Option<String> = None;
+impl<'s> AzureBlobsListReader<'s> {
+    pub fn new(connection: &'s AzureStorageConnectionData, container_name: &'s str) -> Self {
+        Self {
+            connection,
+            next_marker: NextMarkerToRead::Start,
+            container_name,
+        }
+    }
 
-    loop {
-        let fl_url: FlUrl = connection.into();
+    fn get_next_marker(&mut self) -> Option<String> {
+        let mut result = NextMarkerToRead::End;
+
+        std::mem::swap(&mut result, &mut self.next_marker);
+
+        if let NextMarkerToRead::Next(marker) = result {
+            Some(marker)
+        } else {
+            None
+        }
+    }
+
+    pub async fn get_next(&mut self) -> Result<Option<Vec<String>>, AzureStorageError> {
+        if let NextMarkerToRead::End = &self.next_marker {
+            return Ok(None);
+        }
+
+        let fl_url: FlUrl = self.connection.into();
+
+        let next_marker = self.get_next_marker();
 
         let response = fl_url
-            .append_path_segment(container_name)
+            .append_path_segment(self.container_name)
             .append_query_param("comp", "list")
             .append_query_param("restype", "container")
             .add_azure_headers(
                 SignVerb::GET,
-                &connection,
+                self.connection,
                 None,
                 next_marker,
                 AZURE_REST_VERSION,
@@ -40,16 +65,27 @@ pub async fn get_list(
 
         let azure_response = deserialize_list_of_blobs(body.as_ref());
 
-        result.extend(azure_response.items);
-
-        if azure_response.next_marker.is_none() {
-            break;
+        if let Some(marker) = azure_response.next_marker {
+            self.next_marker = NextMarkerToRead::Next(marker);
         }
 
-        next_marker = azure_response.next_marker;
+        Ok(Some(azure_response.items))
+    }
+}
+
+pub async fn get_list(
+    connection: &AzureStorageConnectionData,
+    container_name: &str,
+) -> Result<Vec<String>, AzureStorageError> {
+    let mut result = vec![];
+
+    let mut reader = AzureBlobsListReader::new(connection, container_name);
+
+    while let Some(chunk) = reader.get_next().await? {
+        result.extend(chunk);
     }
 
-    return Ok(result);
+    Ok(result)
 }
 
 pub async fn get_blob_properties(

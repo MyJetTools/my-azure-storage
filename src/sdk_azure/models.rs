@@ -12,6 +12,12 @@ const BLOB_ARRAY_ITEM_NODE: &str = "Blob";
 
 const NEXT_MARKER_NODE: &str = "NextMarker";
 
+pub enum NextMarkerToRead {
+    Start,
+    Next(String),
+    End,
+}
+
 fn get_array_of_names<'t>(
     xml_reader: &mut MyXmlReader<'t>,
     array_node: XmlTagInfo<'t>,
