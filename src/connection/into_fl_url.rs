@@ -1,6 +1,6 @@
 use flurl::{FlUrl, FlUrlTelemetry};
 
-use crate::consts::DEPENDENCY_TYPE;
+use crate::sdk_azure::consts::DEPENDENCY_TYPE;
 
 use super::AzureStorageConnectionData;
 

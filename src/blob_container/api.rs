@@ -1,7 +1,7 @@
 use async_trait::async_trait;
 use hyper::Error;
 
-use crate::types::AzureStorageError;
+use crate::AzureStorageError;
 
 #[async_trait]
 pub trait BlobContainersApi {

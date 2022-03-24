@@ -3,11 +3,13 @@ pub mod blobs {
     use flurl::FlUrl;
 
     use crate::{
-        azure_response_handler::{AzureResponseHandler, ToAzureResponseHandler},
         connection::AzureStorageConnectionData,
-        flurl_ext::FlUrlAzureExtensions,
-        sign_utils::SignVerb,
-        types::AzureStorageError,
+        sdk_azure::{
+            azure_response_handler::{AzureResponseHandler, ToAzureResponseHandler},
+            flurl_ext::FlUrlAzureExtensions,
+            sign_utils::SignVerb,
+        },
+        AzureStorageError,
     };
 
     pub async fn get_blob_properties(

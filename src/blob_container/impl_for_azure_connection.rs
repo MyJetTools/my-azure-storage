@@ -1,4 +1,4 @@
-use crate::{connection::AzureStorageConnection, types::AzureStorageError};
+use crate::{connection::AzureStorageConnection, AzureStorageError};
 
 use super::api::BlobContainersApi;
 

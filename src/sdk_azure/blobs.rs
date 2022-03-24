@@ -1,12 +1,13 @@
-use crate::azure_response_handler::ToAzureResponseHandler;
+use super::azure_response_handler::ToAzureResponseHandler;
+use super::flurl_ext::FlUrlAzureExtensions;
+use super::sign_utils::SignVerb;
 use crate::blob::BlobProperties;
 use crate::connection::AzureStorageConnectionData;
-use crate::types::AzureStorageError;
-use crate::{flurl_ext::FlUrlAzureExtensions, sign_utils::SignVerb};
+use crate::AzureStorageError;
 
 use flurl::FlUrl;
 
-use super::super::consts::AZURE_REST_VERSION;
+use super::consts::AZURE_REST_VERSION;
 use super::models::{deserialize_list_of_blobs, NextMarkerToRead};
 
 pub struct AzureBlobsListReader<'s> {
@@ -93,13 +94,10 @@ pub async fn get_blob_properties(
     container_name: &str,
     blob_name: &str,
 ) -> Result<BlobProperties, AzureStorageError> {
-    let response = super::super::fl_requests::blobs::get_blob_properties(
-        connection,
-        container_name,
-        blob_name,
-    )
-    .await?
-    .check_if_there_is_an_error()?;
+    let response =
+        super::fl_requests::blobs::get_blob_properties(connection, container_name, blob_name)
+            .await?
+            .check_if_there_is_an_error()?;
 
     let content_len = response.get_header("content-length").unwrap();
 

@@ -7,8 +7,9 @@ pub enum AzureStorageError {
     ContainerAlreadyExists,
     InvalidPageRange,
     RequestBodyTooLarge,
+    IoError(std::io::Error),
+    HyperError(hyper::Error),
     UnknownError { msg: String },
-    HyperError { err: hyper::Error },
 }
 
 impl AzureStorageError {
@@ -32,19 +33,12 @@ impl AzureStorageError {
 
 impl From<hyper::Error> for AzureStorageError {
     fn from(err: hyper::Error) -> Self {
-        AzureStorageError::HyperError { err }
+        AzureStorageError::HyperError(err)
     }
-}
-
-pub struct AzureItems<T> {
-    pub next_marker: Option<String>,
-    pub items: Vec<T>,
 }
 
 impl From<std::io::Error> for AzureStorageError {
     fn from(src: std::io::Error) -> Self {
-        AzureStorageError::UnknownError {
-            msg: format!("I/O error: {}", src),
-        }
+        AzureStorageError::IoError(src)
     }
 }

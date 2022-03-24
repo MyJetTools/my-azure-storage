@@ -1,14 +1,15 @@
 use flurl::FlUrl;
 
-use crate::azure_response_handler::ToAzureResponseHandler;
+use super::azure_response_handler::ToAzureResponseHandler;
+use super::consts::AZURE_REST_VERSION;
+use super::flurl_ext::FlUrlAzureExtensions;
 use crate::blob::BlobProperties;
 use crate::connection::AzureStorageConnectionData;
-use crate::consts::AZURE_REST_VERSION;
-use crate::flurl_ext::FlUrlAzureExtensions;
+use crate::AzureStorageError;
+
+use super::sign_utils::SignVerb;
 
 use crate::page_blob::consts::BLOB_PAGE_SIZE;
-use crate::sign_utils::SignVerb;
-use crate::types::AzureStorageError;
 
 pub async fn create_page_blob_if_not_exists(
     connection: &AzureStorageConnectionData,

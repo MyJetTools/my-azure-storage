@@ -1,9 +1,9 @@
-use crate::{
-    azure_response_handler::ToAzureResponseHandler, connection::AzureStorageConnectionData,
-    flurl_ext::FlUrlAzureExtensions, sign_utils::SignVerb, types::AzureStorageError,
-};
+use crate::sdk_azure::azure_response_handler::ToAzureResponseHandler;
+use crate::sdk_azure::flurl_ext::FlUrlAzureExtensions;
+use crate::sdk_azure::sign_utils::SignVerb;
+use crate::{connection::AzureStorageConnectionData, types::AzureStorageError};
 
-use super::super::consts::AZURE_REST_VERSION;
+use crate::sdk_azure::consts::AZURE_REST_VERSION;
 
 use flurl::FlUrl;
 

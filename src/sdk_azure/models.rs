@@ -1,6 +1,6 @@
 use my_xml_reader::{MyXmlReader, XmlTagInfo};
 
-use crate::types::AzureItems;
+use super::azure_response_chunk::AzureResponseChunk;
 
 const ROOT_NODE_NAME: &str = "EnumerationResults";
 
@@ -44,7 +44,7 @@ fn get_array_of_names<'t>(
     result
 }
 
-pub fn deserialize_list_of_containers(xml: &[u8]) -> AzureItems<String> {
+pub fn deserialize_list_of_containers(xml: &[u8]) -> AzureResponseChunk<String> {
     let mut xml_reader = MyXmlReader::from_slice(xml).unwrap();
 
     let root_node = xml_reader
@@ -86,13 +86,13 @@ pub fn deserialize_list_of_containers(xml: &[u8]) -> AzureItems<String> {
         }
     }
 
-    return AzureItems {
+    return AzureResponseChunk {
         next_marker,
         items: blobs.unwrap(),
     };
 }
 
-pub fn deserialize_list_of_blobs(xml: &[u8]) -> AzureItems<String> {
+pub fn deserialize_list_of_blobs(xml: &[u8]) -> AzureResponseChunk<String> {
     let mut xml_reader = MyXmlReader::from_slice(xml).unwrap();
 
     let root_node = xml_reader
@@ -134,7 +134,7 @@ pub fn deserialize_list_of_blobs(xml: &[u8]) -> AzureItems<String> {
         }
     }
 
-    return AzureItems {
+    return AzureResponseChunk {
         next_marker,
         items: containers.unwrap(),
     };

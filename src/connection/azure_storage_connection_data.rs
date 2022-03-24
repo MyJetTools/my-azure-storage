@@ -3,7 +3,7 @@ use std::{collections::HashMap, sync::Arc};
 use flurl::FlUrl;
 use my_telemetry::MyTelemetry;
 
-use crate::sign_utils::{self, SignVerb};
+use crate::sdk_azure::sign_utils::SignVerb;
 
 #[derive(Clone)]
 pub struct AzureStorageConnectionData {
@@ -71,14 +71,17 @@ impl AzureStorageConnectionData {
             None => "".to_string(),
         };
 
-        let string_to_sign = sign_utils::get_auth_header(
+        let string_to_sign = crate::sdk_azure::sign_utils::get_auth_header(
             self.account_name.as_str(),
             content_len.as_str(),
             verb,
             &flurl,
         );
 
-        let signature = sign_utils::sign_transaction(string_to_sign.as_str(), &self.account_key);
+        let signature = crate::sdk_azure::sign_utils::sign_transaction(
+            string_to_sign.as_str(),
+            &self.account_key,
+        );
         format!("SharedKey {}:{}", &self.account_name, signature)
     }
 }

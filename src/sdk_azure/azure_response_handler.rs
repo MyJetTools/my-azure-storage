@@ -1,7 +1,7 @@
 use flurl::FlUrlResponse;
 use std::collections::HashMap;
 
-use crate::types::AzureStorageError;
+use crate::AzureStorageError;
 
 pub struct AzureResponseHandler {
     fl_response: FlUrlResponse,

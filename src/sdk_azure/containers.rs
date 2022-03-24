@@ -1,10 +1,10 @@
-use crate::{
-    azure_response_handler::ToAzureResponseHandler, connection::AzureStorageConnectionData,
-    flurl_ext::FlUrlAzureExtensions, sign_utils::SignVerb, types::AzureStorageError,
-};
+use crate::{connection::AzureStorageConnectionData, AzureStorageError};
 use flurl::FlUrl;
 
-use super::models::NextMarkerToRead;
+use super::{
+    azure_response_handler::ToAzureResponseHandler, flurl_ext::FlUrlAzureExtensions,
+    models::NextMarkerToRead,
+};
 
 pub struct AzureContainersListReader<'s> {
     connection: &'s AzureStorageConnectionData,
@@ -43,7 +43,7 @@ impl<'s> AzureContainersListReader<'s> {
         let response = fl_url
             .append_query_param("comp", "list")
             .add_azure_headers(
-                super::super::sign_utils::SignVerb::GET,
+                super::sign_utils::SignVerb::GET,
                 self.connection,
                 None,
                 next_marker,
@@ -87,7 +87,13 @@ pub async fn create_if_not_exists(
     fl_url
         .append_path_segment(container_name)
         .append_query_param("restype", "container")
-        .add_azure_headers(SignVerb::PUT, connection, None, None, AZURE_REST_VERSION)
+        .add_azure_headers(
+            super::sign_utils::SignVerb::PUT,
+            connection,
+            None,
+            None,
+            AZURE_REST_VERSION,
+        )
         .put(None)
         .await?
         .to_azure_response_handler()
@@ -105,7 +111,13 @@ pub async fn delete(
     fl_url
         .append_path_segment(container_name)
         .append_query_param("restype", "container")
-        .add_azure_headers(SignVerb::DELETE, connection, None, None, AZURE_REST_VERSION)
+        .add_azure_headers(
+            super::sign_utils::SignVerb::DELETE,
+            connection,
+            None,
+            None,
+            AZURE_REST_VERSION,
+        )
         .delete()
         .await?
         .to_azure_response_handler()
@@ -123,7 +135,13 @@ pub async fn delete_if_exists(
     fl_url
         .append_path_segment(container_name)
         .append_query_param("restype", "container")
-        .add_azure_headers(SignVerb::DELETE, connection, None, None, AZURE_REST_VERSION)
+        .add_azure_headers(
+            super::sign_utils::SignVerb::DELETE,
+            connection,
+            None,
+            None,
+            AZURE_REST_VERSION,
+        )
         .delete()
         .await?
         .to_azure_response_handler()
