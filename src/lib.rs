@@ -7,6 +7,6 @@ pub mod page_blob;
 pub mod sdk_azure;
 mod sdk_files;
 
-pub use connection::AzureStorageConnection;
+pub use connection::{AzureStorageConnection, AzureStorageConnectionData};
 mod types;
 pub use types::AzureStorageError;
