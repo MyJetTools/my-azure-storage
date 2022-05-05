@@ -28,11 +28,20 @@ pub fn compile_container_path<TFileConnectionInfo: FileConnectionInfo>(
 }
 
 pub async fn get_blob_properties(file_name: &str) -> Result<BlobProperties, AzureStorageError> {
-    let metadata = tokio::fs::metadata(file_name).await?;
+    match tokio::fs::metadata(file_name).await {
+        Ok(metadata) => {
+            return Ok(BlobProperties {
+                blob_size: metadata.len() as usize,
+            });
+        }
+        Err(err) => {
+            if let std::io::ErrorKind::NotFound = err.kind() {
+                return Err(AzureStorageError::BlobNotFound);
+            }
 
-    Ok(BlobProperties {
-        blob_size: metadata.len() as usize,
-    })
+            return Err(AzureStorageError::IoError(err));
+        }
+    }
 }
 
 pub fn extract_file_name(full_path: &str, separator: char) -> &str {
