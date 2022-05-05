@@ -232,6 +232,10 @@ impl PageBlobFileEngine {
 
         let mut result = Vec::with_capacity(read_size);
 
+        unsafe {
+            result.set_len(read_size);
+        }
+
         file.read_exact(&mut result).await?;
 
         Ok(result)
