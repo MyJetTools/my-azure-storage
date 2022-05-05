@@ -165,9 +165,7 @@ impl PageBlobFileEngine {
             return Err(AzureStorageError::BlobAlreadyExists);
         }
 
-        let file = tokio::fs::File::create(file_name.as_str()).await?;
-
-        self.file = Some(file);
+        tokio::fs::File::create(file_name.as_str()).await?;
 
         self.resize(pages_amount).await?;
 
@@ -199,16 +197,11 @@ impl PageBlobFileEngine {
             return crate::sdk_files::utils::get_blob_properties(file_name.as_str()).await;
         }
 
-        let file = tokio::fs::File::create(file_name.as_str()).await?;
-
-        self.file = Some(file);
+        tokio::fs::File::create(file_name.as_str()).await?;
 
         self.resize(pages_amount).await?;
 
-        let result = crate::sdk_files::utils::get_blob_properties(file_name.as_str()).await;
-
-        self.file = None;
-        result
+        crate::sdk_files::utils::get_blob_properties(file_name.as_str()).await
     }
 
     pub async fn get(
