@@ -121,8 +121,6 @@ impl PageBlobFileEngine {
         crate::sdk_files::containers::create_if_not_exists(self, self.container_name.as_str())
             .await?;
 
-        self.file = None;
-
         Ok(())
     }
 
@@ -207,7 +205,10 @@ impl PageBlobFileEngine {
 
         self.resize(pages_amount).await?;
 
-        return crate::sdk_files::utils::get_blob_properties(file_name.as_str()).await;
+        let result = crate::sdk_files::utils::get_blob_properties(file_name.as_str()).await;
+
+        self.file = None;
+        result
     }
 
     pub async fn get(
