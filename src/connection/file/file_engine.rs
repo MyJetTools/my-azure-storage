@@ -251,7 +251,7 @@ impl PageBlobFileEngine {
 
         file.seek(SeekFrom::Start(pos as u64)).await?;
 
-        file.write(payload).await?;
+        file.write_all(payload).await?;
 
         Ok(())
     }
