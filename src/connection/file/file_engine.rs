@@ -1,6 +1,6 @@
 use std::io::SeekFrom;
 
-use tokio::fs::{self, File};
+use tokio::fs::{self, File, OpenOptions};
 use tokio::io::{AsyncReadExt, AsyncSeekExt, AsyncWriteExt};
 
 use crate::blob::BlobProperties;
@@ -197,7 +197,14 @@ impl PageBlobFileEngine {
             return crate::sdk_files::utils::get_blob_properties(file_name.as_str()).await;
         }
 
-        tokio::fs::File::create(file_name.as_str()).await?;
+        let file = OpenOptions::new()
+            .create_new(true)
+            .write(true)
+            .append(true)
+            .open(file_name)
+            .await?;
+
+        self.file = Some(file);
 
         self.resize(pages_amount).await?;
 
