@@ -201,7 +201,7 @@ impl PageBlobFileEngine {
             .create_new(true)
             .write(true)
             .append(true)
-            .open(file_name)
+            .open(file_name.as_str())
             .await?;
 
         self.file = Some(file);
