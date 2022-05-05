@@ -1,6 +1,6 @@
 use std::io::SeekFrom;
 
-use tokio::fs::{self, File, OpenOptions};
+use tokio::fs::{self, File};
 use tokio::io::{AsyncReadExt, AsyncSeekExt, AsyncWriteExt};
 
 use crate::blob::BlobProperties;
@@ -163,9 +163,9 @@ impl PageBlobFileEngine {
 
         if tokio::fs::metadata(file_name.as_str()).await.is_ok() {
             return Err(AzureStorageError::BlobAlreadyExists);
+        } else {
+            tokio::fs::File::create(file_name.as_str()).await?;
         }
-
-        tokio::fs::File::create(file_name.as_str()).await?;
 
         self.resize(pages_amount).await?;
 
@@ -195,16 +195,9 @@ impl PageBlobFileEngine {
 
         if self.get_file_mut().await.is_ok() {
             return crate::sdk_files::utils::get_blob_properties(file_name.as_str()).await;
+        } else {
+            tokio::fs::File::create(file_name.as_str()).await?;
         }
-
-        let file = OpenOptions::new()
-            .create_new(true)
-            .write(true)
-            .append(true)
-            .open(file_name.as_str())
-            .await?;
-
-        self.file = Some(file);
 
         self.resize(pages_amount).await?;
 
