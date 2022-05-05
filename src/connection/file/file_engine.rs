@@ -118,7 +118,12 @@ impl PageBlobFileEngine {
             return Ok(());
         }
 
-        crate::sdk_files::containers::create_if_not_exists(self, self.container_name.as_str()).await
+        crate::sdk_files::containers::create_if_not_exists(self, self.container_name.as_str())
+            .await?;
+
+        self.file = None;
+
+        Ok(())
     }
 
     pub async fn delete_container_if_exists(&mut self) -> Result<(), AzureStorageError> {
