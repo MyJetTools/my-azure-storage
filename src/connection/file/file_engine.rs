@@ -60,11 +60,23 @@ impl PageBlobFileEngine {
             self.blob_name.as_str(),
         );
 
-        let file = File::open(file_name.as_str()).await.unwrap();
+        let file_result = File::open(file_name.as_str()).await;
 
-        self.file = Some(file);
+        match file_result {
+            Ok(file) => {
+                self.file = Some(file);
+                Ok(self.file.as_mut().unwrap())
+            }
+            Err(err) => match err.kind() {
+                std::io::ErrorKind::NotFound => {
+                    return Err(AzureStorageError::BlobNotFound);
+                }
 
-        Ok(self.file.as_mut().unwrap())
+                _ => Err(AzureStorageError::UnknownError {
+                    msg: format!("{:?}", err),
+                }),
+            },
+        }
     }
 
     pub async fn download(&mut self) -> Result<Vec<u8>, AzureStorageError> {
