@@ -9,7 +9,7 @@ pub enum AzureStorageError {
     RequestBodyTooLarge,
     IoError(std::io::Error),
     HyperError(hyper::Error),
-    Timout,
+    Timeout,
     UnknownError { msg: String },
 }
 
@@ -36,7 +36,7 @@ impl From<flurl::FlUrlError> for AzureStorageError {
     fn from(err: flurl::FlUrlError) -> Self {
         match err {
             flurl::FlUrlError::HyperError(err) => AzureStorageError::HyperError(err),
-            flurl::FlUrlError::Timeout => AzureStorageError::Timout,
+            flurl::FlUrlError::Timeout => AzureStorageError::Timeout,
         }
     }
 }
