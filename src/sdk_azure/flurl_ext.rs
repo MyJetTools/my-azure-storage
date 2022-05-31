@@ -34,7 +34,7 @@ impl FlUrlAzureExtensions for FlUrl {
         };
 
         let mut flurl = self
-            .append_query_param("timeout", connection.time_out_ms.as_str())
+            .append_query_param("timeout", connection.time_out_as_string.as_str())
             .append_query_param("maxresults", "100")
             .with_header("x-ms-date", date.as_str())
             .with_header("x-ms-version", azure_rest_version);

@@ -3,7 +3,7 @@ use crate::{connection::AzureStorageConnection, AzureStorageError};
 use super::api::BlobContainersApi;
 
 use async_trait::async_trait;
-use hyper::Error;
+use flurl::FlUrlError;
 
 #[async_trait]
 impl BlobContainersApi for AzureStorageConnection {
@@ -65,7 +65,7 @@ impl BlobContainersApi for AzureStorageConnection {
         }
     }
 
-    async fn get_list_of_blob_containers(&self) -> Result<Vec<String>, Error> {
+    async fn get_list_of_blob_containers(&self) -> Result<Vec<String>, FlUrlError> {
         match self {
             AzureStorageConnection::AzureStorage(connection_data) => {
                 crate::sdk_azure::containers::get_list(connection_data).await

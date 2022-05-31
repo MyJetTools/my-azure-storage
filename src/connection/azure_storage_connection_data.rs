@@ -1,4 +1,4 @@
-use std::{collections::HashMap, sync::Arc};
+use std::{collections::HashMap, sync::Arc, time::Duration};
 
 use flurl::FlUrl;
 use my_telemetry::MyTelemetry;
@@ -12,7 +12,8 @@ pub struct AzureStorageConnectionData {
     pub endpoint_suffix: String,
     pub default_endpoints_protocol: String,
     pub blobs_api_url: String,
-    pub time_out_ms: String,
+    pub time_out: Duration,
+    pub time_out_as_string: String,
     pub telemetry: Option<Arc<dyn MyTelemetry + Send + Sync + 'static>>,
 }
 
@@ -55,7 +56,8 @@ impl AzureStorageConnectionData {
             endpoint_suffix: conn_keys.get("EndpointSuffix").unwrap().to_string(),
             default_endpoints_protocol,
             blobs_api_url,
-            time_out_ms: "60".to_string(),
+            time_out: Duration::from_secs(5),
+            time_out_as_string: "5".to_string(),
             telemetry: None,
         }
     }

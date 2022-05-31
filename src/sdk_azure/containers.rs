@@ -1,5 +1,5 @@
 use crate::{connection::AzureStorageConnectionData, AzureStorageError};
-use flurl::FlUrl;
+use flurl::{FlUrl, FlUrlError};
 
 use super::{
     azure_response_handler::ToAzureResponseHandler, flurl_ext::FlUrlAzureExtensions,
@@ -31,7 +31,7 @@ impl<'s> AzureContainersListReader<'s> {
         }
     }
 
-    pub async fn get_next(&mut self) -> Result<Option<Vec<String>>, hyper::Error> {
+    pub async fn get_next(&mut self) -> Result<Option<Vec<String>>, FlUrlError> {
         if let NextMarkerToRead::End = &self.next_marker {
             return Ok(None);
         }
@@ -40,7 +40,7 @@ impl<'s> AzureContainersListReader<'s> {
 
         let next_marker = self.get_next_marker();
 
-        let response = fl_url
+        let mut response = fl_url
             .append_query_param("comp", "list")
             .add_azure_headers(
                 super::sign_utils::SignVerb::GET,
@@ -64,9 +64,7 @@ impl<'s> AzureContainersListReader<'s> {
     }
 }
 
-pub async fn get_list(
-    connection: &AzureStorageConnectionData,
-) -> Result<Vec<String>, hyper::Error> {
+pub async fn get_list(connection: &AzureStorageConnectionData) -> Result<Vec<String>, FlUrlError> {
     let mut result = vec![];
 
     let mut reader = AzureContainersListReader::new(connection);

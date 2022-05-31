@@ -1,3 +1,5 @@
+use flurl::FlUrlError;
+
 use crate::AzureStorageError;
 
 use super::utils::FileConnectionInfo;
@@ -44,7 +46,7 @@ pub async fn delete_if_exists<TFileConnectionInfo: FileConnectionInfo>(
 
 pub async fn get_list<TFileConnectionInfo: FileConnectionInfo>(
     connection_data: &TFileConnectionInfo,
-) -> Result<Vec<String>, hyper::Error> {
+) -> Result<Vec<String>, FlUrlError> {
     let mut result = Vec::new();
 
     let root_path = connection_data.get_root_path();
