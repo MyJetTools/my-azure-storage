@@ -19,6 +19,10 @@ pub struct AzureStorageConnectionData {
 
 impl AzureStorageConnectionData {
     pub fn from_conn_string(conn_string: &str) -> Self {
+        Self::from_conn_string_with_timeout(conn_string, 10)
+    }
+
+    pub fn from_conn_string_with_timeout(conn_string: &str, timeout_secs: u64) -> Self {
         let key_values = conn_string.split(";");
 
         let mut conn_keys: HashMap<&str, &str> = HashMap::new();
@@ -56,12 +60,17 @@ impl AzureStorageConnectionData {
             endpoint_suffix: conn_keys.get("EndpointSuffix").unwrap().to_string(),
             default_endpoints_protocol,
             blobs_api_url,
-            time_out: Duration::from_secs(5),
-            time_out_as_string: "5".to_string(),
+            time_out: Duration::from_secs(timeout_secs),
+            time_out_as_string: timeout_secs.to_string(),
             telemetry: None,
         }
     }
 
+    pub fn with_timeout(mut self, seconds: u64) -> Self {
+        self.time_out = Duration::from_secs(seconds);
+        self.time_out_as_string = seconds.to_string();
+        self
+    }
     pub fn get_auth_header(
         &self,
         verb: SignVerb,
