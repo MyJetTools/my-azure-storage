@@ -7,6 +7,7 @@ pub enum AzureStorageError {
     ContainerAlreadyExists,
     InvalidPageRange,
     RequestBodyTooLarge,
+    InvalidResourceName,
     IoError(std::io::Error),
     HyperError(hyper::Error),
     Timeout,
@@ -22,6 +23,7 @@ impl AzureStorageError {
             "ContainerAlreadyExists" => AzureStorageError::ContainerAlreadyExists,
             "InvalidPageRange" => AzureStorageError::InvalidPageRange,
             "RequestBodyTooLarge" => AzureStorageError::RequestBodyTooLarge,
+            "InvalidResourceName" => AzureStorageError::InvalidResourceName,
             _ => {
                 println!("Unknown error is found: {:?}", str);
                 AzureStorageError::UnknownError {

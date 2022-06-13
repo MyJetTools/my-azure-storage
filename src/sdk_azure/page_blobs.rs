@@ -157,9 +157,9 @@ mod tests {
 
     #[tokio::test]
     async fn test_page_blob() {
-        let conn_string = env!("TEST_STORAGE_ACCOUNT");
+        let conn_string = std::env::var("TEST_STORAGE_ACCOUNT").unwrap();
 
-        let connection = AzureStorageConnectionData::from_conn_string(conn_string);
+        let connection = AzureStorageConnectionData::from_conn_string(conn_string.as_str());
 
         crate::sdk_azure::containers::create_if_not_exists(&connection, "testtest")
             .await

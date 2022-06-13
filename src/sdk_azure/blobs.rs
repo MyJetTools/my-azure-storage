@@ -173,9 +173,9 @@ mod tests {
 
     #[tokio::test]
     async fn test_blob_not_found() {
-        let conn_string = env!("TEST_STORAGE_ACCOUNT");
+        let conn_string = std::env::var("TEST_STORAGE_ACCOUNT").unwrap();
 
-        let connection = AzureStorageConnectionData::from_conn_string(conn_string);
+        let connection = AzureStorageConnectionData::from_conn_string(conn_string.as_str());
         println!("Name:{}", connection.account_name);
 
         let result = get_blob_properties(&connection, "testtest", "notexists").await;

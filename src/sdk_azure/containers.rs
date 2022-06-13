@@ -157,9 +157,9 @@ mod tests {
 
     #[tokio::test]
     async fn test_create_and_delete_container() {
-        let conn_string = env!("TEST_STORAGE_ACCOUNT");
+        let conn_string = std::env::var("TEST_STORAGE_ACCOUNT").unwrap();
 
-        let connection = AzureStorageConnectionData::from_conn_string(conn_string);
+        let connection = AzureStorageConnectionData::from_conn_string(conn_string.as_str());
 
         create_if_not_exists(&connection, "testtest").await.unwrap();
 
@@ -168,9 +168,9 @@ mod tests {
 
     #[tokio::test]
     async fn test_container_not_found() {
-        let conn_string = env!("TEST_STORAGE_ACCOUNT");
+        let conn_string = std::env::var("TEST_STORAGE_ACCOUNT").unwrap();
 
-        let connection = AzureStorageConnectionData::from_conn_string(conn_string);
+        let connection = AzureStorageConnectionData::from_conn_string(conn_string.as_str());
         println!("Name:{}", connection.account_name);
 
         let result =
