@@ -15,7 +15,7 @@ pub async fn get_list<TFileConnectionInfo: FileConnectionInfo>(
         if let Ok(entity) = entry {
             let file_type = entity.file_type().unwrap();
 
-            if file_type.is_dir() {
+            if file_type.is_file() {
                 let path = entity.path();
 
                 let path = format!("{}", path.display());
