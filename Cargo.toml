@@ -1,6 +1,6 @@
 [package]
 name = "my-azure-storage-sdk"
-version = "0.3.1"
+version = "0.3.2"
 authors = ["Andrey <amigin@gmail.com>"]
 edition = "2021"
 
@@ -8,9 +8,9 @@ edition = "2021"
 
 [dependencies]
 my-xml-reader = { branch = "main", git = "https://github.com/MyJetTools/my-xml-reader" }
-flurl = { branch = "0.1.3", git = "https://github.com/MyJetTools/fl-url" }
-my-telemetry = { branch = "main", git = "https://github.com/MyJetTools/my-telemetry.git" }
-rust-extensions = { branch = "main", git = "https://github.com/MyJetTools/rust-extensions.git" }
+flurl = { branch = "0.2.1", git = "https://github.com/MyJetTools/fl-url" }
+my-telemetry = { branch = "0.2.1", git = "https://github.com/MyJetTools/my-telemetry.git" }
+rust-extensions = { branch = "0.1.1", git = "https://github.com/MyJetTools/rust-extensions.git" }
 hmac = "*"
 sha2 = "*"
 base64 = "*"

@@ -1,7 +1,6 @@
-use std::{collections::HashMap, sync::Arc, time::Duration};
+use std::{collections::HashMap, time::Duration};
 
 use flurl::FlUrl;
-use my_telemetry::MyTelemetry;
 
 use crate::sdk_azure::sign_utils::SignVerb;
 
@@ -14,7 +13,6 @@ pub struct AzureStorageConnectionData {
     pub blobs_api_url: String,
     pub time_out: Duration,
     pub time_out_as_string: String,
-    pub telemetry: Option<Arc<dyn MyTelemetry + Send + Sync + 'static>>,
 }
 
 impl AzureStorageConnectionData {
@@ -62,7 +60,6 @@ impl AzureStorageConnectionData {
             blobs_api_url,
             time_out: Duration::from_secs(timeout_secs),
             time_out_as_string: timeout_secs.to_string(),
-            telemetry: None,
         }
     }
 
