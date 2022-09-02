@@ -1,20 +1,27 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, time::Duration};
 
 use flurl::FlUrl;
 
-use crate::sign_utils::{self, SignVerb};
+use crate::sdk_azure::sign_utils::SignVerb;
 
-pub struct AzureStorageConnectionInfo {
+#[derive(Clone)]
+pub struct AzureStorageConnectionData {
     pub account_name: String,
     pub account_key: Vec<u8>,
     pub endpoint_suffix: String,
     pub default_endpoints_protocol: String,
     pub blobs_api_url: String,
-    pub time_out_ms: String,
+    pub time_out: Duration,
+    pub time_out_as_string: String,
+    pub table_storage_api_url: String,
 }
 
-impl AzureStorageConnectionInfo {
+impl AzureStorageConnectionData {
     pub fn from_conn_string(conn_string: &str) -> Self {
+        Self::from_conn_string_with_timeout(conn_string, 10)
+    }
+
+    pub fn from_conn_string_with_timeout(conn_string: &str, timeout_secs: u64) -> Self {
         let key_values = conn_string.split(";");
 
         let mut conn_keys: HashMap<&str, &str> = HashMap::new();
@@ -46,16 +53,27 @@ impl AzureStorageConnectionInfo {
             default_endpoints_protocol, account_name, endpoint_suffix
         );
 
+        let table_storage_api_url = format!(
+            "{}://{}.table.{}",
+            default_endpoints_protocol, account_name, endpoint_suffix
+        );
         Self {
             account_name,
             account_key: account_key,
             endpoint_suffix: conn_keys.get("EndpointSuffix").unwrap().to_string(),
             default_endpoints_protocol,
             blobs_api_url,
-            time_out_ms: "60".to_string(),
+            time_out: Duration::from_secs(timeout_secs),
+            time_out_as_string: timeout_secs.to_string(),
+            table_storage_api_url,
         }
     }
 
+    pub fn with_timeout(mut self, seconds: u64) -> Self {
+        self.time_out = Duration::from_secs(seconds);
+        self.time_out_as_string = seconds.to_string();
+        self
+    }
     pub fn get_auth_header(
         &self,
         verb: SignVerb,
@@ -67,14 +85,17 @@ impl AzureStorageConnectionInfo {
             None => "".to_string(),
         };
 
-        let string_to_sign = sign_utils::get_auth_header(
+        let string_to_sign = crate::sdk_azure::sign_utils::get_auth_header(
             self.account_name.as_str(),
             content_len.as_str(),
             verb,
             &flurl,
         );
 
-        let signature = sign_utils::sign_transaction(string_to_sign.as_str(), &self.account_key);
+        let signature = crate::sdk_azure::sign_utils::sign_transaction(
+            string_to_sign.as_str(),
+            &self.account_key,
+        );
         format!("SharedKey {}:{}", &self.account_name, signature)
     }
 }

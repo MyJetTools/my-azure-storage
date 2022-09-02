@@ -1,7 +1,7 @@
 use async_trait::async_trait;
-use hyper::Error;
+use flurl::FlUrlError;
 
-use crate::types::AzureStorageError;
+use crate::AzureStorageError;
 
 #[async_trait]
 pub trait BlobContainersApi {
@@ -17,7 +17,7 @@ pub trait BlobContainersApi {
         container_name: &str,
     ) -> Result<(), AzureStorageError>;
 
-    async fn get_list_of_blob_containers(&self) -> Result<Vec<String>, Error>;
+    async fn get_list_of_blob_containers(&self) -> Result<Vec<String>, FlUrlError>;
 
     async fn get_list_of_blobs(
         &self,

@@ -1,7 +1,7 @@
 use flurl::FlUrlResponse;
 use std::collections::HashMap;
 
-use crate::types::AzureStorageError;
+use crate::AzureStorageError;
 
 pub struct AzureResponseHandler {
     fl_response: FlUrlResponse,
@@ -51,8 +51,7 @@ impl<'t> AzureResponseHandler {
     }
 
     pub async fn get_body(self) -> Result<Vec<u8>, AzureStorageError> {
-        let result = self.fl_response.get_body().await?;
-
+        let result = self.fl_response.receive_body().await?;
         return Ok(result);
     }
 

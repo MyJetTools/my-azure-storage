@@ -1,17 +1,13 @@
-mod azure_response_handler;
 pub mod blob;
 pub mod blob_container;
 pub mod block_blob;
 mod connection;
-mod consts;
-mod fl_requests;
-mod flurl_ext;
+
 pub mod page_blob;
-mod sign_utils;
+pub mod sdk_azure;
+mod sdk_files;
+pub mod table_storage;
+
+pub use connection::{AzureStorageConnection, AzureStorageConnectionData};
 mod types;
-
-pub use connection::{
-    AzureStorageConnection, AzureStorageConnectionInfo, AzureStorageConnectionWithTelemetry,
-};
-
 pub use types::AzureStorageError;
