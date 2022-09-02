@@ -4,24 +4,26 @@ use crate::{AzureStorageConnection, AzureStorageError};
 
 use super::TableStorageEntity;
 
-pub struct TableStorage {
+pub struct TableStorage<TEntity: TableStorageEntity> {
     connection: Arc<AzureStorageConnection>,
     table_name: String,
+    _phantom: std::marker::PhantomData<TEntity>,
 }
 
-impl TableStorage {
-    pub fn new(connection: Arc<AzureStorageConnection>, table_name: String) -> TableStorage {
+impl<TEntity: TableStorageEntity> TableStorage<TEntity> {
+    pub fn new(connection: Arc<AzureStorageConnection>, table_name: String) -> Self {
         TableStorage {
             connection,
             table_name,
+            _phantom: std::marker::PhantomData,
         }
     }
 
-    pub async fn get_entity<T: TableStorageEntity>(
+    pub async fn get_entity(
         &self,
         partition_key: &str,
         row_key: &str,
-    ) -> Result<Option<T>, AzureStorageError> {
+    ) -> Result<Option<TEntity>, AzureStorageError> {
         match self.connection.as_ref() {
             AzureStorageConnection::AzureStorage(data) => {
                 let result = data
