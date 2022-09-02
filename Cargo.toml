@@ -1,16 +1,18 @@
 [package]
 name = "my-azure-storage-sdk"
-version = "0.3.2"
+version = "0.3.3"
 authors = ["Andrey <amigin@gmail.com>"]
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-my-xml-reader = { branch = "main", git = "https://github.com/MyJetTools/my-xml-reader" }
-flurl = { branch = "0.2.1", git = "https://github.com/MyJetTools/fl-url" }
-my-telemetry = { branch = "0.2.1", git = "https://github.com/MyJetTools/my-telemetry.git" }
-rust-extensions = { branch = "0.1.1", git = "https://github.com/MyJetTools/rust-extensions.git" }
+my-xml-reader = { tag = "0.1.0", git = "https://github.com/MyJetTools/my-xml-reader" }
+flurl = { tag = "0.2.2", git = "https://github.com/MyJetTools/fl-url" }
+my-telemetry = { tag = "0.2.2", git = "https://github.com/MyJetTools/my-telemetry.git" }
+rust-extensions = { tag = "0.1.2", git = "https://github.com/MyJetTools/rust-extensions.git" }
+my-json = { tag = "0.1.2", git = "https://github.com/MyJetTools/my-json.git" }
+
 hmac = "*"
 sha2 = "*"
 base64 = "*"

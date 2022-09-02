@@ -13,6 +13,13 @@ pub trait FlUrlAzureExtensions {
         next_marker: Option<String>,
         azure_rest_version: &str,
     ) -> Self;
+
+    fn add_table_storage_azure_headers(
+        self,
+        connection: &AzureStorageConnectionData,
+        content_len: Option<usize>,
+        next_marker: Option<String>,
+    ) -> Self;
 }
 
 impl FlUrlAzureExtensions for FlUrl {
@@ -44,6 +51,35 @@ impl FlUrlAzureExtensions for FlUrl {
         }
 
         let auth_key = connection.get_auth_header(verb, content_len, &flurl);
+
+        flurl.with_header_val_string("Authorization", auth_key)
+    }
+
+    fn add_table_storage_azure_headers(
+        mut self,
+        connection: &AzureStorageConnectionData,
+        content_len: Option<usize>,
+        next_marker: Option<String>,
+    ) -> Self {
+        let now = Utc::now();
+
+        let date = now.to_rfc2822().replace("+0000", "GMT");
+
+        self = match content_len {
+            Some(size) => self.with_header_val_string("Content-Length", size.to_string()),
+            None => self.with_header("Content-Length", "0"),
+        };
+
+        let mut flurl = self
+            .with_header("x-ms-date", date.as_str())
+            .with_header("x-ms-version", "2015-12-11")
+            .with_header("Accept", "application/json;odata=nometadata");
+
+        if let Some(next_marker) = next_marker {
+            flurl = flurl.append_query_param_string("marker", next_marker);
+        }
+
+        let auth_key = connection.get_table_storage_auth_header(&date, &flurl);
 
         flurl.with_header_val_string("Authorization", auth_key)
     }

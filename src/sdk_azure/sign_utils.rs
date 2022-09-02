@@ -54,7 +54,7 @@ pub fn get_auth_header(
     result
 }
 
-fn get_canonicalized_resourse(flurl: &FlUrl, account_name: &str) -> String {
+pub fn get_canonicalized_resourse(flurl: &FlUrl, account_name: &str) -> String {
     let mut sb = StringBuilder::new();
 
     sb.append_char('/');

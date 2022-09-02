@@ -13,6 +13,7 @@ pub struct AzureStorageConnectionData {
     pub blobs_api_url: String,
     pub time_out: Duration,
     pub time_out_as_string: String,
+    pub table_storage_api_url: String,
 }
 
 impl AzureStorageConnectionData {
@@ -52,6 +53,10 @@ impl AzureStorageConnectionData {
             default_endpoints_protocol, account_name, endpoint_suffix
         );
 
+        let table_storage_api_url = format!(
+            "{}://{}.table.{}",
+            default_endpoints_protocol, account_name, endpoint_suffix
+        );
         Self {
             account_name,
             account_key: account_key,
@@ -60,6 +65,7 @@ impl AzureStorageConnectionData {
             blobs_api_url,
             time_out: Duration::from_secs(timeout_secs),
             time_out_as_string: timeout_secs.to_string(),
+            table_storage_api_url,
         }
     }
 
