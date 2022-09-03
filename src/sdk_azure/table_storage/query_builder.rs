@@ -51,7 +51,7 @@ impl TableStorageQueryBuilder {
         match &mut self.mode {
             PopulationMode::NotInitialized => {
                 self.mode = PopulationMode::Select;
-                result.extend_from_slice("?$select=(".as_bytes());
+                result.extend_from_slice("?$select=".as_bytes());
             }
             PopulationMode::Filter => {
                 self.mode = PopulationMode::Select;
