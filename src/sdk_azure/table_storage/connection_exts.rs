@@ -75,8 +75,6 @@ impl crate::AzureStorageConnectionData {
 
         let response = fl_url.get().await.unwrap();
 
-        println!("Headers:{:?}", response.get_headers());
-
         let continuation_token = ContinuationToken::new(&response);
 
         let body = response.receive_body().await.unwrap();
