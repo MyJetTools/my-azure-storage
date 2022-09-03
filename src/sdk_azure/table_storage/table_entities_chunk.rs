@@ -3,11 +3,11 @@ use crate::{
     AzureStorageConnectionData,
 };
 
-use super::ContinuationToken;
+use super::EntitiesContinuationToken;
 
 pub struct TableEntitiesChunk<'s, TResult: TableStorageEntity> {
     items: Option<Vec<TResult>>,
-    continuation_token: Option<ContinuationToken>,
+    continuation_token: Option<EntitiesContinuationToken>,
     connection_data: &'s AzureStorageConnectionData,
     table_name: &'s str,
 }
@@ -17,9 +17,9 @@ impl<'s, TResult: TableStorageEntity> TableEntitiesChunk<'s, TResult> {
         connection_data: &'s AzureStorageConnectionData,
         table_name: &'s str,
         items: Vec<TResult>,
-        continuation_token: Option<ContinuationToken>,
+        continuation_token: Option<EntitiesContinuationToken>,
     ) -> Self {
-        TableEntitiesChunk {
+        Self {
             connection_data,
             table_name,
             items: Some(items),
@@ -61,7 +61,7 @@ impl<'s, TResult: TableStorageEntity> TableEntitiesChunk<'s, TResult> {
 
             let response = fl_url.get().await.unwrap();
 
-            self.continuation_token = ContinuationToken::new(&response);
+            self.continuation_token = EntitiesContinuationToken::new(&response);
 
             let body = response.receive_body().await.unwrap();
 

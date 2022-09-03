@@ -2,7 +2,7 @@ use flurl::FlUrlResponse;
 use my_json::json_reader::array_parser::JsonArrayIterator;
 
 use crate::{
-    sdk_azure::table_storage::{ContinuationToken, TableEntitiesChunk},
+    sdk_azure::table_storage::{EntitiesContinuationToken, TableEntitiesChunk},
     table_storage::{TableStorageEntity, TableStorageError},
     AzureStorageConnectionData,
 };
@@ -12,7 +12,7 @@ pub async fn read_entities<'s, TResult: TableStorageEntity>(
     table_name: &'s str,
     response: FlUrlResponse,
 ) -> Result<Option<TableEntitiesChunk<'s, TResult>>, TableStorageError> {
-    let continuation_token = ContinuationToken::new(&response);
+    let continuation_token = EntitiesContinuationToken::new(&response);
     let body = response.receive_body().await?;
     let payload_with_value = super::read_value_payload(&body)?;
     match read_entities_items(payload_with_value) {

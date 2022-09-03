@@ -8,10 +8,10 @@ use crate::{
     table_storage::{TableStorageEntity, TableStorageError},
 };
 
-use super::TableEntitiesChunk;
+use super::{TableEntitiesChunk, TableNamesChunk};
 
 impl crate::AzureStorageConnectionData {
-    pub async fn get_list_of_tables(&self) -> Result<Option<Vec<String>>, TableStorageError> {
+    pub async fn get_list_of_tables(&self) -> Result<Option<TableNamesChunk>, TableStorageError> {
         let response = flurl::FlUrl::new(&self.table_storage_api_url.as_str(), None)
             .append_path_segment("Tables")
             .add_table_storage_azure_headers(self, None)
@@ -20,15 +20,32 @@ impl crate::AzureStorageConnectionData {
 
         let status_code = response.get_status_code();
 
-        let payload = response.receive_body().await?;
-
-        println!("Status code: {}", status_code);
-        println!("Payload: {}", String::from_utf8_lossy(&payload));
-
         if status_code == 200 {
+            let continuation_token = if let Some(token) = response
+                .get_headers()
+                .get("x-ms-continuation-nexttablename")
+            {
+                Some(token.to_string())
+            } else {
+                None
+            };
+
+            let payload = response.receive_body().await?;
             let payload = super::models::read_value_payload(payload.as_slice())?;
-            return Ok(super::models::read_table_names(payload));
+
+            let result = super::models::read_table_names(payload);
+
+            if result.is_some() {
+                return Ok(Some(TableNamesChunk::new(
+                    self,
+                    Ok(result),
+                    continuation_token,
+                )));
+            } else {
+                return Ok(None);
+            }
         } else {
+            let payload = response.receive_body().await?;
             return Err(super::models::read_error(payload));
         }
     }

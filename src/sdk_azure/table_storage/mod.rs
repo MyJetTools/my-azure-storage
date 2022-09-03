@@ -1,9 +1,11 @@
 pub mod connection_exts;
-mod continuation_token;
+mod entities_continuation_token;
 mod models;
 mod query_builder;
 mod sign_utils;
 mod table_entities_chunk;
-pub use continuation_token::*;
+mod table_names_chunk;
+pub use entities_continuation_token::*;
 pub use query_builder::*;
 pub use table_entities_chunk::*;
+pub use table_names_chunk::*;

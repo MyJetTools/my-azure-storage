@@ -1,6 +1,9 @@
 use std::sync::Arc;
 
-use crate::{sdk_azure::table_storage::TableEntitiesChunk, AzureStorageConnection};
+use crate::{
+    sdk_azure::table_storage::{TableEntitiesChunk, TableNamesChunk},
+    AzureStorageConnection,
+};
 
 use super::{TableStorageEntity, TableStorageError};
 
@@ -19,7 +22,7 @@ impl<TEntity: TableStorageEntity> TableStorage<TEntity> {
         }
     }
 
-    pub async fn get_table_list(&self) -> Result<Option<Vec<String>>, TableStorageError> {
+    pub async fn get_table_list(&self) -> Result<Option<TableNamesChunk>, TableStorageError> {
         match self.connection.as_ref() {
             AzureStorageConnection::AzureStorage(data) => data.get_list_of_tables().await,
             AzureStorageConnection::File(_data) => {

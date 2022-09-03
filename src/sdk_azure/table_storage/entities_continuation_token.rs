@@ -1,11 +1,11 @@
 use flurl::FlUrlResponse;
 
-pub struct ContinuationToken {
+pub struct EntitiesContinuationToken {
     pub next_partition_key: Option<String>,
     pub next_row_key: Option<String>,
 }
 
-impl ContinuationToken {
+impl EntitiesContinuationToken {
     pub fn new(response: &FlUrlResponse) -> Option<Self> {
         let headers = response.get_headers();
 
@@ -26,7 +26,7 @@ impl ContinuationToken {
             return None;
         }
 
-        Some(ContinuationToken {
+        Some(EntitiesContinuationToken {
             next_partition_key,
             next_row_key,
         })
