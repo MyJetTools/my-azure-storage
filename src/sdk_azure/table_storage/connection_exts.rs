@@ -79,6 +79,8 @@ impl crate::AzureStorageConnectionData {
 
         let body = response.receive_body().await.unwrap();
 
+        println!("{}", std::str::from_utf8(body.as_slice()).unwrap());
+
         let entities = parse_entities(body.as_slice())?;
 
         return Some(TableEntitiesChunk::new(
