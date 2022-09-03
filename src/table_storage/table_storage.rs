@@ -113,7 +113,7 @@ impl<TEntity: TableStorageEntity> TableStorage<TEntity> {
         &self,
         partition_key: &str,
         row_key: &str,
-    ) -> Result<(), TableStorageError> {
+    ) -> Result<bool, TableStorageError> {
         match self.connection.as_ref() {
             AzureStorageConnection::AzureStorage(data) => {
                 data.delete_table_entity(&self.table_name, partition_key, row_key)
