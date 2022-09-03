@@ -135,7 +135,7 @@ impl crate::AzureStorageConnectionData {
         entity: &TEntity,
     ) -> Result<(), TableStorageError> {
         let table_name_for_request = format!(
-            "{}(PartitionKey='{}',RowKey='{}')",
+            "{}(PartitionKey=%27{}%27,RowKey=%27{}%27)",
             table_name,
             entity.get_partition_key(),
             entity.get_row_key()
