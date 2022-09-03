@@ -190,7 +190,7 @@ impl crate::AzureStorageConnectionData {
         table_name: &str,
         partition_key: &str,
         row_key: &str,
-    ) -> Result<(), TableStorageError> {
+    ) -> Result<bool, TableStorageError> {
         let table_name_for_request = format!(
             "{}(PartitionKey='{}',RowKey='{}')",
             table_name, partition_key, row_key
@@ -205,13 +205,19 @@ impl crate::AzureStorageConnectionData {
 
         let status_code = response.get_status_code();
 
+        println!("Status code: {}", status_code);
+
         if status_code == 200 || status_code == 202 {
-            return Ok(());
+            return Ok(true);
         }
 
         let body = response.receive_body().await?;
 
-        Err(get_error(&body))
+        let err = get_error(&body);
+        match err {
+            TableStorageError::ResourceNotFound => Ok(false),
+            _ => Err(err),
+        }
     }
 
     pub fn get_table_storage_auth_header(&self, date: &str, flurl: &FlUrl) -> String {
