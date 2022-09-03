@@ -134,7 +134,12 @@ impl crate::AzureStorageConnectionData {
         table_name: &str,
         entity: &TEntity,
     ) -> Result<(), TableStorageError> {
-        let table_name_for_request = format!("{}()", table_name);
+        let table_name_for_request = format!(
+            "{}(PartitionKey='{}',RowKey='{}')",
+            table_name,
+            entity.get_partition_key(),
+            entity.get_row_key()
+        );
 
         let body = entity.serialize();
         let response = flurl::FlUrl::new(&self.table_storage_api_url.as_str(), None)
