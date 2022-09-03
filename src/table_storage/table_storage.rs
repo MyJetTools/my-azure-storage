@@ -34,6 +34,16 @@ impl<TEntity: TableStorageEntity> TableStorage<TEntity> {
         }
     }
 
+    pub async fn crate_table_if_not_exists(&self) -> Result<(), TableStorageError> {
+        match self.crate_table().await {
+            Ok(_) => Ok(()),
+            Err(err) => match err {
+                TableStorageError::TableAlreadyExists => Ok(()),
+                _ => Err(err),
+            },
+        }
+    }
+
     pub async fn get_table_list(&self) -> Result<Option<TableNamesChunk>, TableStorageError> {
         match self.connection.as_ref() {
             AzureStorageConnection::AzureStorage(data) => data.get_list_of_tables().await,
