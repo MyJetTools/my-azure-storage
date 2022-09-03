@@ -39,8 +39,6 @@ impl crate::AzureStorageConnectionData {
 
         let body = result.receive_body().await.unwrap();
 
-        println!("{}", std::str::from_utf8(body.as_slice()).unwrap());
-
         if let Err(err) = check_for_error(body.as_slice()) {
             match err {
                 TableStorageError::ResourceNotFound => {
