@@ -1,6 +1,8 @@
 use std::sync::Arc;
 
-use crate::{AzureStorageConnection, AzureStorageError};
+use crate::{
+    sdk_azure::table_storage::TableEntitiesChunk, AzureStorageConnection, AzureStorageError,
+};
 
 use super::TableStorageEntity;
 
@@ -30,6 +32,44 @@ impl<TEntity: TableStorageEntity> TableStorage<TEntity> {
                     .get_table_storage_entity(&self.table_name, partition_key, row_key)
                     .await;
 
+                Ok(result)
+            }
+            AzureStorageConnection::File(data) => {
+                todo!("Not implemented yet");
+            }
+            AzureStorageConnection::InMemory(data) => {
+                todo!("Not implemented yet");
+            }
+        }
+    }
+
+    pub async fn get_entities_by_partition_key(
+        &self,
+        partition_key: &str,
+    ) -> Result<Option<TableEntitiesChunk<TEntity>>, AzureStorageError> {
+        match self.connection.as_ref() {
+            AzureStorageConnection::AzureStorage(data) => {
+                let result = data
+                    .get_table_storage_entity_by_partition_key(&self.table_name, partition_key)
+                    .await;
+
+                Ok(result)
+            }
+            AzureStorageConnection::File(data) => {
+                todo!("Not implemented yet");
+            }
+            AzureStorageConnection::InMemory(data) => {
+                todo!("Not implemented yet");
+            }
+        }
+    }
+
+    pub async fn get_all_entities(
+        &self,
+    ) -> Result<Option<TableEntitiesChunk<TEntity>>, AzureStorageError> {
+        match self.connection.as_ref() {
+            AzureStorageConnection::AzureStorage(data) => {
+                let result = data.get_table_storage_all_entities(&self.table_name).await;
                 Ok(result)
             }
             AzureStorageConnection::File(data) => {
