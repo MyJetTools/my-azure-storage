@@ -37,6 +37,8 @@ impl crate::AzureStorageConnectionData {
 
         let result = fl_url.get().await.unwrap();
 
+        println!("StatusCode: {}", result.get_status_code());
+
         let body = result.receive_body().await.unwrap();
 
         if let Err(err) = check_for_error(body.as_slice()) {
@@ -173,6 +175,28 @@ impl crate::AzureStorageConnectionData {
             .with_header("Content-Type", "application/json")
             .add_table_storage_azure_headers(self, Some(body.len()))
             .post(Some(body))
+            .await?;
+
+        let body = response.receive_body().await?;
+        check_for_error(&body)
+    }
+
+    pub async fn delete_entity<TEntity: TableStorageEntity>(
+        &self,
+        table_name: &str,
+        partition_key: &str,
+        row_key: &str,
+    ) -> Result<(), TableStorageError> {
+        let table_name_for_request = format!(
+            "{}(PartitionKey='{}',RowKey='{}')",
+            table_name, partition_key, row_key
+        );
+
+        let response = flurl::FlUrl::new(&self.table_storage_api_url.as_str(), None)
+            .append_path_segment(table_name_for_request.as_str())
+            .with_header("Content-Type", "application/json")
+            .add_table_storage_azure_headers(self, None)
+            .delete()
             .await?;
 
         let body = response.receive_body().await?;
