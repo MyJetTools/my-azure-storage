@@ -176,14 +176,7 @@ impl crate::AzureStorageConnectionData {
             .await?;
 
         let body = response.receive_body().await?;
-
-        println!("{:?}", std::str::from_utf8(body.as_slice()).unwrap());
-
-        let payload_with_value = get_payload_with_value(&body)?;
-
-        println!("{:?}", std::str::from_utf8(payload_with_value).unwrap());
-
-        Ok(())
+        check_for_error(&body)
     }
 
     pub fn get_table_storage_auth_header(&self, date: &str, flurl: &FlUrl) -> String {
