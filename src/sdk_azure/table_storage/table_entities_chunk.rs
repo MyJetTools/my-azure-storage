@@ -27,7 +27,7 @@ impl<'s, TResult: TableStorageEntity> TableEntitiesChunk<'s, TResult> {
         }
     }
 
-    pub async fn get_items(&mut self) -> Option<Vec<TResult>> {
+    pub async fn get_next(&mut self) -> Option<Vec<TResult>> {
         if let Some(result) = self.items.take() {
             return Some(result);
         }
