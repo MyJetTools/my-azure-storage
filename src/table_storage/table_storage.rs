@@ -80,4 +80,22 @@ impl<TEntity: TableStorageEntity> TableStorage<TEntity> {
             }
         }
     }
+
+    pub async fn insert_or_replace_entity(
+        &self,
+        entity: &TEntity,
+    ) -> Result<(), AzureStorageError> {
+        match self.connection.as_ref() {
+            AzureStorageConnection::AzureStorage(data) => {
+                data.insert_or_replace_entity(&self.table_name, entity)
+                    .await
+            }
+            AzureStorageConnection::File(data) => {
+                todo!("Not implemented yet");
+            }
+            AzureStorageConnection::InMemory(data) => {
+                todo!("Not implemented yet");
+            }
+        }
+    }
 }
