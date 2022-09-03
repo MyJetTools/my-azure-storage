@@ -19,6 +19,18 @@ impl<TEntity: TableStorageEntity> TableStorage<TEntity> {
         }
     }
 
+    pub async fn get_table_list(&self) -> Result<Option<Vec<String>>, TableStorageError> {
+        match self.connection.as_ref() {
+            AzureStorageConnection::AzureStorage(data) => data.get_list_of_tables().await,
+            AzureStorageConnection::File(_data) => {
+                todo!("Not implemented yet");
+            }
+            AzureStorageConnection::InMemory(_data) => {
+                todo!("Not implemented yet");
+            }
+        }
+    }
+
     pub async fn get_entity(
         &self,
         partition_key: &str,
