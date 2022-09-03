@@ -98,7 +98,26 @@ impl<TEntity: TableStorageEntity> TableStorage<TEntity> {
     pub async fn insert_entity(&self, entity: &TEntity) -> Result<(), TableStorageError> {
         match self.connection.as_ref() {
             AzureStorageConnection::AzureStorage(data) => {
-                data.insert_entity(&self.table_name, entity).await
+                data.insert_table_entity(&self.table_name, entity).await
+            }
+            AzureStorageConnection::File(_data) => {
+                todo!("Not implemented yet");
+            }
+            AzureStorageConnection::InMemory(_data) => {
+                todo!("Not implemented yet");
+            }
+        }
+    }
+
+    pub async fn delete_entity(
+        &self,
+        partition_key: &str,
+        row_key: &str,
+    ) -> Result<(), TableStorageError> {
+        match self.connection.as_ref() {
+            AzureStorageConnection::AzureStorage(data) => {
+                data.delete_table_entity(&self.table_name, partition_key, row_key)
+                    .await
             }
             AzureStorageConnection::File(_data) => {
                 todo!("Not implemented yet");

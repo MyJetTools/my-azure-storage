@@ -161,7 +161,7 @@ impl crate::AzureStorageConnectionData {
         Ok(())
     }
 
-    pub async fn insert_entity<TEntity: TableStorageEntity>(
+    pub async fn insert_table_entity<TEntity: TableStorageEntity>(
         &self,
         table_name: &str,
         entity: &TEntity,
@@ -181,7 +181,7 @@ impl crate::AzureStorageConnectionData {
         check_for_error(&body)
     }
 
-    pub async fn delete_entity<TEntity: TableStorageEntity>(
+    pub async fn delete_table_entity(
         &self,
         table_name: &str,
         partition_key: &str,
