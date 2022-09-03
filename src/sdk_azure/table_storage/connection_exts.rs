@@ -22,6 +22,9 @@ impl crate::AzureStorageConnectionData {
 
         let payload = response.receive_body().await?;
 
+        println!("Status code: {}", status_code);
+        println!("Payload: {}", String::from_utf8_lossy(&payload));
+
         if status_code == 200 {
             return Ok(super::models::read_table_names(payload.as_slice()));
         } else {
