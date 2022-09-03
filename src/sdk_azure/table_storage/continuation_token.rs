@@ -10,13 +10,13 @@ impl ContinuationToken {
         let headers = response.get_headers();
 
         let next_partition_key =
-            if let Some(header) = headers.get("x-ms-continuation-NextPartitionKey") {
+            if let Some(header) = headers.get("x-ms-continuation-nextpartitionkey") {
                 Some(header.to_string())
             } else {
                 None
             };
 
-        let next_row_key = if let Some(header) = headers.get("x-ms-continuation-NextRowKey") {
+        let next_row_key = if let Some(header) = headers.get("x-ms-continuation-nextrowkey") {
             Some(header.to_string())
         } else {
             None
