@@ -145,6 +145,10 @@ impl crate::AzureStorageConnectionData {
 
         println!("{:?}", std::str::from_utf8(body.as_slice()).unwrap());
 
+        let payload_with_value = get_payload_with_value(&body)?;
+
+        println!("{:?}", std::str::from_utf8(payload_with_value).unwrap());
+
         Ok(())
     }
 
