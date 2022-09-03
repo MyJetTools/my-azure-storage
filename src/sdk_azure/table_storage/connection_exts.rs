@@ -148,15 +148,15 @@ impl crate::AzureStorageConnectionData {
             .put(Some(body))
             .await?;
 
+        let status_code = response.get_status_code();
+
+        if status_code == 204 {
+            return Ok(());
+        }
+
         let body = response.receive_body().await?;
 
-        println!("{:?}", std::str::from_utf8(body.as_slice()).unwrap());
-
-        let payload_with_value = get_payload_with_value(&body)?;
-
-        println!("{:?}", std::str::from_utf8(payload_with_value).unwrap());
-
-        Ok(())
+        Err(get_error(&body))
     }
 
     pub async fn insert_table_entity<TEntity: TableStorageEntity>(
