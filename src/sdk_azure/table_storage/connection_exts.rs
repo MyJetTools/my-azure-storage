@@ -22,13 +22,10 @@ impl crate::AzureStorageConnectionData {
 
         let status_code = response.get_status_code();
 
-        println!("status_code: {}", status_code);
-
         if status_code == 204 || status_code == 201 {
             return Ok(());
         } else {
             let payload = response.receive_body().await?;
-            println!("payload: {}", std::str::from_utf8(&payload).unwrap());
             return Err(super::models::read_error(payload));
         }
     }
