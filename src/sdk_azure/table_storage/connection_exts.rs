@@ -165,6 +165,7 @@ impl crate::AzureStorageConnectionData {
 
         let response = flurl::FlUrl::new(&self.table_storage_api_url.as_str(), None)
             .append_path_segment(table_name_for_request.as_str())
+            .with_header("Content-Type", "application/json")
             .add_table_storage_azure_headers(self, None, None)
             .post(Some(body))
             .await?;
