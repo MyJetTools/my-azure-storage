@@ -249,6 +249,9 @@ fn get_error(while_payload: &[u8], value_payload: &[u8]) -> TableStorageError {
                 "TableNotFound" => {
                     return TableStorageError::TableNotFound;
                 }
+                "EntityAlreadyExists" => {
+                    return TableStorageError::EntityAlreadyExists;
+                }
                 _ => {
                     return TableStorageError::Unknown(
                         String::from_utf8(while_payload.to_vec()).unwrap(),
