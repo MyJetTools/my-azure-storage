@@ -68,13 +68,13 @@ impl FlUrlAzureExtensions for FlUrl {
             None => self.with_header("Content-Length", "0"),
         };
 
-        let mut flurl = self
+        let fl_url = self
             .with_header("x-ms-date", date.as_str())
             .with_header("x-ms-version", "2015-12-11")
             .with_header("Accept", "application/json;odata=nometadata");
 
-        let auth_key = connection.get_table_storage_auth_header(&date, &flurl);
+        let auth_key = connection.get_table_storage_auth_header(&date, &fl_url);
 
-        flurl.with_header_val_string("Authorization", auth_key)
+        fl_url.with_header_val_string("Authorization", auth_key)
     }
 }

@@ -57,7 +57,7 @@ impl<'s, TResult: TableStorageEntity> TableEntitiesChunk<'s, TResult> {
             let fl_url = flurl::FlUrl::new(&self.connection_data.table_storage_api_url, None)
                 .append_path_segment(self.table_name)
                 .append_raw_ending(raw_ending.as_str())
-                .add_table_storage_azure_headers(self.connection_data, None, None);
+                .add_table_storage_azure_headers(self.connection_data, None);
 
             let response = fl_url.get().await.unwrap();
 
