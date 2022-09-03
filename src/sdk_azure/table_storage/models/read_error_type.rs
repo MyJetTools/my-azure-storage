@@ -17,6 +17,9 @@ pub fn read_error_type(whole_payload: &[u8], value_payload: &[u8]) -> TableStora
                 "ResourceNotFound" => {
                     return TableStorageError::ResourceNotFound;
                 }
+                "TableAlreadyExists" => {
+                    return TableStorageError::TableAlreadyExists;
+                }
                 _ => {
                     return TableStorageError::Unknown(
                         String::from_utf8(whole_payload.to_vec()).unwrap(),

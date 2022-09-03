@@ -5,6 +5,7 @@ pub enum TableStorageError {
     TableNotFound,
     EntityAlreadyExists,
     ResourceNotFound,
+    TableAlreadyExists,
     FlUrlError(FlUrlError),
     Unknown(String),
 }
