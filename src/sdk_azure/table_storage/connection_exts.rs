@@ -18,7 +18,7 @@ impl crate::AzureStorageConnectionData {
         row_key: &str,
     ) -> Option<TResult> {
         let table_name = format!(
-            "{}(PartitionKey=%27{}%27,RowKey=%27{}%27)",
+            "{}(PartitionKey='{}',RowKey='{}')",
             table_name, partition_key, row_key
         );
 
