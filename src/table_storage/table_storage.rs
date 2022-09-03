@@ -4,7 +4,7 @@ use crate::{
     sdk_azure::table_storage::TableEntitiesChunk, AzureStorageConnection, AzureStorageError,
 };
 
-use super::TableStorageEntity;
+use super::{TableStorageEntity, TableStorageError};
 
 pub struct TableStorage<TEntity: TableStorageEntity> {
     connection: Arc<AzureStorageConnection>,
@@ -34,10 +34,10 @@ impl<TEntity: TableStorageEntity> TableStorage<TEntity> {
 
                 Ok(result)
             }
-            AzureStorageConnection::File(data) => {
+            AzureStorageConnection::File(_data) => {
                 todo!("Not implemented yet");
             }
-            AzureStorageConnection::InMemory(data) => {
+            AzureStorageConnection::InMemory(_data) => {
                 todo!("Not implemented yet");
             }
         }
@@ -55,10 +55,10 @@ impl<TEntity: TableStorageEntity> TableStorage<TEntity> {
 
                 Ok(result)
             }
-            AzureStorageConnection::File(data) => {
+            AzureStorageConnection::File(_data) => {
                 todo!("Not implemented yet");
             }
-            AzureStorageConnection::InMemory(data) => {
+            AzureStorageConnection::InMemory(_data) => {
                 todo!("Not implemented yet");
             }
         }
@@ -66,16 +66,15 @@ impl<TEntity: TableStorageEntity> TableStorage<TEntity> {
 
     pub async fn get_all_entities(
         &self,
-    ) -> Result<Option<TableEntitiesChunk<TEntity>>, AzureStorageError> {
+    ) -> Result<Option<TableEntitiesChunk<TEntity>>, TableStorageError> {
         match self.connection.as_ref() {
             AzureStorageConnection::AzureStorage(data) => {
-                let result = data.get_table_storage_all_entities(&self.table_name).await;
-                Ok(result)
+                data.get_table_storage_all_entities(&self.table_name).await
             }
-            AzureStorageConnection::File(data) => {
+            AzureStorageConnection::File(_data) => {
                 todo!("Not implemented yet");
             }
-            AzureStorageConnection::InMemory(data) => {
+            AzureStorageConnection::InMemory(_data) => {
                 todo!("Not implemented yet");
             }
         }
@@ -84,16 +83,16 @@ impl<TEntity: TableStorageEntity> TableStorage<TEntity> {
     pub async fn insert_or_replace_entity(
         &self,
         entity: &TEntity,
-    ) -> Result<(), AzureStorageError> {
+    ) -> Result<(), TableStorageError> {
         match self.connection.as_ref() {
             AzureStorageConnection::AzureStorage(data) => {
                 data.insert_or_replace_entity(&self.table_name, entity)
                     .await
             }
-            AzureStorageConnection::File(data) => {
+            AzureStorageConnection::File(_data) => {
                 todo!("Not implemented yet");
             }
-            AzureStorageConnection::InMemory(data) => {
+            AzureStorageConnection::InMemory(_data) => {
                 todo!("Not implemented yet");
             }
         }
