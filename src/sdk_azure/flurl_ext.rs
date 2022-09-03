@@ -18,7 +18,6 @@ pub trait FlUrlAzureExtensions {
         self,
         connection: &AzureStorageConnectionData,
         content_len: Option<usize>,
-        next_marker: Option<String>,
     ) -> Self;
 }
 
@@ -59,7 +58,6 @@ impl FlUrlAzureExtensions for FlUrl {
         mut self,
         connection: &AzureStorageConnectionData,
         content_len: Option<usize>,
-        next_marker: Option<String>,
     ) -> Self {
         let now = Utc::now();
 
@@ -74,10 +72,6 @@ impl FlUrlAzureExtensions for FlUrl {
             .with_header("x-ms-date", date.as_str())
             .with_header("x-ms-version", "2015-12-11")
             .with_header("Accept", "application/json;odata=nometadata");
-
-        if let Some(next_marker) = next_marker {
-            flurl = flurl.append_query_param_string("marker", next_marker);
-        }
 
         let auth_key = connection.get_table_storage_auth_header(&date, &flurl);
 

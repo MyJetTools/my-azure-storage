@@ -30,7 +30,7 @@ impl crate::AzureStorageConnectionData {
         let fl_url = flurl::FlUrl::new(&self.table_storage_api_url.as_str(), None)
             .append_path_segment(table_name.as_str())
             .append_raw_ending(raw_ending.as_str())
-            .add_table_storage_azure_headers(self, None, None);
+            .add_table_storage_azure_headers(self, None);
 
         let result = fl_url.get().await.unwrap();
 
@@ -71,7 +71,7 @@ impl crate::AzureStorageConnectionData {
         let fl_url = flurl::FlUrl::new(&self.table_storage_api_url.as_str(), None)
             .append_path_segment(table_name_for_request.as_str())
             .append_raw_ending(raw_ending.as_str())
-            .add_table_storage_azure_headers(self, None, None);
+            .add_table_storage_azure_headers(self, None);
 
         let response = fl_url.get().await?;
 
@@ -111,7 +111,7 @@ impl crate::AzureStorageConnectionData {
         let fl_url = flurl::FlUrl::new(&self.table_storage_api_url.as_str(), None)
             .append_path_segment(table_name_for_request.as_str())
             .append_raw_ending(raw_ending.as_str())
-            .add_table_storage_azure_headers(self, None, None);
+            .add_table_storage_azure_headers(self, None);
 
         let response = fl_url.get().await.unwrap();
 
@@ -137,7 +137,7 @@ impl crate::AzureStorageConnectionData {
         let table_name_for_request = format!("{}()", table_name);
         let response = flurl::FlUrl::new(&self.table_storage_api_url.as_str(), None)
             .append_path_segment(table_name_for_request.as_str())
-            .add_table_storage_azure_headers(self, None, None)
+            .add_table_storage_azure_headers(self, None)
             .put(Some(entity.serialize()))
             .await?;
 
@@ -166,7 +166,7 @@ impl crate::AzureStorageConnectionData {
         let response = flurl::FlUrl::new(&self.table_storage_api_url.as_str(), None)
             .append_path_segment(table_name_for_request.as_str())
             .with_header("Content-Type", "application/json")
-            .add_table_storage_azure_headers(self, None, None)
+            .add_table_storage_azure_headers(self, Some(body.len()))
             .post(Some(body))
             .await?;
 
