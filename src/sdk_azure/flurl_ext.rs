@@ -14,6 +14,7 @@ pub trait FlUrlAzureExtensions {
         azure_rest_version: &str,
     ) -> Self;
 
+    #[cfg(feature = "table-storage")]
     fn add_table_storage_azure_headers(
         self,
         connection: &AzureStorageConnectionData,
@@ -54,6 +55,7 @@ impl FlUrlAzureExtensions for FlUrl {
         flurl.with_header_val_string("Authorization", auth_key)
     }
 
+    #[cfg(feature = "table-storage")]
     fn add_table_storage_azure_headers(
         mut self,
         connection: &AzureStorageConnectionData,

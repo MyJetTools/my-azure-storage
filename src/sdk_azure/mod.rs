@@ -8,4 +8,5 @@ pub mod flurl_ext;
 pub mod models;
 pub mod page_blobs;
 pub mod sign_utils;
+#[cfg(feature = "table-storage")]
 pub mod table_storage;
