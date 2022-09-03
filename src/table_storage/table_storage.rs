@@ -1,8 +1,6 @@
 use std::sync::Arc;
 
-use crate::{
-    sdk_azure::table_storage::TableEntitiesChunk, AzureStorageConnection, AzureStorageError,
-};
+use crate::{sdk_azure::table_storage::TableEntitiesChunk, AzureStorageConnection};
 
 use super::{TableStorageEntity, TableStorageError};
 
@@ -43,14 +41,11 @@ impl<TEntity: TableStorageEntity> TableStorage<TEntity> {
     pub async fn get_entities_by_partition_key(
         &self,
         partition_key: &str,
-    ) -> Result<Option<TableEntitiesChunk<TEntity>>, AzureStorageError> {
+    ) -> Result<Option<TableEntitiesChunk<TEntity>>, TableStorageError> {
         match self.connection.as_ref() {
             AzureStorageConnection::AzureStorage(data) => {
-                let result = data
-                    .get_table_storage_entity_by_partition_key(&self.table_name, partition_key)
-                    .await;
-
-                Ok(result)
+                data.get_table_storage_entity_by_partition_key(&self.table_name, partition_key)
+                    .await
             }
             AzureStorageConnection::File(_data) => {
                 todo!("Not implemented yet");

@@ -1,5 +1,5 @@
 use flurl::FlUrl;
-use my_json::json_reader::{array_parser::JsonArrayIterator, JsonFirstLineReader};
+use my_json::json_reader::JsonFirstLineReader;
 
 use crate::{
     sdk_azure::{
@@ -8,9 +8,27 @@ use crate::{
     table_storage::{TableStorageEntity, TableStorageError},
 };
 
-use super::{ContinuationToken, TableEntitiesChunk};
+use super::TableEntitiesChunk;
 
 impl crate::AzureStorageConnectionData {
+    pub async fn get_list_of_tables(&self) -> Result<Option<Vec<String>>, TableStorageError> {
+        let response = flurl::FlUrl::new(&self.table_storage_api_url.as_str(), None)
+            .append_path_segment("Tables")
+            .add_table_storage_azure_headers(self, None)
+            .get()
+            .await?;
+
+        let status_code = response.get_status_code();
+
+        let payload = response.receive_body().await?;
+
+        if status_code == 200 {
+            return Ok(super::models::read_table_names(payload.as_slice()));
+        } else {
+            return Err(super::models::read_error(payload));
+        }
+    }
+
     pub async fn get_table_storage_entity<TResult: TableStorageEntity>(
         &self,
         table_name: &str,
@@ -44,7 +62,7 @@ impl crate::AzureStorageConnectionData {
             ))));
         }
 
-        let err = get_error(body.as_slice());
+        let err = super::models::read_error(body);
         match err {
             TableStorageError::ResourceNotFound => {
                 return Ok(None);
@@ -73,30 +91,24 @@ impl crate::AzureStorageConnectionData {
 
         let response = fl_url.get().await?;
 
-        let continuation_token = ContinuationToken::new(&response);
+        let status_code = response.get_status_code();
 
-        let body = response.receive_body().await.unwrap();
-
-        let payload_with_value = get_payload_with_value(&body)?;
-
-        match parse_entities(payload_with_value) {
-            Some(entities) => {
-                return Ok(Some(TableEntitiesChunk::new(
-                    self,
-                    table_name,
-                    entities,
-                    continuation_token,
-                )));
-            }
-            None => Ok(None),
+        if status_code == 200 {
+            return super::models::read_entities(self, table_name, response).await;
         }
+
+        let body = response.receive_body().await?;
+
+        let err = super::models::read_error(body);
+
+        Err(err)
     }
 
     pub async fn get_table_storage_entity_by_partition_key<'s, TResult: TableStorageEntity>(
         &'s self,
         table_name: &'s str,
         partition_key: &str,
-    ) -> Option<TableEntitiesChunk<TResult>> {
+    ) -> Result<Option<TableEntitiesChunk<TResult>>, TableStorageError> {
         let table_name_for_request = format!("{}()", table_name);
 
         let mut query_builder = TableStorageQueryBuilder::new();
@@ -111,20 +123,19 @@ impl crate::AzureStorageConnectionData {
             .append_raw_ending(raw_ending.as_str())
             .add_table_storage_azure_headers(self, None);
 
-        let response = fl_url.get().await.unwrap();
+        let response = fl_url.get().await?;
 
-        let continuation_token = ContinuationToken::new(&response);
+        let status_code = response.get_status_code();
 
-        let body = response.receive_body().await.unwrap();
+        if status_code == 200 {
+            return super::models::read_entities(self, table_name, response).await;
+        }
 
-        let entities = parse_entities(body.as_slice())?;
+        let body = response.receive_body().await?;
 
-        return Some(TableEntitiesChunk::new(
-            self,
-            table_name,
-            entities,
-            continuation_token,
-        ));
+        let err = super::models::read_error(body);
+
+        Err(err)
     }
 
     pub async fn insert_or_replace_entity<TEntity: TableStorageEntity>(
@@ -155,7 +166,8 @@ impl crate::AzureStorageConnectionData {
 
         let body = response.receive_body().await?;
 
-        Err(get_error(&body))
+        let err = super::models::read_error(body);
+        Err(err)
     }
 
     pub async fn insert_table_entity<TEntity: TableStorageEntity>(
@@ -176,12 +188,14 @@ impl crate::AzureStorageConnectionData {
 
         let status_code = response.get_status_code();
 
-        if status_code == 200 || status_code == 202 {
+        if status_code == 200 && status_code < 210 {
             return Ok(());
         }
+
         let body = response.receive_body().await?;
 
-        Err(get_error(&body))
+        let err = super::models::read_error(body);
+        Err(err)
     }
 
     pub async fn delete_table_entity(
@@ -212,7 +226,7 @@ impl crate::AzureStorageConnectionData {
 
         let body = response.receive_body().await?;
 
-        let err = get_error(&body);
+        let err = super::models::read_error(body);
         match err {
             TableStorageError::ResourceNotFound => Ok(false),
             _ => Err(err),
@@ -233,88 +247,4 @@ impl crate::AzureStorageConnectionData {
         );
         format!("SharedKeyLite {}:{}", &self.account_name, signature)
     }
-}
-
-pub fn get_payload_with_value(body: &[u8]) -> Result<&[u8], TableStorageError> {
-    for first_line in JsonFirstLineReader::new(body) {
-        let first_line = first_line.unwrap();
-
-        match first_line.get_name().unwrap() {
-            "value" => {
-                return Ok(first_line.get_value().unwrap().as_bytes().unwrap());
-            }
-            "odata.error" => {
-                let err = get_error_type(body, first_line.get_value().unwrap().as_bytes().unwrap());
-                return Err(err);
-            }
-            _ => {
-                return Err(TableStorageError::Unknown(
-                    String::from_utf8(body.to_vec()).unwrap(),
-                ));
-            }
-        }
-    }
-
-    Err(TableStorageError::Unknown(
-        String::from_utf8(body.to_vec()).unwrap(),
-    ))
-}
-
-pub fn get_error(body: &[u8]) -> TableStorageError {
-    for first_line in JsonFirstLineReader::new(body) {
-        let first_line = first_line.unwrap();
-
-        match first_line.get_name().unwrap() {
-            "odata.error" => {
-                return get_error_type(body, first_line.get_value().unwrap().as_bytes().unwrap());
-            }
-            _ => {
-                return TableStorageError::Unknown(String::from_utf8(body.to_vec()).unwrap());
-            }
-        }
-    }
-    return TableStorageError::Unknown(String::from_utf8(body.to_vec()).unwrap());
-}
-
-pub fn parse_entities<TResult: TableStorageEntity>(payload: &[u8]) -> Option<Vec<TResult>> {
-    let mut items = Vec::with_capacity(1000);
-
-    for itm in JsonArrayIterator::new(payload) {
-        let itm = itm.unwrap();
-        let json_reader = my_json::json_reader::JsonFirstLineReader::new(itm);
-        items.push(TResult::create(json_reader));
-    }
-
-    if items.len() > 0 {
-        return Some(items);
-    }
-
-    None
-}
-
-fn get_error_type(whole_payload: &[u8], value_payload: &[u8]) -> TableStorageError {
-    for first_line in JsonFirstLineReader::new(value_payload) {
-        let first_line = first_line.unwrap();
-
-        if first_line.get_name().unwrap() == "code" {
-            match first_line.get_value().unwrap().as_str().unwrap() {
-                "TableNotFound" => {
-                    return TableStorageError::TableNotFound;
-                }
-                "EntityAlreadyExists" => {
-                    return TableStorageError::EntityAlreadyExists;
-                }
-                "ResourceNotFound" => {
-                    return TableStorageError::ResourceNotFound;
-                }
-                _ => {
-                    return TableStorageError::Unknown(
-                        String::from_utf8(whole_payload.to_vec()).unwrap(),
-                    );
-                }
-            }
-        }
-    }
-
-    return TableStorageError::Unknown(String::from_utf8(whole_payload.to_vec()).unwrap());
 }

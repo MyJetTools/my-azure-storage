@@ -3,7 +3,7 @@ use crate::{
     AzureStorageConnectionData,
 };
 
-use super::{connection_exts::parse_entities, ContinuationToken};
+use super::ContinuationToken;
 
 pub struct TableEntitiesChunk<'s, TResult: TableStorageEntity> {
     items: Option<Vec<TResult>>,
@@ -65,7 +65,7 @@ impl<'s, TResult: TableStorageEntity> TableEntitiesChunk<'s, TResult> {
 
             let body = response.receive_body().await.unwrap();
 
-            parse_entities(body.as_slice())
+            super::models::read_entities_items(body.as_slice())
         } else {
             None
         }
