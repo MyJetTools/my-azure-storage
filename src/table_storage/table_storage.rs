@@ -22,6 +22,18 @@ impl<TEntity: TableStorageEntity> TableStorage<TEntity> {
         }
     }
 
+    pub async fn crate_table(&self) -> Result<(), TableStorageError> {
+        match self.connection.as_ref() {
+            AzureStorageConnection::AzureStorage(data) => data.create_table(&self.table_name).await,
+            AzureStorageConnection::File(_data) => {
+                todo!("Not implemented yet");
+            }
+            AzureStorageConnection::InMemory(_data) => {
+                todo!("Not implemented yet");
+            }
+        }
+    }
+
     pub async fn get_table_list(&self) -> Result<Option<TableNamesChunk>, TableStorageError> {
         match self.connection.as_ref() {
             AzureStorageConnection::AzureStorage(data) => data.get_list_of_tables().await,

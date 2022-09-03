@@ -11,6 +11,28 @@ use crate::{
 use super::{TableEntitiesChunk, TableNamesChunk};
 
 impl crate::AzureStorageConnectionData {
+    pub async fn create_table(&self, table_name: &str) -> Result<(), TableStorageError> {
+        let body = format!(r#"{{"TableName":"{}"}}"#, table_name);
+
+        let response = flurl::FlUrl::new(&self.table_storage_api_url.as_str(), None)
+            .append_path_segment("Tables")
+            .add_table_storage_azure_headers(self, Some(body.len()))
+            .post(Some(body.into_bytes()))
+            .await?;
+
+        let status_code = response.get_status_code();
+
+        println!("status_code: {}", status_code);
+
+        if status_code == 204 || status_code == 201 {
+            return Ok(());
+        } else {
+            let payload = response.receive_body().await?;
+            println!("payload: {}", std::str::from_utf8(&payload).unwrap());
+            return Err(super::models::read_error(payload));
+        }
+    }
+
     pub async fn get_list_of_tables(&self) -> Result<Option<TableNamesChunk>, TableStorageError> {
         let response = flurl::FlUrl::new(&self.table_storage_api_url.as_str(), None)
             .append_path_segment("Tables")
