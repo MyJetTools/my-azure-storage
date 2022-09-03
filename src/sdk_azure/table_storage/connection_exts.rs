@@ -23,9 +23,6 @@ impl crate::AzureStorageConnectionData {
         );
 
         let mut query_builder = TableStorageQueryBuilder::new();
-
-        //  query_builder.add_partition_key(partition_key);
-        // query_builder.add_row_key(row_key);
         TResult::populate_field_names(&mut query_builder);
 
         let raw_ending = query_builder.get_result();
@@ -37,24 +34,25 @@ impl crate::AzureStorageConnectionData {
 
         let result = fl_url.get().await.unwrap();
 
-        println!("StatusCode: {}", result.get_status_code());
+        let status_code = result.get_status_code();
 
         let body = result.receive_body().await.unwrap();
 
-        if let Err(err) = check_for_error(body.as_slice()) {
-            match err {
-                TableStorageError::ResourceNotFound => {
-                    return Ok(None);
-                }
-                _ => {
-                    return Err(err);
-                }
-            }
+        if status_code == 200 {
+            return Ok(Some(TResult::create(JsonFirstLineReader::new(
+                body.as_slice(),
+            ))));
         }
 
-        return Ok(Some(TResult::create(JsonFirstLineReader::new(
-            body.as_slice(),
-        ))));
+        let err = get_error(body.as_slice());
+        match err {
+            TableStorageError::ResourceNotFound => {
+                return Ok(None);
+            }
+            _ => {
+                return Err(err);
+            }
+        }
     }
 
     pub async fn get_table_storage_all_entities<'s, TResult: TableStorageEntity>(
@@ -177,8 +175,14 @@ impl crate::AzureStorageConnectionData {
             .post(Some(body))
             .await?;
 
+        let status_code = response.get_status_code();
+
+        if status_code == 200 || status_code == 202 {
+            return Ok(());
+        }
         let body = response.receive_body().await?;
-        check_for_error(&body)
+
+        Err(get_error(&body))
     }
 
     pub async fn delete_table_entity(
@@ -199,8 +203,15 @@ impl crate::AzureStorageConnectionData {
             .delete()
             .await?;
 
+        let status_code = response.get_status_code();
+
+        if status_code == 200 || status_code == 202 {
+            return Ok(());
+        }
+
         let body = response.receive_body().await?;
-        check_for_error(&body)
+
+        Err(get_error(&body))
     }
 
     pub fn get_table_storage_auth_header(&self, date: &str, flurl: &FlUrl) -> String {
@@ -228,7 +239,7 @@ pub fn get_payload_with_value(body: &[u8]) -> Result<&[u8], TableStorageError> {
                 return Ok(first_line.get_value().unwrap().as_bytes().unwrap());
             }
             "odata.error" => {
-                let err = get_error(body, first_line.get_value().unwrap().as_bytes().unwrap());
+                let err = get_error_type(body, first_line.get_value().unwrap().as_bytes().unwrap());
                 return Err(err);
             }
             _ => {
@@ -244,24 +255,20 @@ pub fn get_payload_with_value(body: &[u8]) -> Result<&[u8], TableStorageError> {
     ))
 }
 
-pub fn check_for_error(body: &[u8]) -> Result<(), TableStorageError> {
+pub fn get_error(body: &[u8]) -> TableStorageError {
     for first_line in JsonFirstLineReader::new(body) {
         let first_line = first_line.unwrap();
 
         match first_line.get_name().unwrap() {
             "odata.error" => {
-                let err = get_error(body, first_line.get_value().unwrap().as_bytes().unwrap());
-                return Err(err);
+                return get_error_type(body, first_line.get_value().unwrap().as_bytes().unwrap());
             }
             _ => {
-                return Err(TableStorageError::Unknown(
-                    String::from_utf8(body.to_vec()).unwrap(),
-                ));
+                return TableStorageError::Unknown(String::from_utf8(body.to_vec()).unwrap());
             }
         }
     }
-
-    Ok(())
+    return TableStorageError::Unknown(String::from_utf8(body.to_vec()).unwrap());
 }
 
 pub fn parse_entities<TResult: TableStorageEntity>(payload: &[u8]) -> Option<Vec<TResult>> {
@@ -280,7 +287,7 @@ pub fn parse_entities<TResult: TableStorageEntity>(payload: &[u8]) -> Option<Vec
     None
 }
 
-fn get_error(while_payload: &[u8], value_payload: &[u8]) -> TableStorageError {
+fn get_error_type(whole_payload: &[u8], value_payload: &[u8]) -> TableStorageError {
     for first_line in JsonFirstLineReader::new(value_payload) {
         let first_line = first_line.unwrap();
 
@@ -297,12 +304,12 @@ fn get_error(while_payload: &[u8], value_payload: &[u8]) -> TableStorageError {
                 }
                 _ => {
                     return TableStorageError::Unknown(
-                        String::from_utf8(while_payload.to_vec()).unwrap(),
+                        String::from_utf8(whole_payload.to_vec()).unwrap(),
                     );
                 }
             }
         }
     }
 
-    return TableStorageError::Unknown(String::from_utf8(while_payload.to_vec()).unwrap());
+    return TableStorageError::Unknown(String::from_utf8(whole_payload.to_vec()).unwrap());
 }
