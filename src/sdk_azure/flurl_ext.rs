@@ -71,6 +71,7 @@ impl FlUrlAzureExtensions for FlUrl {
         let fl_url = self
             .with_header("x-ms-date", date.as_str())
             .with_header("x-ms-version", "2015-12-11")
+            .with_header("Content-Type", "application/json")
             .with_header("Accept", "application/json;odata=nometadata");
 
         let auth_key = connection.get_table_storage_auth_header(&date, &fl_url);
