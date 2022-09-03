@@ -140,6 +140,8 @@ impl crate::AzureStorageConnectionData {
         );
 
         let body = entity.serialize();
+        println!("Src: {:?}", std::str::from_utf8(body.as_slice()).unwrap());
+
         let response = flurl::FlUrl::new(&self.table_storage_api_url.as_str(), None)
             .append_path_segment(table_name_for_request.as_str())
             .add_table_storage_azure_headers(self, Some(body.len()))
@@ -165,8 +167,6 @@ impl crate::AzureStorageConnectionData {
         let table_name_for_request = format!("{}()", table_name);
 
         let body = entity.serialize();
-
-        println!("Src: {:?}", std::str::from_utf8(body.as_slice()).unwrap());
 
         let response = flurl::FlUrl::new(&self.table_storage_api_url.as_str(), None)
             .append_path_segment(table_name_for_request.as_str())
