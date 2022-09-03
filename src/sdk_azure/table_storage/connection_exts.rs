@@ -207,7 +207,7 @@ impl crate::AzureStorageConnectionData {
 
         println!("Status code: {}", status_code);
 
-        if status_code == 200 || status_code == 202 {
+        if status_code == 200 && status_code < 299 {
             return Ok(true);
         }
 
