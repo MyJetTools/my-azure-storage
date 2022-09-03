@@ -4,6 +4,7 @@ use flurl::FlUrlError;
 pub enum TableStorageError {
     TableNotFound,
     EntityAlreadyExists,
+    ResourceNotFound,
     FlUrlError(FlUrlError),
     Unknown(String),
 }

@@ -16,7 +16,7 @@ impl crate::AzureStorageConnectionData {
         table_name: &str,
         partition_key: &str,
         row_key: &str,
-    ) -> Option<TResult> {
+    ) -> Result<Option<TResult>, TableStorageError> {
         let table_name = format!(
             "{}(PartitionKey='{}',RowKey='{}')",
             table_name, partition_key, row_key
@@ -41,23 +41,20 @@ impl crate::AzureStorageConnectionData {
 
         println!("{}", std::str::from_utf8(body.as_slice()).unwrap());
 
-        for first_line in JsonFirstLineReader::new(body.as_slice()) {
-            let first_line = first_line.unwrap();
-
-            if first_line.get_name().unwrap() == "value" {
-                for value in first_line.get_value() {
-                    let array = value.as_bytes().unwrap();
-
-                    for itm in JsonArrayIterator::new(array) {
-                        let itm = itm.unwrap();
-                        let json_reader = my_json::json_reader::JsonFirstLineReader::new(itm);
-                        return Some(TResult::create(json_reader));
-                    }
+        if let Err(err) = check_for_error(body.as_slice()) {
+            match err {
+                TableStorageError::ResourceNotFound => {
+                    return Ok(None);
+                }
+                _ => {
+                    return Err(err);
                 }
             }
         }
 
-        None
+        return Ok(Some(TResult::create(JsonFirstLineReader::new(
+            body.as_slice(),
+        ))));
     }
 
     pub async fn get_table_storage_all_entities<'s, TResult: TableStorageEntity>(
@@ -230,6 +227,26 @@ pub fn get_payload_with_value(body: &[u8]) -> Result<&[u8], TableStorageError> {
     Err(TableStorageError::Unknown(
         String::from_utf8(body.to_vec()).unwrap(),
     ))
+}
+
+pub fn check_for_error(body: &[u8]) -> Result<(), TableStorageError> {
+    for first_line in JsonFirstLineReader::new(body) {
+        let first_line = first_line.unwrap();
+
+        match first_line.get_name().unwrap() {
+            "odata.error" => {
+                let err = get_error(body, first_line.get_value().unwrap().as_bytes().unwrap());
+                return Err(err);
+            }
+            _ => {
+                return Err(TableStorageError::Unknown(
+                    String::from_utf8(body.to_vec()).unwrap(),
+                ));
+            }
+        }
+    }
+
+    Ok(())
 }
 
 pub fn parse_entities<TResult: TableStorageEntity>(payload: &[u8]) -> Option<Vec<TResult>> {

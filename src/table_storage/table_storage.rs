@@ -25,14 +25,11 @@ impl<TEntity: TableStorageEntity> TableStorage<TEntity> {
         &self,
         partition_key: &str,
         row_key: &str,
-    ) -> Result<Option<TEntity>, AzureStorageError> {
+    ) -> Result<Option<TEntity>, TableStorageError> {
         match self.connection.as_ref() {
             AzureStorageConnection::AzureStorage(data) => {
-                let result = data
-                    .get_table_storage_entity(&self.table_name, partition_key, row_key)
-                    .await;
-
-                Ok(result)
+                data.get_table_storage_entity(&self.table_name, partition_key, row_key)
+                    .await
             }
             AzureStorageConnection::File(_data) => {
                 todo!("Not implemented yet");
