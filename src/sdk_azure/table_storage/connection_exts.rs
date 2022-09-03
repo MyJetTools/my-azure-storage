@@ -6,6 +6,7 @@ use crate::{
         flurl_ext::FlUrlAzureExtensions, table_storage::query_builder::TableStorageQueryBuilder,
     },
     table_storage::TableStorageEntity,
+    AzureStorageError,
 };
 
 use super::{ContinuationToken, TableEntitiesChunk};
@@ -122,6 +123,25 @@ impl crate::AzureStorageConnectionData {
             entities,
             continuation_token,
         ));
+    }
+
+    pub async fn insert_or_replace_entity<TEntity: TableStorageEntity>(
+        &self,
+        table_name: &str,
+        entity: &TEntity,
+    ) -> Result<(), AzureStorageError> {
+        let table_name_for_request = format!("{}()", table_name);
+        let response = flurl::FlUrl::new(&self.table_storage_api_url.as_str(), None)
+            .append_path_segment(table_name_for_request.as_str())
+            .add_table_storage_azure_headers(self, None, None)
+            .put(Some(entity.serialize()))
+            .await?;
+
+        let body = response.receive_body().await?;
+
+        println!("{:?}", std::str::from_utf8(body.as_slice()).unwrap());
+
+        Ok(())
     }
 
     pub fn get_table_storage_auth_header(&self, date: &str, flurl: &FlUrl) -> String {
