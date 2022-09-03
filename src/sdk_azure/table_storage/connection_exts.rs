@@ -17,12 +17,15 @@ impl crate::AzureStorageConnectionData {
         partition_key: &str,
         row_key: &str,
     ) -> Option<TResult> {
-        let table_name = format!("{}()", table_name);
+        let table_name = format!(
+            "{}(PartitionKey=%27{}%27,RowKey=%27{}%27)",
+            table_name, partition_key, row_key
+        );
 
         let mut query_builder = TableStorageQueryBuilder::new();
 
-        query_builder.add_partition_key(partition_key);
-        query_builder.add_row_key(row_key);
+        //  query_builder.add_partition_key(partition_key);
+        // query_builder.add_row_key(row_key);
         TResult::populate_field_names(&mut query_builder);
 
         let raw_ending = query_builder.get_result();
