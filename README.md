@@ -11,6 +11,7 @@ First of al - we need a connection to Account. We wrap it into Arc so it can be 
 
 ### Table Storage usage:
 
+#### Basic Setup
 First of all we specify TableEntity for a table. To do that - there is a macros library: https://github.com/MyJetTools/table-storage-entity
 
 ```Toml
@@ -30,14 +31,33 @@ pub struct TestTableEntity {
     pub id: String,
 }
 ```
-
-
-
 ```Rust
-    let table_storage: TableStorage<TestTableEntity> =
-        TableStorage::new(connection_string, "TestTable".to_string());
+let table_storage: TableStorage<TestTableEntity> =
+    TableStorage::new(connection_string, "TestTable".to_string());
+```
+
+#### Manipulatins with tables
+
+##### Crate Table
+```Rust
+
+let result = table_storage.crate_table().await;
 ```
 
 
+##### Crate Table if not exists
+```Rust
+let result = table_storage.crate_table_if_not_exists().await;
+```
 
+
+##### Get list of tables
+```Rust
+
+if let Some(mut table_names_chunk) = table_storage.get_table_list().await? {
+    while let Some(table_names) = table_names_chunk.get_next().await? {
+        println!("Got tables: {:?}", table_names)
+    }
+}
+```
 
