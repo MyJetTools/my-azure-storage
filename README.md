@@ -36,7 +36,7 @@ let table_storage: TableStorage<TestTableEntity> =
     TableStorage::new(connection_string, "TestTable".to_string());
 ```
 
-#### Manipulatins with tables
+#### Manipulations with tables
 
 ##### Crate Table
 ```Rust
