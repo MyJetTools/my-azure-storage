@@ -9,7 +9,7 @@ First of al - we need a connection to Account. We wrap it into Arc so it can be 
     let connection_string = Arc::new(connection_string);
 ```
 
-### Table Storage usage:
+### Table Storage usages:
 
 #### Basic Setup
 First of all we specify TableEntity for a table. To do that - there is a macros library: https://github.com/MyJetTools/table-storage-entity
