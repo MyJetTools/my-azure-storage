@@ -67,6 +67,7 @@ impl<'s, TResult: TableStorageEntity> TableEntitiesChunk<'s, TResult> {
 
             println!("{}", std::str::from_utf8(&body[0..20]).unwrap());
 
+            
             super::models::read_entities_items(body.as_slice())
         } else {
             None
