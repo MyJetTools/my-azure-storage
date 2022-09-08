@@ -65,10 +65,9 @@ impl<'s, TResult: TableStorageEntity> TableEntitiesChunk<'s, TResult> {
 
             let body = response.receive_body().await.unwrap();
 
-            println!("{}", std::str::from_utf8(&body[0..20]).unwrap());
+            let payload = super::models::read_value_payload(&body).unwrap();
 
-            
-            super::models::read_entities_items(body.as_slice())
+            super::models::read_entities_items(payload)
         } else {
             None
         }
