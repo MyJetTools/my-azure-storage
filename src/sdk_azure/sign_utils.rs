@@ -120,7 +120,7 @@ mod tests {
 
     #[test]
     pub fn test_canonical_headers_builder() {
-        let flurl = FlUrl::new("https://127.0.0.1", None)
+        let flurl = FlUrl::new("https://127.0.0.1")
             .with_header("x-ms-date", "Fri, 17 Nov 2017 00:44:48 GMT")
             .with_header("x-ms-version", "2017-07-29");
 
@@ -133,7 +133,7 @@ mod tests {
     }
     #[test]
     pub fn test_canonical_resources_builder_list_of_blobs_usecase() {
-        let flurl = FlUrl::new("https://127.0.0.1", None).append_query_param("comp", "list");
+        let flurl = FlUrl::new("https://127.0.0.1").append_query_param("comp", "list");
 
         let msft_canonical_resources = get_canonicalized_resourse(&flurl, "contosorest");
 
@@ -142,7 +142,7 @@ mod tests {
 
     #[test]
     pub fn test_auth_header_to_sign() {
-        let flurl = FlUrl::new("https://127.0.0.1", None)
+        let flurl = FlUrl::new("https://127.0.0.1")
             .with_header("x-ms-date", "Fri, 17 Nov 2017 01:07:37 GMT")
             .append_query_param("comp", "list")
             .with_header("x-ms-version", "2017-07-29");
