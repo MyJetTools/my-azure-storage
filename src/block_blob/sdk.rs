@@ -7,7 +7,7 @@ use crate::sdk_azure::consts::AZURE_REST_VERSION;
 
 use flurl::FlUrl;
 
-pub async fn upload(
+pub async fn upload_block_blob(
     connection: &AzureStorageConnectionData,
     container_name: &str,
     blob_name: &str,

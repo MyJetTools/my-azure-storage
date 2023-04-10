@@ -39,7 +39,12 @@ impl AzureStorageConnectionData {
 
         let account_key = conn_keys.get("AccountKey").unwrap();
 
-        let account_key = base64::decode(account_key).unwrap();
+        //let account_key = base64::decode(account_key).unwrap();
+
+        use base64::Engine;
+        let account_key = base64::engine::general_purpose::STANDARD
+            .decode(account_key)
+            .unwrap();
 
         let endpoint_suffix = conn_keys.get("EndpointSuffix").unwrap().to_string();
 

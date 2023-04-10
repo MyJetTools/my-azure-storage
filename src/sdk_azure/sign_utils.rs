@@ -101,6 +101,7 @@ fn get_canonicalized_headers(flurl: &FlUrl) -> String {
 }
 
 pub fn sign_transaction(string_to_sign: &str, key: &[u8]) -> String {
+    /*cspell: Disable */
     let mut hmac256 = HmacSha256::new_from_slice(key).expect("HMAC can take key of any size");
 
     hmac256.update(string_to_sign.as_bytes());
@@ -111,7 +112,9 @@ pub fn sign_transaction(string_to_sign: &str, key: &[u8]) -> String {
 
     let bytes_result = code_bytes.as_slice();
 
-    return base64::encode(bytes_result);
+    use base64::Engine;
+    base64::engine::general_purpose::STANDARD.encode(bytes_result)
+    /*cspell: Enable */
 }
 
 #[cfg(test)]

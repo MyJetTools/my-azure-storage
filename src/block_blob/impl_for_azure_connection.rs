@@ -6,7 +6,7 @@ use super::api::BlockBlobApi;
 
 #[async_trait]
 impl BlockBlobApi for AzureStorageConnection {
-    async fn upload(
+    async fn upload_block_blob(
         &self,
         container_name: &str,
         blob_name: &str,
@@ -14,7 +14,8 @@ impl BlockBlobApi for AzureStorageConnection {
     ) -> Result<(), AzureStorageError> {
         match self {
             AzureStorageConnection::AzureStorage(connection_data) => {
-                super::sdk::upload(connection_data, container_name, blob_name, content).await
+                super::sdk::upload_block_blob(connection_data, container_name, blob_name, content)
+                    .await
             }
             AzureStorageConnection::File(connection_data) => {
                 crate::sdk_files::blobs::upload(
@@ -68,7 +69,7 @@ mod test {
 
         let src_content = vec![0u8, 1u8, 2u8];
         connection_string
-            .upload(CONTAINER_NAME, BLOB_NAME, src_content.clone())
+            .upload_block_blob(CONTAINER_NAME, BLOB_NAME, src_content.clone())
             .await
             .unwrap();
 
@@ -81,7 +82,7 @@ mod test {
 
         let src_content = vec![3u8, 4u8, 5u8, 6u8];
         connection_string
-            .upload(CONTAINER_NAME, BLOB_NAME, src_content.clone())
+            .upload_block_blob(CONTAINER_NAME, BLOB_NAME, src_content.clone())
             .await
             .unwrap();
 
@@ -118,7 +119,7 @@ mod test {
 
         let src_content = vec![0u8, 1u8, 2u8];
         connection_string
-            .upload(CONTAINER_NAME, BLOB_NAME, src_content.clone())
+            .upload_block_blob(CONTAINER_NAME, BLOB_NAME, src_content.clone())
             .await
             .unwrap();
 
