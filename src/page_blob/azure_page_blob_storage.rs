@@ -1,5 +1,7 @@
 use std::sync::Arc;
 
+use rust_extensions::StrOrString;
+
 use crate::{blob::BlobProperties, AzureStorageConnection, AzureStorageError};
 
 use super::consts::BLOB_PAGE_SIZE;
@@ -28,10 +30,15 @@ impl Drop for AzurePageBlobStorage {
 impl AzurePageBlobStorage {
     pub async fn new(
         connection: Arc<AzureStorageConnection>,
-        container_name: String,
-        blob_name: String,
+        container_name: impl Into<StrOrString<'static>>,
+        blob_name: impl Into<StrOrString<'static>>,
     ) -> Self {
         let id = generate_id();
+
+        let container_name: StrOrString<'static> = container_name.into();
+        let container_name = container_name.to_string();
+        let blob_name: StrOrString<'static> = blob_name.into();
+        let blob_name = blob_name.to_string();
 
         if let AzureStorageConnection::File(connection_data) = connection.as_ref() {
             connection_data
@@ -71,9 +78,7 @@ impl AzurePageBlobStorage {
                 .await
             }
             AzureStorageConnection::File(connection_data) => {
-                connection_data
-                    .ressize(self.id.as_str(), pages_amount)
-                    .await
+                connection_data.resize(self.id.as_str(), pages_amount).await
             }
             AzureStorageConnection::InMemory(connection_data) => {
                 let container = crate::connection::in_mem::operations::get_container(
@@ -83,7 +88,7 @@ impl AzurePageBlobStorage {
                 .await?;
 
                 container
-                    .ressize_page_blob(self.blob_name.as_str(), pages_amount)
+                    .resize_page_blob(self.blob_name.as_str(), pages_amount)
                     .await
             }
         }

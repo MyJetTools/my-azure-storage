@@ -69,7 +69,7 @@ impl FileConnectionData {
         panic!("{}", PANIC_MESSAGE);
     }
 
-    pub async fn ressize(&self, id: &str, pages_amount: usize) -> Result<(), AzureStorageError> {
+    pub async fn resize(&self, id: &str, pages_amount: usize) -> Result<(), AzureStorageError> {
         let mut write_access = self.page_data.lock().await;
 
         if let Some(page_blob_file) = write_access.get_mut(id) {

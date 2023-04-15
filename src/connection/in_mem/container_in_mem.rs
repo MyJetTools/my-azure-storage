@@ -99,7 +99,7 @@ impl ContainerInMem {
         return result.is_some();
     }
 
-    pub async fn ressize_page_blob(
+    pub async fn resize_page_blob(
         &self,
         blob_name: &str,
         pages_amount: usize,
