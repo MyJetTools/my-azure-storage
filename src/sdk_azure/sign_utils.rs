@@ -35,7 +35,7 @@ pub fn get_auth_header(
     flurl: &FlUrl,
 ) -> String {
     let canonicalized_headers = get_canonicalized_headers(flurl);
-    let canonicalized_resourse = get_canonicalized_resourse(flurl, storage_account_name);
+    let canonicalized_resource = get_canonicalized_resource(flurl, storage_account_name);
 
     let content_md5 = "";
 
@@ -48,13 +48,13 @@ pub fn get_auth_header(
         content_md5,
         if_match,
         canonicalized_headers,
-        canonicalized_resourse
+        canonicalized_resource
     );
 
     result
 }
 
-pub fn get_canonicalized_resourse(flurl: &FlUrl, account_name: &str) -> String {
+pub fn get_canonicalized_resource(flurl: &FlUrl, account_name: &str) -> String {
     let mut sb = StringBuilder::new();
 
     sb.append_char('/');
@@ -76,7 +76,7 @@ pub fn get_canonicalized_resourse(flurl: &FlUrl, account_name: &str) -> String {
         sb.append_str(value);
     }
 
-    return sb.to_string_utf8().unwrap();
+    return sb.to_string_utf8();
 }
 
 fn get_canonicalized_headers(flurl: &FlUrl) -> String {
@@ -97,7 +97,7 @@ fn get_canonicalized_headers(flurl: &FlUrl) -> String {
         headers_builder.append_char('\n');
     }
 
-    return headers_builder.to_string_utf8().unwrap();
+    return headers_builder.to_string_utf8();
 }
 
 pub fn sign_transaction(string_to_sign: &str, key: &[u8]) -> String {
@@ -138,7 +138,7 @@ mod tests {
     pub fn test_canonical_resources_builder_list_of_blobs_usecase() {
         let flurl = FlUrl::new("https://127.0.0.1").append_query_param("comp", "list");
 
-        let msft_canonical_resources = get_canonicalized_resourse(&flurl, "contosorest");
+        let msft_canonical_resources = get_canonicalized_resource(&flurl, "contosorest");
 
         assert_eq!("/contosorest/\ncomp:list", msft_canonical_resources);
     }
