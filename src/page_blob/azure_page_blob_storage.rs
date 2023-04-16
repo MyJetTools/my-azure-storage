@@ -217,7 +217,7 @@ impl AzurePageBlobStorage {
         Ok(props.blob_size / crate::page_blob::consts::BLOB_PAGE_SIZE)
     }
 
-    pub async fn get(
+    pub async fn get_pages(
         &self,
         start_page_no: usize,
         pages_amount: usize,
