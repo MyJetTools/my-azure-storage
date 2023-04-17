@@ -4,7 +4,7 @@ use rust_extensions::StrOrString;
 
 use crate::{blob::BlobProperties, AzureStorageConnection, AzureStorageError};
 
-use super::consts::BLOB_PAGE_SIZE;
+use super::{consts::BLOB_PAGE_SIZE, PageBlobAbstractions};
 
 pub struct AzurePageBlobStorage {
     connection: Arc<AzureStorageConnection>,
@@ -403,6 +403,18 @@ impl AzurePageBlobStorage {
     }
 }
 
+#[async_trait::async_trait]
+impl PageBlobAbstractions for AzurePageBlobStorage {
+    async fn create_container_if_not_exist(&self) -> Result<(), AzureStorageError> {
+        self.create_container_if_not_exist().await
+    }
+    async fn create_blob_if_not_exists(
+        &self,
+        init_pages_amounts: usize,
+    ) -> Result<usize, AzureStorageError> {
+        self.create_if_not_exists(init_pages_amounts).await
+    }
+}
 fn generate_id() -> String {
     uuid::Uuid::new_v4().to_string()
 }
