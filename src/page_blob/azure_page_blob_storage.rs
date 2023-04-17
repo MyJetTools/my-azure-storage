@@ -94,7 +94,7 @@ impl AzurePageBlobStorage {
         }
     }
 
-    pub async fn create_container_if_not_exist(&self) -> Result<(), AzureStorageError> {
+    pub async fn create_container_if_not_exists(&self) -> Result<(), AzureStorageError> {
         match self.connection.as_ref() {
             AzureStorageConnection::AzureStorage(connection_data) => {
                 crate::sdk_azure::containers::create_if_not_exists(
@@ -405,8 +405,8 @@ impl AzurePageBlobStorage {
 
 #[async_trait::async_trait]
 impl PageBlobAbstractions for AzurePageBlobStorage {
-    async fn create_container_if_not_exist(&self) -> Result<(), AzureStorageError> {
-        self.create_container_if_not_exist().await
+    async fn create_container_if_not_exists(&self) -> Result<(), AzureStorageError> {
+        self.create_container_if_not_exists().await
     }
     async fn create_blob_if_not_exists(
         &self,

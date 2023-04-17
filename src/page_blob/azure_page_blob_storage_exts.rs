@@ -66,7 +66,7 @@ mod tests {
         let connection = AzureStorageConnection::new_in_memory();
 
         let page_blob = AzurePageBlobStorage::new(Arc::new(connection), "Test", "Test").await;
-        page_blob.create_container_if_not_exist().await.unwrap();
+        page_blob.create_container_if_not_exists().await.unwrap();
         page_blob.create_if_not_exists(0).await.unwrap();
 
         page_blob.resize(3).await.unwrap();
