@@ -6,14 +6,17 @@ use crate::{connection::AzureStorageConnectionData, types::AzureStorageError};
 use crate::sdk_azure::consts::AZURE_REST_VERSION;
 
 use flurl::FlUrl;
+use rust_extensions::AsSliceOrVec;
 
-pub async fn upload_block_blob(
+pub async fn upload_block_blob<'s>(
     connection: &AzureStorageConnectionData,
     container_name: &str,
     blob_name: &str,
-    content: Vec<u8>,
+    content: impl Into<AsSliceOrVec<'s, u8>>,
 ) -> Result<(), AzureStorageError> {
     let fl_url: FlUrl = connection.into();
+
+    let content = content.into().into_vec();
 
     fl_url
         .append_path_segment(container_name)

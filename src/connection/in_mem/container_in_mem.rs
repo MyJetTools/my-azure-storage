@@ -68,7 +68,12 @@ impl ContainerInMem {
         read_access.keys().map(|itm| itm.to_string()).collect()
     }
 
-    pub async fn upload_block_blob(&self, blob_name: String, content: Vec<u8>) {
+    pub async fn upload_block_blob<'s>(
+        &self,
+        blob_name: String,
+        content: impl Into<AsSliceOrVec<'s, u8>>,
+    ) {
+        let content = content.into().into_vec();
         let mut write_access = self.blobs.write().await;
         write_access.insert(blob_name, BlobData::BlockBlob(BlockBlob::new(content)));
     }

@@ -1,4 +1,5 @@
 use async_trait::async_trait;
+use rust_extensions::AsSliceOrVec;
 
 use crate::{connection::AzureStorageConnection, types::AzureStorageError};
 
@@ -6,11 +7,11 @@ use super::api::BlockBlobApi;
 
 #[async_trait]
 impl BlockBlobApi for AzureStorageConnection {
-    async fn upload_block_blob(
+    async fn upload_block_blob<'s>(
         &self,
         container_name: &str,
         blob_name: &str,
-        content: Vec<u8>,
+        content: impl Into<AsSliceOrVec<'s, u8>> + Send + Sync + 'static,
     ) -> Result<(), AzureStorageError> {
         match self {
             AzureStorageConnection::AzureStorage(connection_data) => {
@@ -18,23 +19,20 @@ impl BlockBlobApi for AzureStorageConnection {
                     .await
             }
             AzureStorageConnection::File(connection_data) => {
-                crate::sdk_files::blobs::upload(
-                    connection_data,
-                    container_name,
-                    blob_name,
-                    content.as_slice(),
-                )
-                .await
+                crate::sdk_files::blobs::upload(connection_data, container_name, blob_name, content)
+                    .await
             }
             AzureStorageConnection::InMemory(connection_data) => {
                 let container = connection_data.get_container(container_name).await;
                 if container.is_none() {
                     return Err(AzureStorageError::ContainerNotFound);
                 }
+
                 container
                     .unwrap()
                     .upload_block_blob(blob_name.to_string(), content)
                     .await;
+
                 Ok(())
             }
         }
