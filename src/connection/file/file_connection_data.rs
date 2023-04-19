@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 
+use rust_extensions::AsSliceOrVec;
 use tokio::sync::Mutex;
 
 use crate::{blob::BlobProperties, sdk_files::utils::FileConnectionInfo, AzureStorageError};
@@ -79,11 +80,11 @@ impl FileConnectionData {
         panic!("{}", PANIC_MESSAGE);
     }
 
-    pub async fn upload(
+    pub async fn upload<'s>(
         &self,
         id: &str,
         start_page: usize,
-        payload: &[u8],
+        payload: impl Into<AsSliceOrVec<'s, u8>>,
     ) -> Result<(), AzureStorageError> {
         let mut write_access = self.page_data.lock().await;
 
@@ -177,11 +178,11 @@ impl FileConnectionData {
         panic!("{}", PANIC_MESSAGE);
     }
 
-    pub async fn save_pages(
+    pub async fn save_pages<'s>(
         &self,
         id: &str,
         start_page_no: usize,
-        payload: &[u8],
+        payload: impl Into<AsSliceOrVec<'s, u8>>,
     ) -> Result<(), AzureStorageError> {
         let mut write_access = self.page_data.lock().await;
 

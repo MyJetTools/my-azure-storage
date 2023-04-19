@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use rust_extensions::StrOrString;
+use rust_extensions::{AsSliceOrVec, StrOrString};
 
 use crate::{blob::BlobProperties, AzureStorageConnection, AzureStorageError};
 
@@ -252,10 +252,10 @@ impl AzurePageBlobStorage {
         }
     }
 
-    pub async fn save_pages(
+    pub async fn save_pages<'s>(
         &self,
         start_page_no: usize,
-        payload: Vec<u8>,
+        payload: impl Into<AsSliceOrVec<'s, u8>>,
     ) -> Result<(), AzureStorageError> {
         match self.connection.as_ref() {
             AzureStorageConnection::AzureStorage(connection_data) => {
@@ -264,13 +264,13 @@ impl AzurePageBlobStorage {
                     self.container_name.as_str(),
                     self.blob_name.as_str(),
                     start_page_no,
-                    payload,
+                    payload.into().into_vec(),
                 )
                 .await
             }
             AzureStorageConnection::File(connection_data) => {
                 connection_data
-                    .save_pages(self.id.as_str(), start_page_no, payload.as_ref())
+                    .save_pages(self.id.as_str(), start_page_no, payload)
                     .await
             }
             AzureStorageConnection::InMemory(connection_data) => {

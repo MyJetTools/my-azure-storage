@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 
+use rust_extensions::AsSliceOrVec;
 use tokio::sync::RwLock;
 
 use crate::{blob::BlobProperties, page_blob::consts::BLOB_PAGE_SIZE, AzureStorageError};
@@ -120,11 +121,11 @@ impl ContainerInMem {
         return Err(AzureStorageError::BlobNotFound);
     }
 
-    pub async fn upload_pages_to_page_blob(
+    pub async fn upload_pages_to_page_blob<'s>(
         &self,
         blob_name: &str,
         start_page_no: usize,
-        content: Vec<u8>,
+        content: impl Into<AsSliceOrVec<'s, u8>>,
     ) -> Result<(), AzureStorageError> {
         let mut write_access = self.blobs.write().await;
 

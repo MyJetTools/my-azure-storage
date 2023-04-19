@@ -1,3 +1,5 @@
+use rust_extensions::AsSliceOrVec;
+
 use crate::{blob::BlobProperties, page_blob::consts::BLOB_PAGE_SIZE};
 
 struct Page {
@@ -64,7 +66,15 @@ impl PageBlobInMem {
         result
     }
 
-    pub fn save_pages(&mut self, start_page_no: usize, payload: Vec<u8>) {
+    pub fn save_pages<'s>(
+        &mut self,
+        start_page_no: usize,
+        payload: impl Into<AsSliceOrVec<'s, u8>>,
+    ) {
+        let payload = payload.into();
+
+        let payload = payload.as_slice();
+
         let pages_amount = payload.len() / BLOB_PAGE_SIZE;
         let mut page_index = start_page_no;
 

@@ -1,4 +1,5 @@
 use flurl::FlUrl;
+use rust_extensions::AsSliceOrVec;
 
 use super::azure_response_handler::ToAzureResponseHandler;
 use super::consts::AZURE_REST_VERSION;
@@ -60,14 +61,16 @@ pub async fn resize_page_blob(
     Ok(())
 }
 
-pub async fn save_pages(
+pub async fn save_pages<'s>(
     connection: &AzureStorageConnectionData,
     container_name: &str,
     blob_name: &str,
     start_page_no: usize,
-    payload: Vec<u8>,
+    payload: impl Into<AsSliceOrVec<'s, u8>>,
 ) -> Result<(), AzureStorageError> {
     let start_bytes = start_page_no * BLOB_PAGE_SIZE;
+
+    let payload = payload.into().into_vec();
 
     let end_bytes = start_bytes + payload.len() - 1;
 
