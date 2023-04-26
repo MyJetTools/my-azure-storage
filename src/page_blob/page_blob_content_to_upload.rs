@@ -25,6 +25,10 @@ impl PageBlobContentToUpload {
     pub fn get_size_in_pages(&self) -> usize {
         super::consts::get_required_pages_amount(self.0.len())
     }
+
+    pub fn content_size(&self) -> usize {
+        self.0.len()
+    }
 }
 
 impl<'s> Into<AsSliceOrVec<'s, u8>> for PageBlobContentToUpload {
