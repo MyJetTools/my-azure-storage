@@ -1,6 +1,6 @@
 use rust_extensions::AsSliceOrVec;
 
-use crate::{blob::BlobProperties, page_blob::consts::BLOB_PAGE_SIZE};
+use crate::{blob::BlobProperties, page_blob::consts::BLOB_PAGE_SIZE, AzureStorageError};
 
 struct Page {
     data: [u8; BLOB_PAGE_SIZE],
@@ -70,7 +70,7 @@ impl PageBlobInMem {
         &mut self,
         start_page_no: usize,
         payload: impl Into<AsSliceOrVec<'s, u8>>,
-    ) {
+    ) -> Result<(), AzureStorageError> {
         let payload = payload.into();
 
         let payload = payload.as_slice();
@@ -91,13 +91,21 @@ impl PageBlobInMem {
         while page_index < start_page_no + pages_amount {
             let slice = &payload[payload_index..payload_index + BLOB_PAGE_SIZE];
 
-            let page = self.pages.get_mut(page_index).unwrap();
+            let page = self.pages.get_mut(page_index);
+
+            if page.is_none() {
+                return Err(AzureStorageError::InvalidPageRange);
+            }
+
+            let page = page.unwrap();
 
             page.as_slice_mut().copy_from_slice(slice);
 
             page_index += 1;
             payload_index += BLOB_PAGE_SIZE;
         }
+
+        Ok(())
     }
 
     pub fn download(&self) -> Vec<u8> {

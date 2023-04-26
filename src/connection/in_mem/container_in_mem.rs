@@ -138,8 +138,7 @@ impl ContainerInMem {
 
         if let Some(blob_data) = blob_data {
             if let BlobData::PageBlob(page_blob) = blob_data {
-                page_blob.save_pages(start_page_no, content);
-                return Ok(());
+                return page_blob.save_pages(start_page_no, content);
             } else {
                 panic!("{}", NOT_A_PAGE_BLOB_PANIC);
             }
