@@ -1,8 +1,7 @@
 use rust_extensions::AsSliceOrVec;
 
-pub struct PageBlobContentToUpload {
-    content: Vec<u8>,
-}
+#[derive(Clone)]
+pub struct PageBlobContentToUpload(Vec<u8>);
 
 impl PageBlobContentToUpload {
     pub fn new<'s>(content: impl Into<AsSliceOrVec<'s, u8>>, fill_byte: u8) -> Self {
@@ -20,12 +19,16 @@ impl PageBlobContentToUpload {
             content.resize(required_size, fill_byte);
         }
 
-        Self { content }
+        Self(content)
+    }
+
+    pub fn get_size_in_pages(&self) -> usize {
+        super::consts::get_required_pages_amount(self.0.len())
     }
 }
 
 impl<'s> Into<AsSliceOrVec<'s, u8>> for PageBlobContentToUpload {
     fn into(self) -> AsSliceOrVec<'s, u8> {
-        AsSliceOrVec::AsVec(self.content)
+        AsSliceOrVec::AsVec(self.0)
     }
 }
