@@ -75,6 +75,14 @@ impl PageBlobInMem {
 
         let payload = payload.as_slice();
 
+        if payload.len() % BLOB_PAGE_SIZE != 0 {
+            panic!(
+                "Payload size must be a multiple of {}. Current size is: {}",
+                BLOB_PAGE_SIZE,
+                payload.len()
+            );
+        }
+
         let pages_amount = payload.len() / BLOB_PAGE_SIZE;
         let mut page_index = start_page_no;
 
