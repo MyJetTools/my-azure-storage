@@ -157,7 +157,14 @@ mod tests {
 
     #[tokio::test]
     async fn test_create_and_delete_container() {
-        let conn_string = std::env::var("TEST_STORAGE_ACCOUNT").unwrap();
+        let conn_string = std::env::var("TEST_STORAGE_ACCOUNT");
+
+        if conn_string.is_err() {
+            println!("TEST_STORAGE_ACCOUNT is not set. Skipping test.");
+            return;
+        }
+
+        let conn_string = conn_string.unwrap();
 
         let connection = AzureStorageConnectionData::from_conn_string(conn_string.as_str());
 
@@ -168,7 +175,14 @@ mod tests {
 
     #[tokio::test]
     async fn test_container_not_found() {
-        let conn_string = std::env::var("TEST_STORAGE_ACCOUNT").unwrap();
+        let conn_string = std::env::var("TEST_STORAGE_ACCOUNT");
+
+        if conn_string.is_err() {
+            println!("TEST_STORAGE_ACCOUNT is not set. Skipping test.");
+            return;
+        }
+
+        let conn_string = conn_string.unwrap();
 
         let connection = AzureStorageConnectionData::from_conn_string(conn_string.as_str());
         println!("Name:{}", connection.account_name);
