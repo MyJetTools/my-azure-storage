@@ -10,6 +10,15 @@ pub async fn create_if_not_exists<TFileConnectionInfo: FileConnectionInfo>(
 ) -> Result<(), AzureStorageError> {
     let folder_name = super::utils::compile_container_path(connection, container_name);
 
+    if std::env::var("DEBUG").is_ok() {
+        println!(
+            "Creating folder: {} for container {} for root path {}",
+            folder_name.as_str(),
+            container_name,
+            connection.get_root_path()
+        );
+    }
+
     match tokio::fs::create_dir(folder_name.as_str()).await {
         Ok(_) => Ok(()),
         Err(err) => match err.kind() {
