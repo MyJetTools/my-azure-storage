@@ -53,7 +53,7 @@ pub fn extract_file_name(full_path: &str, separator: char) -> &str {
         }
     }
 
-    panic!("Can not extract filename from fullpath [{}]", full_path);
+    panic!("Can not extract filename from full path [{}]", full_path);
 }
 
 #[cfg(test)]

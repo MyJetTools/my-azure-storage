@@ -4,8 +4,8 @@ use crate::AzureStorageError;
 
 use super::utils::FileConnectionInfo;
 
-pub async fn create_if_not_exists<TFileConnectionInfo: FileConnectionInfo>(
-    connection: &TFileConnectionInfo,
+pub async fn create_if_not_exists(
+    connection: &impl FileConnectionInfo,
     container_name: &str,
 ) -> Result<(), AzureStorageError> {
     let folder_name = super::utils::compile_container_path(connection, container_name);
@@ -32,8 +32,8 @@ pub async fn create_if_not_exists<TFileConnectionInfo: FileConnectionInfo>(
     }
 }
 
-pub async fn delete<TFileConnectionInfo: FileConnectionInfo>(
-    connection_data: &TFileConnectionInfo,
+pub async fn delete(
+    connection_data: &impl FileConnectionInfo,
     container_name: &str,
 ) -> Result<(), AzureStorageError> {
     let folder_name = super::utils::compile_container_path(connection_data, container_name);
@@ -41,8 +41,8 @@ pub async fn delete<TFileConnectionInfo: FileConnectionInfo>(
     Ok(())
 }
 
-pub async fn delete_if_exists<TFileConnectionInfo: FileConnectionInfo>(
-    connection_data: &TFileConnectionInfo,
+pub async fn delete_if_exists(
+    connection_data: &impl FileConnectionInfo,
     container_name: &str,
 ) -> Result<(), AzureStorageError> {
     let folder_name = super::utils::compile_container_path(connection_data, container_name);
@@ -53,8 +53,8 @@ pub async fn delete_if_exists<TFileConnectionInfo: FileConnectionInfo>(
     }
 }
 
-pub async fn get_list<TFileConnectionInfo: FileConnectionInfo>(
-    connection_data: &TFileConnectionInfo,
+pub async fn get_list(
+    connection_data: &impl FileConnectionInfo,
 ) -> Result<Vec<String>, FlUrlError> {
     let mut result = Vec::new();
 
@@ -78,4 +78,33 @@ pub async fn get_list<TFileConnectionInfo: FileConnectionInfo>(
     }
 
     Ok(result)
+}
+
+pub async fn check_error_if_container_exists<TResult>(
+    src: Result<TResult, AzureStorageError>,
+    connection: &impl FileConnectionInfo,
+    container_name: &str,
+) -> Result<TResult, AzureStorageError> {
+    match src {
+        Ok(result) => Ok(result),
+        Err(err) => {
+            if let AzureStorageError::BlobNotFound = err {
+                check_if_container_exists(connection, container_name).await?;
+            }
+
+            return Err(err);
+        }
+    }
+}
+
+pub async fn check_if_container_exists(
+    connection: &impl FileConnectionInfo,
+    container_name: &str,
+) -> Result<(), AzureStorageError> {
+    let path = super::utils::compile_container_path(connection, container_name);
+    if tokio::fs::metadata(path).await.is_err() {
+        return Err(AzureStorageError::ContainerNotFound);
+    }
+
+    Ok(())
 }

@@ -298,7 +298,14 @@ impl AzurePageBlobStorage {
                 .await
             }
             AzureStorageConnection::File(connection_data) => {
-                connection_data.delete_blob(self.id.as_str()).await
+                let result = connection_data.delete_blob(self.id.as_str()).await;
+
+                crate::sdk_files::containers::check_error_if_container_exists(
+                    result,
+                    connection_data,
+                    self.container_name.as_str(),
+                )
+                .await
             }
             AzureStorageConnection::InMemory(connection_data) => {
                 let container = crate::connection::in_mem::operations::get_container(
@@ -327,9 +334,16 @@ impl AzurePageBlobStorage {
                 .await
             }
             AzureStorageConnection::File(connection_data) => {
-                connection_data
+                let result = connection_data
                     .delete_blob_if_exists(self.id.as_str())
-                    .await
+                    .await;
+
+                crate::sdk_files::containers::check_error_if_container_exists(
+                    result,
+                    connection_data,
+                    self.container_name.as_str(),
+                )
+                .await
             }
             AzureStorageConnection::InMemory(connection_data) => {
                 let container = crate::connection::in_mem::operations::get_container(
@@ -356,8 +370,14 @@ impl AzurePageBlobStorage {
                 .await
             }
             AzureStorageConnection::File(connection_data) => {
-                let result = connection_data.download(self.id.as_str()).await?;
-                return Ok(result);
+                let result = connection_data.download(self.id.as_str()).await;
+
+                crate::sdk_files::containers::check_error_if_container_exists(
+                    result,
+                    connection_data,
+                    self.container_name.as_str(),
+                )
+                .await
             }
             AzureStorageConnection::InMemory(connection_data) => {
                 let container = crate::connection::in_mem::operations::get_container(
@@ -388,7 +408,14 @@ impl AzurePageBlobStorage {
                     self.blob_name.as_str(),
                 );
 
-                crate::sdk_files::utils::get_blob_properties(file_name.as_str()).await
+                let result = crate::sdk_files::utils::get_blob_properties(file_name.as_str()).await;
+
+                crate::sdk_files::containers::check_error_if_container_exists(
+                    result,
+                    connection_data,
+                    self.container_name.as_str(),
+                )
+                .await
             }
             AzureStorageConnection::InMemory(connection_data) => {
                 let container = crate::connection::in_mem::operations::get_container(
