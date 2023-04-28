@@ -19,8 +19,20 @@ impl BlockBlobApi for AzureStorageConnection {
                     .await
             }
             AzureStorageConnection::File(connection_data) => {
-                crate::sdk_files::blobs::upload(connection_data, container_name, blob_name, content)
-                    .await
+                let result = crate::sdk_files::blobs::upload(
+                    connection_data,
+                    container_name,
+                    blob_name,
+                    content,
+                )
+                .await;
+
+                crate::sdk_files::containers::check_error_if_container_exists(
+                    result,
+                    connection_data,
+                    container_name,
+                )
+                .await
             }
             AzureStorageConnection::InMemory(connection_data) => {
                 let container = connection_data.get_container(container_name).await;
