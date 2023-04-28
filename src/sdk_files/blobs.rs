@@ -84,10 +84,15 @@ pub async fn download<TFileConnectionInfo: FileConnectionInfo>(
 ) -> Result<Vec<u8>, AzureStorageError> {
     let file_name = super::utils::compile_blob_path(connection_data, container_name, blob_name);
 
-    let mut file = tokio::fs::File::open(file_name).await?;
+    let file = tokio::fs::File::open(file_name).await;
+
+    let mut file = super::handle_error_on_file_level(file)?;
 
     let mut result = Vec::new();
-    tokio::io::AsyncReadExt::read_to_end(&mut file, &mut result).await?;
+    let read_result = tokio::io::AsyncReadExt::read_to_end(&mut file, &mut result).await;
+
+    super::handle_error_on_file_level(read_result)?;
+
     return Ok(result);
 }
 

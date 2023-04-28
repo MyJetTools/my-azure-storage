@@ -42,9 +42,3 @@ impl From<flurl::FlUrlError> for AzureStorageError {
         }
     }
 }
-
-impl From<std::io::Error> for AzureStorageError {
-    fn from(src: std::io::Error) -> Self {
-        AzureStorageError::IoError(src)
-    }
-}
