@@ -5,7 +5,7 @@ use crate::AzureStorageError;
 
 #[async_trait]
 pub trait BlobContainersApi {
-    async fn create_container_if_not_exist(
+    async fn create_container_if_not_exists(
         &self,
         container_name: &str,
     ) -> Result<(), AzureStorageError>;

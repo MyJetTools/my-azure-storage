@@ -67,7 +67,7 @@ mod test {
         let connection_string = AzureStorageConnection::from_conn_string(folder.as_str());
 
         connection_string
-            .create_container_if_not_exist(CONTAINER_NAME)
+            .create_container_if_not_exists(CONTAINER_NAME)
             .await
             .unwrap();
 
@@ -117,7 +117,7 @@ mod test {
         let connection_string = AzureStorageConnection::from_conn_string(folder.as_str());
 
         connection_string
-            .create_container_if_not_exist(CONTAINER_NAME)
+            .create_container_if_not_exists(CONTAINER_NAME)
             .await
             .unwrap();
 
