@@ -6,6 +6,33 @@ use crate::{blob::BlobProperties, AzureStorageConnection, AzureStorageError};
 
 use super::{consts::BLOB_PAGE_SIZE, PageBlobAbstractions};
 
+#[async_trait::async_trait]
+pub trait MyAzurePageBlobStorage {
+    fn get_blob_name(&self) -> &str;
+    fn get_container_name(&self) -> &str;
+    async fn resize(&self, pages_amount: usize) -> Result<(), AzureStorageError>;
+    async fn create_container_if_not_exists(&self) -> Result<(), AzureStorageError>;
+    async fn get_available_pages_amount(&self) -> Result<usize, AzureStorageError>;
+    async fn create(&self, pages_amount: usize) -> Result<(), AzureStorageError>;
+    async fn create_if_not_exists(&self, pages_amount: usize) -> Result<usize, AzureStorageError>;
+    async fn get_pages(
+        &self,
+        start_page_no: usize,
+        pages_amount: usize,
+    ) -> Result<Vec<u8>, AzureStorageError>;
+
+    async fn save_pages<'s>(
+        &self,
+        start_page_no: usize,
+        payload: impl Into<AsSliceOrVec<'s, u8>> + Send + Sync + 'static,
+    ) -> Result<(), AzureStorageError>;
+
+    async fn delete(&self) -> Result<(), AzureStorageError>;
+    async fn download(&self) -> Result<Vec<u8>, AzureStorageError>;
+
+    async fn get_blob_properties(&self) -> Result<BlobProperties, AzureStorageError>;
+}
+
 pub struct AzurePageBlobStorage {
     connection: Arc<AzureStorageConnection>,
     container_name: String,
@@ -440,6 +467,58 @@ impl PageBlobAbstractions for AzurePageBlobStorage {
         init_pages_amounts: usize,
     ) -> Result<usize, AzureStorageError> {
         self.create_if_not_exists(init_pages_amounts).await
+    }
+}
+
+#[async_trait::async_trait]
+impl MyAzurePageBlobStorage for AzurePageBlobStorage {
+    fn get_blob_name(&self) -> &str {
+        self.get_blob_name()
+    }
+    fn get_container_name(&self) -> &str {
+        self.get_container_name()
+    }
+    async fn resize(&self, pages_amount: usize) -> Result<(), AzureStorageError> {
+        self.resize(pages_amount).await
+    }
+
+    async fn create_container_if_not_exists(&self) -> Result<(), AzureStorageError> {
+        self.create_container_if_not_exists().await
+    }
+    async fn get_available_pages_amount(&self) -> Result<usize, AzureStorageError> {
+        self.get_available_pages_amount().await
+    }
+    async fn create(&self, pages_amount: usize) -> Result<(), AzureStorageError> {
+        self.create(pages_amount).await
+    }
+    async fn create_if_not_exists(&self, pages_amount: usize) -> Result<usize, AzureStorageError> {
+        self.create_if_not_exists(pages_amount).await
+    }
+    async fn get_pages(
+        &self,
+        start_page_no: usize,
+        pages_amount: usize,
+    ) -> Result<Vec<u8>, AzureStorageError> {
+        self.get_pages(start_page_no, pages_amount).await
+    }
+
+    async fn save_pages<'s>(
+        &self,
+        start_page_no: usize,
+        payload: impl Into<AsSliceOrVec<'s, u8>> + Send + Sync + 'static,
+    ) -> Result<(), AzureStorageError> {
+        self.save_pages(start_page_no, payload).await
+    }
+
+    async fn delete(&self) -> Result<(), AzureStorageError> {
+        self.delete().await
+    }
+    async fn download(&self) -> Result<Vec<u8>, AzureStorageError> {
+        self.download().await
+    }
+
+    async fn get_blob_properties(&self) -> Result<BlobProperties, AzureStorageError> {
+        self.get_blob_properties().await
     }
 }
 fn generate_id() -> String {
