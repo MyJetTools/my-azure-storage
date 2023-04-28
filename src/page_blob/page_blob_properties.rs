@@ -2,6 +2,7 @@ use crate::blob::BlobProperties;
 
 use super::consts::BLOB_PAGE_SIZE;
 
+#[derive(Debug, Clone)]
 pub struct PageBlobProperties {
     pub blob_properties: BlobProperties,
 }
