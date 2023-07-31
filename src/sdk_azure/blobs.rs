@@ -48,8 +48,8 @@ impl<'s> AzureBlobsListReader<'s> {
 
         let response = fl_url
             .append_path_segment(self.container_name)
-            .append_query_param("comp", "list")
-            .append_query_param("restype", "container")
+            .append_query_param("comp", Some("list"))
+            .append_query_param("restype", Some("container"))
             .add_azure_headers(
                 SignVerb::GET,
                 self.connection,

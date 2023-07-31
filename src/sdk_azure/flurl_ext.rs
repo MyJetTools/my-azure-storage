@@ -36,23 +36,23 @@ impl FlUrlAzureExtensions for FlUrl {
         let date = now.to_rfc2822().replace("+0000", "GMT");
 
         self = match content_len {
-            Some(size) => self.with_header_val_string("Content-Length", size.to_string()),
+            Some(size) => self.with_header("Content-Length", size.to_string()),
             None => self.with_header("Content-Length", "0"),
         };
 
         let mut flurl = self
-            .append_query_param("timeout", connection.time_out_as_string.as_str())
-            .append_query_param("maxresults", "100")
+            .append_query_param("timeout", Some(connection.time_out_as_string.as_str()))
+            .append_query_param("maxresults", Some("100"))
             .with_header("x-ms-date", date.as_str())
             .with_header("x-ms-version", azure_rest_version);
 
         if let Some(next_marker) = next_marker {
-            flurl = flurl.append_query_param_string("marker", next_marker);
+            flurl = flurl.append_query_param("marker", Some(next_marker));
         }
 
         let auth_key = connection.get_auth_header(verb, content_len, &flurl);
 
-        flurl.with_header_val_string("Authorization", auth_key)
+        flurl.with_header("Authorization", auth_key)
     }
 
     #[cfg(feature = "table-storage")]

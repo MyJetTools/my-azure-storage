@@ -49,8 +49,8 @@ pub async fn resize_page_blob(
     fl_url
         .append_path_segment(container_name)
         .append_path_segment(blob_name)
-        .append_query_param("comp", "properties")
-        .with_header_val_string("x-ms-blob-content-length", new_size.to_string())
+        .append_query_param("comp", Some("properties"))
+        .with_header("x-ms-blob-content-length", new_size.to_string())
         .with_header("x-ms-blob-type", "PageBlob")
         .add_azure_headers(SignVerb::PUT, &connection, None, None, AZURE_REST_VERSION)
         .put(None)
@@ -81,9 +81,9 @@ pub async fn save_pages<'s>(
     fl_url
         .append_path_segment(container_name)
         .append_path_segment(blob_name)
-        .append_query_param("comp", "page")
+        .append_query_param("comp", Some("page"))
         .with_header("x-ms-page-write", "update")
-        .with_header_val_string("x-ms-range", range_header)
+        .with_header("x-ms-range", range_header)
         .add_azure_headers(
             SignVerb::PUT,
             &connection,
@@ -119,7 +119,7 @@ pub async fn get_pages(
     let response = fl_url
         .append_path_segment(container_name)
         .append_path_segment(blob_name)
-        .with_header_val_string("x-ms-range", range_header)
+        .with_header("x-ms-range", range_header)
         .add_azure_headers(SignVerb::GET, &connection, None, None, AZURE_REST_VERSION)
         .get()
         .await?
@@ -142,7 +142,7 @@ pub async fn create_page_blob(
     fl_url
         .append_path_segment(container_name)
         .append_path_segment(blob_name)
-        .with_header_val_string("x-ms-blob-content-length", new_size.to_string())
+        .with_header("x-ms-blob-content-length", new_size.to_string())
         .with_header("x-ms-blob-type", "PageBlob")
         .add_azure_headers(SignVerb::PUT, &connection, None, None, AZURE_REST_VERSION)
         .put(None)

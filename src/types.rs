@@ -39,6 +39,9 @@ impl From<flurl::FlUrlError> for AzureStorageError {
         match err {
             flurl::FlUrlError::HyperError(err) => AzureStorageError::HyperError(err),
             flurl::FlUrlError::Timeout => AzureStorageError::Timeout,
+            flurl::FlUrlError::SerializationError(err) => AzureStorageError::UnknownError {
+                msg: format!("Can not serialize payload: {:?}", err),
+            },
         }
     }
 }

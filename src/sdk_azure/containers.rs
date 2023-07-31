@@ -41,7 +41,7 @@ impl<'s> AzureContainersListReader<'s> {
         let next_marker = self.get_next_marker();
 
         let mut response = fl_url
-            .append_query_param("comp", "list")
+            .append_query_param("comp", Some("list"))
             .add_azure_headers(
                 super::sign_utils::SignVerb::GET,
                 self.connection,
@@ -84,7 +84,7 @@ pub async fn create_if_not_exists(
 
     fl_url
         .append_path_segment(container_name)
-        .append_query_param("restype", "container")
+        .append_query_param("restype", Some("container"))
         .add_azure_headers(
             super::sign_utils::SignVerb::PUT,
             connection,
@@ -108,7 +108,7 @@ pub async fn delete(
 
     fl_url
         .append_path_segment(container_name)
-        .append_query_param("restype", "container")
+        .append_query_param("restype", Some("container"))
         .add_azure_headers(
             super::sign_utils::SignVerb::DELETE,
             connection,
@@ -132,7 +132,7 @@ pub async fn delete_if_exists(
 
     fl_url
         .append_path_segment(container_name)
-        .append_query_param("restype", "container")
+        .append_query_param("restype", Some("container"))
         .add_azure_headers(
             super::sign_utils::SignVerb::DELETE,
             connection,

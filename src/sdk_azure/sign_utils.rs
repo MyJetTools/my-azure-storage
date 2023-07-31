@@ -136,7 +136,7 @@ mod tests {
     }
     #[test]
     pub fn test_canonical_resources_builder_list_of_blobs_usecase() {
-        let flurl = FlUrl::new("https://127.0.0.1").append_query_param("comp", "list");
+        let flurl = FlUrl::new("https://127.0.0.1").append_query_param("comp", Some("list"));
 
         let msft_canonical_resources = get_canonicalized_resource(&flurl, "contosorest");
 
@@ -147,7 +147,7 @@ mod tests {
     pub fn test_auth_header_to_sign() {
         let flurl = FlUrl::new("https://127.0.0.1")
             .with_header("x-ms-date", "Fri, 17 Nov 2017 01:07:37 GMT")
-            .append_query_param("comp", "list")
+            .append_query_param("comp", Some("list"))
             .with_header("x-ms-version", "2017-07-29");
 
         let header_to_sign = get_auth_header("contosorest", "0", SignVerb::GET, &flurl);
