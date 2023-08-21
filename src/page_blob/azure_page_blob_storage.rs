@@ -98,33 +98,6 @@ pub trait MyAzurePageBlobStorage {
         Ok(())
     }
 
-    async fn get_blob_properties_or_create_blob(
-        &self,
-        init_pages_amount: usize,
-    ) -> Result<PageBlobProperties, AzureStorageError> {
-        match self.get_blob_properties().await {
-            Ok(result) => {
-                return Ok(result.into());
-            }
-            Err(err) => match &err {
-                AzureStorageError::ContainerNotFound => {
-                    self.create_container_if_not_exists().await?;
-                    self.create(init_pages_amount).await?;
-                    return Ok(PageBlobProperties::new(BlobProperties {
-                        blob_size: init_pages_amount * BLOB_PAGE_SIZE,
-                    }));
-                }
-                AzureStorageError::BlobNotFound => {
-                    self.create(init_pages_amount).await?;
-                    return Ok(PageBlobProperties::new(BlobProperties {
-                        blob_size: init_pages_amount * BLOB_PAGE_SIZE,
-                    }));
-                }
-                _ => return Err(err),
-            },
-        }
-    }
-
     async fn delete(&self) -> Result<(), AzureStorageError>;
     async fn download(&self) -> Result<Vec<u8>, AzureStorageError>;
 
