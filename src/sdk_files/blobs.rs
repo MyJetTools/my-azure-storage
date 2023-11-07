@@ -13,22 +13,43 @@ pub async fn get_list<TFileConnectionInfo: FileConnectionInfo>(
 
     let mut result = Vec::new();
 
-    for entry in std::fs::read_dir(container_path.as_str()).unwrap() {
-        if let Ok(entity) = entry {
-            let file_type = entity.file_type().unwrap();
+    let mut read_dir = tokio::fs::read_dir(container_path.as_str()).await.unwrap();
 
-            if file_type.is_file() {
-                let path = entity.path();
+    while let Ok(entry) = read_dir.next_entry().await {
+        if entry.is_none() {
+            break;
+        }
 
-                let path = format!("{}", path.display());
+        let entry = entry.unwrap();
 
-                result.push(
-                    super::utils::extract_file_name(path.as_str(), path_separator).to_string(),
-                );
-            }
+        let file_type = entry.file_type().await.unwrap();
+
+        if file_type.is_file() {
+            let path = entry.path();
+
+            let path = format!("{}", path.display());
+
+            result.push(super::utils::extract_file_name(path.as_str(), path_separator).to_string());
         }
     }
 
+    /*
+       for entry in tokio::fs::read_dir(container_path.as_str()).await {
+           if let Ok(entity) = entry {
+               let file_type = entity.file_type().unwrap();
+
+               if file_type.is_file() {
+                   let path = entity.path();
+
+                   let path = format!("{}", path.display());
+
+                   result.push(
+                       super::utils::extract_file_name(path.as_str(), path_separator).to_string(),
+                   );
+               }
+           }
+       }
+    */
     Ok(result)
 }
 
