@@ -9,7 +9,7 @@ pub enum AzureStorageError {
     RequestBodyTooLarge,
     InvalidResourceName,
     IoError(std::io::Error),
-    HyperError(hyper::Error),
+    HyperError(flurl::hyper::Error),
     Timeout,
     UnknownError { msg: String },
 }
