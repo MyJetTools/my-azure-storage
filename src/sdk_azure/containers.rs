@@ -52,7 +52,7 @@ impl<'s> AzureContainersListReader<'s> {
             .get()
             .await?;
 
-        let body = response.get_body().await?;
+        let body = response.get_body_as_slice().await?;
 
         let azure_response = super::models::deserialize_list_of_containers(body.as_ref());
 
