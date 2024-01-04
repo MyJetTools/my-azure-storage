@@ -1,7 +1,6 @@
-use crate::connection::AzureStorageConnectionData;
+use crate::{connection::AzureStorageConnectionData, sdk_azure::sign_utils};
 
 use super::sign_utils::SignVerb;
-use chrono::Utc;
 use flurl::FlUrl;
 
 pub trait FlUrlAzureExtensions {
@@ -31,9 +30,9 @@ impl FlUrlAzureExtensions for FlUrl {
         next_marker: Option<String>,
         azure_rest_version: &str,
     ) -> Self {
-        let now = Utc::now();
+        let date = sign_utils::get_now_date();
 
-        let date = now.to_rfc2822().replace("+0000", "GMT");
+        let date = date.as_str();
 
         self = match content_len {
             Some(size) => self.with_header("Content-Length", size.to_string()),
@@ -43,7 +42,7 @@ impl FlUrlAzureExtensions for FlUrl {
         let mut flurl = self
             .append_query_param("timeout", Some(connection.time_out_as_string.as_str()))
             .append_query_param("maxresults", Some("100"))
-            .with_header("x-ms-date", date.as_str())
+            .with_header("x-ms-date", date)
             .with_header("x-ms-version", azure_rest_version);
 
         if let Some(next_marker) = next_marker {

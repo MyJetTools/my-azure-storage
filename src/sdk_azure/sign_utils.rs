@@ -1,7 +1,7 @@
 use std::collections::BTreeMap;
 
 use hmac::{Hmac, Mac};
-use rust_extensions::StringBuilder;
+use rust_extensions::{date_time::DateTimeAsMicroseconds, StringBuilder};
 use sha2::Sha256;
 
 use flurl::FlUrl;
@@ -17,7 +17,7 @@ pub enum SignVerb {
 }
 
 impl SignVerb {
-    pub fn to_string(&self) -> &str {
+    pub fn as_str(&self) -> &str {
         match self {
             SignVerb::GET => "GET",
             SignVerb::POST => "POST",
@@ -26,6 +26,11 @@ impl SignVerb {
             SignVerb::HEAD => "HEAD",
         }
     }
+}
+
+pub fn get_now_date() -> String {
+    let now = DateTimeAsMicroseconds::now();
+    now.to_rfc7231()
 }
 
 pub fn get_auth_header(
@@ -43,7 +48,7 @@ pub fn get_auth_header(
 
     let result = format!(
         "{}\n\n\n{}\n{}\n\n\n\n{}\n\n\n\n{}{}",
-        verb.to_string(),
+        verb.as_str(),
         content_len,
         content_md5,
         if_match,
@@ -83,8 +88,8 @@ fn get_canonicalized_headers(flurl: &FlUrl) -> String {
     let mut sorted: BTreeMap<String, &str> = BTreeMap::new();
 
     for (key, value) in &flurl.headers {
-        if key.starts_with("x-ms-") {
-            sorted.insert(key.to_lowercase(), value.as_str());
+        if key.as_str().starts_with("x-ms-") {
+            sorted.insert(key.as_str().to_lowercase(), value.as_str());
         }
     }
 
