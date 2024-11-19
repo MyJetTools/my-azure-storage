@@ -10,16 +10,16 @@ pub struct AzureResponseHandler {
 
 impl<'t> AzureResponseHandler {
     pub fn new(fl_response: FlUrlResponse) -> Self {
-        let mut result = AzureResponseHandler {
-            headers: HashMap::new(),
+        let mut headers = HashMap::new();
+        for (key, value) in fl_response.get_headers().iter() {
+            if let Some(value) = value {
+                headers.insert(key.to_string(), value.to_string());
+            }
+        }
+        Self {
+            headers,
             fl_response,
-        };
-
-        result
-            .fl_response
-            .fill_headers_to_hashmap(&mut result.headers);
-
-        result
+        }
     }
 
     pub fn get_header(&'t self, header_name: &'t str) -> Result<&'t String, AzureStorageError> {

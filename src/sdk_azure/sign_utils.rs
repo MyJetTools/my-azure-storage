@@ -1,7 +1,7 @@
 use std::collections::BTreeMap;
 
 use hmac::{Hmac, Mac};
-use rust_extensions::{date_time::DateTimeAsMicroseconds, StringBuilder};
+use rust_extensions::{date_time::DateTimeAsMicroseconds, StrOrString, StringBuilder};
 use sha2::Sha256;
 
 use flurl::FlUrl;
@@ -66,19 +66,23 @@ pub fn get_canonicalized_resource(flurl: &FlUrl, account_name: &str) -> String {
 
     sb.append_str(account_name);
 
-    sb.append_str(flurl.url.get_path().as_str());
+    sb.append_str(flurl.url.get_path());
 
-    let mut sorted_query: BTreeMap<&str, &str> = BTreeMap::new();
+    let mut sorted_query: BTreeMap<&str, StrOrString> = BTreeMap::new();
 
-    for (key, value) in &flurl.url.query {
-        sorted_query.insert(key, value.as_ref().unwrap());
+    if let Some(query) = flurl.url.iter_query() {
+        for (key, value) in query {
+            if let Some(value) = value {
+                sorted_query.insert(key, value);
+            }
+        }
     }
 
     for (key, value) in sorted_query {
         sb.append_char('\n');
         sb.append_str(key.to_lowercase().as_str());
         sb.append_char(':');
-        sb.append_str(value);
+        sb.append_str(value.as_str());
     }
 
     return sb.to_string_utf8();
@@ -87,9 +91,9 @@ pub fn get_canonicalized_resource(flurl: &FlUrl, account_name: &str) -> String {
 fn get_canonicalized_headers(flurl: &FlUrl) -> String {
     let mut sorted: BTreeMap<String, &str> = BTreeMap::new();
 
-    for (key, value) in &flurl.headers {
-        if key.as_str().starts_with("x-ms-") {
-            sorted.insert(key.as_str().to_lowercase(), value.as_str());
+    for (key, value) in flurl.headers.iter() {
+        if key.starts_with("x-ms-") {
+            sorted.insert(key.to_lowercase(), value);
         }
     }
 
