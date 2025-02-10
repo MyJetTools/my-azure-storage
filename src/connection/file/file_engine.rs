@@ -1,6 +1,6 @@
 use std::io::SeekFrom;
 
-use rust_extensions::AsSliceOrVec;
+use rust_extensions::SliceOrVec;
 use tokio::fs::{self, File, OpenOptions};
 use tokio::io::{AsyncReadExt, AsyncSeekExt, AsyncWriteExt};
 
@@ -104,7 +104,7 @@ impl PageBlobFileEngine {
     pub async fn upload<'s>(
         &mut self,
         start_page: usize,
-        payload: impl Into<AsSliceOrVec<'s, u8>>,
+        payload: impl Into<SliceOrVec<'s, u8>>,
     ) -> Result<(), AzureStorageError> {
         let file_access = self.get_file_mut().await?;
 
@@ -245,7 +245,7 @@ impl PageBlobFileEngine {
     pub async fn save_pages<'s>(
         &mut self,
         start_page_no: usize,
-        payload: impl Into<AsSliceOrVec<'s, u8>>,
+        payload: impl Into<SliceOrVec<'s, u8>>,
     ) -> Result<(), AzureStorageError> {
         let file = self.get_file_mut().await?;
         let pos = BLOB_PAGE_SIZE * start_page_no;

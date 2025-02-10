@@ -1,11 +1,11 @@
-use rust_extensions::AsSliceOrVec;
+use rust_extensions::SliceOrVec;
 
 #[derive(Clone)]
 pub struct PageBlobContentToUpload(Vec<u8>);
 
 impl PageBlobContentToUpload {
-    pub fn new<'s>(content: impl Into<AsSliceOrVec<'s, u8>>, fill_byte: u8) -> Self {
-        let content: AsSliceOrVec<'_, u8> = content.into();
+    pub fn new<'s>(content: impl Into<SliceOrVec<'s, u8>>, fill_byte: u8) -> Self {
+        let content: SliceOrVec<'_, u8> = content.into();
 
         let mut content = content.into_vec();
 
@@ -31,8 +31,8 @@ impl PageBlobContentToUpload {
     }
 }
 
-impl<'s> Into<AsSliceOrVec<'s, u8>> for PageBlobContentToUpload {
-    fn into(self) -> AsSliceOrVec<'s, u8> {
-        AsSliceOrVec::AsVec(self.0)
+impl<'s> Into<SliceOrVec<'s, u8>> for PageBlobContentToUpload {
+    fn into(self) -> SliceOrVec<'s, u8> {
+        SliceOrVec::AsVec(self.0)
     }
 }

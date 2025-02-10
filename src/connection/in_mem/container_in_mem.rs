@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use rust_extensions::AsSliceOrVec;
+use rust_extensions::SliceOrVec;
 use tokio::sync::RwLock;
 
 use crate::{blob::BlobProperties, page_blob::consts::BLOB_PAGE_SIZE, AzureStorageError};
@@ -71,7 +71,7 @@ impl ContainerInMem {
     pub async fn upload_block_blob<'s>(
         &self,
         blob_name: String,
-        content: impl Into<AsSliceOrVec<'s, u8>>,
+        content: impl Into<SliceOrVec<'s, u8>>,
     ) {
         let content = content.into().into_vec();
         let mut write_access = self.blobs.write().await;
@@ -130,7 +130,7 @@ impl ContainerInMem {
         &self,
         blob_name: &str,
         start_page_no: usize,
-        content: impl Into<AsSliceOrVec<'s, u8>>,
+        content: impl Into<SliceOrVec<'s, u8>>,
     ) -> Result<(), AzureStorageError> {
         let mut write_access = self.blobs.write().await;
 

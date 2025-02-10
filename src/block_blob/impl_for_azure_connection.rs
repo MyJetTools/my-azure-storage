@@ -1,5 +1,5 @@
 use async_trait::async_trait;
-use rust_extensions::AsSliceOrVec;
+use rust_extensions::SliceOrVec;
 
 use crate::{connection::AzureStorageConnection, types::AzureStorageError};
 
@@ -11,7 +11,7 @@ impl BlockBlobApi for AzureStorageConnection {
         &self,
         container_name: &str,
         blob_name: &str,
-        content: impl Into<AsSliceOrVec<'s, u8>> + Send + Sync + 'static,
+        content: impl Into<SliceOrVec<'s, u8>> + Send + Sync + 'static,
     ) -> Result<(), AzureStorageError> {
         match self {
             AzureStorageConnection::AzureStorage(connection_data) => {

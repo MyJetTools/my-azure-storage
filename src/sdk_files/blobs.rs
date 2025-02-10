@@ -1,4 +1,4 @@
-use rust_extensions::AsSliceOrVec;
+use rust_extensions::SliceOrVec;
 
 use crate::{blob::BlobProperties, AzureStorageError};
 
@@ -121,7 +121,7 @@ pub async fn upload<'s, TFileConnectionInfo: FileConnectionInfo>(
     connection_data: &TFileConnectionInfo,
     container_name: &str,
     blob_name: &str,
-    content: impl Into<AsSliceOrVec<'s, u8>>,
+    content: impl Into<SliceOrVec<'s, u8>>,
 ) -> Result<(), AzureStorageError> {
     let file_name =
         crate::sdk_files::utils::compile_blob_path(connection_data, container_name, blob_name);

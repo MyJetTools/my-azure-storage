@@ -1,5 +1,5 @@
 use async_trait::async_trait;
-use rust_extensions::AsSliceOrVec;
+use rust_extensions::SliceOrVec;
 
 use crate::types::AzureStorageError;
 
@@ -9,6 +9,6 @@ pub trait BlockBlobApi {
         &self,
         container_name: &str,
         blob_name: &str,
-        content: impl Into<AsSliceOrVec<'s, u8>> + Send + Sync + 'static,
+        content: impl Into<SliceOrVec<'s, u8>> + Send + Sync + 'static,
     ) -> Result<(), AzureStorageError>;
 }

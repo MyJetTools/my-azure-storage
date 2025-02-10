@@ -1,4 +1,4 @@
-use rust_extensions::AsSliceOrVec;
+use rust_extensions::SliceOrVec;
 
 use crate::{blob::BlobProperties, page_blob::consts::BLOB_PAGE_SIZE, AzureStorageError};
 
@@ -69,7 +69,7 @@ impl PageBlobInMem {
     pub fn save_pages<'s>(
         &mut self,
         start_page_no: usize,
-        payload: impl Into<AsSliceOrVec<'s, u8>>,
+        payload: impl Into<SliceOrVec<'s, u8>>,
     ) -> Result<(), AzureStorageError> {
         let payload = payload.into();
 

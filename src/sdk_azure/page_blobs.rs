@@ -1,5 +1,5 @@
 use flurl::FlUrl;
-use rust_extensions::AsSliceOrVec;
+use rust_extensions::SliceOrVec;
 
 use super::azure_response_handler::ToAzureResponseHandler;
 use super::consts::AZURE_REST_VERSION;
@@ -66,7 +66,7 @@ pub async fn save_pages<'s>(
     container_name: &str,
     blob_name: &str,
     start_page_no: usize,
-    payload: impl Into<AsSliceOrVec<'s, u8>>,
+    payload: impl Into<SliceOrVec<'s, u8>>,
 ) -> Result<(), AzureStorageError> {
     let start_bytes = start_page_no * BLOB_PAGE_SIZE;
 

@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use rust_extensions::{AsSliceOrVec, StrOrString};
+use rust_extensions::{SliceOrVec, StrOrString};
 
 use crate::{blob::BlobProperties, AzureStorageConnection, AzureStorageError};
 
@@ -57,7 +57,7 @@ pub trait MyAzurePageBlobStorage {
     async fn save_pages<'s>(
         &self,
         start_page_no: usize,
-        payload: impl Into<AsSliceOrVec<'s, u8>> + Send + Sync + 'static,
+        payload: impl Into<SliceOrVec<'s, u8>> + Send + Sync + 'static,
     ) -> Result<(), AzureStorageError>;
 
     async fn save_pages_ext(
@@ -320,7 +320,7 @@ impl AzurePageBlobStorage {
     pub async fn save_pages<'s>(
         &self,
         start_page_no: usize,
-        payload: impl Into<AsSliceOrVec<'s, u8>>,
+        payload: impl Into<SliceOrVec<'s, u8>>,
     ) -> Result<(), AzureStorageError> {
         match self.connection.as_ref() {
             AzureStorageConnection::AzureStorage(connection_data) => {
@@ -541,7 +541,7 @@ impl MyAzurePageBlobStorage for AzurePageBlobStorage {
     async fn save_pages<'s>(
         &self,
         start_page_no: usize,
-        payload: impl Into<AsSliceOrVec<'s, u8>> + Send + Sync + 'static,
+        payload: impl Into<SliceOrVec<'s, u8>> + Send + Sync + 'static,
     ) -> Result<(), AzureStorageError> {
         self.save_pages(start_page_no, payload).await
     }
