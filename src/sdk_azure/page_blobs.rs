@@ -1,3 +1,4 @@
+use flurl::body::FlUrlBody;
 use flurl::FlUrl;
 use rust_extensions::SliceOrVec;
 
@@ -53,7 +54,7 @@ pub async fn resize_page_blob(
         .with_header("x-ms-blob-content-length", new_size.to_string())
         .with_header("x-ms-blob-type", "PageBlob")
         .add_azure_headers(SignVerb::PUT, &connection, None, None, AZURE_REST_VERSION)
-        .put(None)
+        .put(FlUrlBody::Empty)
         .await?
         .to_azure_response_handler()
         .check_if_there_is_an_error()?;
@@ -91,7 +92,10 @@ pub async fn save_pages<'s>(
             None,
             AZURE_REST_VERSION,
         )
-        .put(Some(payload))
+        .put(FlUrlBody::Raw {
+            data: payload,
+            content_type: None,
+        })
         .await?
         .to_azure_response_handler()
         .check_if_there_is_an_error()?;
@@ -145,7 +149,7 @@ pub async fn create_page_blob(
         .with_header("x-ms-blob-content-length", new_size.to_string())
         .with_header("x-ms-blob-type", "PageBlob")
         .add_azure_headers(SignVerb::PUT, &connection, None, None, AZURE_REST_VERSION)
-        .put(None)
+        .put(FlUrlBody::Empty)
         .await?
         .to_azure_response_handler()
         .check_if_there_is_an_error()?;

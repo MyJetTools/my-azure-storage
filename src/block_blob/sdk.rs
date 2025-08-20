@@ -5,6 +5,7 @@ use crate::{connection::AzureStorageConnectionData, types::AzureStorageError};
 
 use crate::sdk_azure::consts::AZURE_REST_VERSION;
 
+use flurl::body::FlUrlBody;
 use flurl::FlUrl;
 use rust_extensions::SliceOrVec;
 
@@ -29,7 +30,10 @@ pub async fn upload_block_blob<'s>(
             None,
             AZURE_REST_VERSION,
         )
-        .put(Some(content))
+        .put(FlUrlBody::Raw {
+            data: content,
+            content_type: None,
+        })
         .await?
         .to_azure_response_handler()
         .check_if_there_is_an_error()?;

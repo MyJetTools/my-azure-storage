@@ -1,5 +1,5 @@
 use crate::{connection::AzureStorageConnectionData, AzureStorageError};
-use flurl::{FlUrl, FlUrlError};
+use flurl::{body::FlUrlBody, FlUrl, FlUrlError};
 
 use super::{
     azure_response_handler::ToAzureResponseHandler, flurl_ext::FlUrlAzureExtensions,
@@ -92,7 +92,7 @@ pub async fn create_if_not_exists(
             None,
             AZURE_REST_VERSION,
         )
-        .put(None)
+        .put(FlUrlBody::Empty)
         .await?
         .to_azure_response_handler()
         .check_if_there_is_an_error_and_ignore_one(AzureStorageError::ContainerAlreadyExists)?;
