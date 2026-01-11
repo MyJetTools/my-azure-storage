@@ -122,7 +122,7 @@ impl BlobApi for AzureStorageConnection {
 
                 container.delete(blob_name).await;
 
-                return Err(AzureStorageError::BlobNotFound);
+                Ok(())
             }
         }
     }

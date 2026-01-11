@@ -90,11 +90,11 @@ impl crate::AzureStorageConnectionData {
             .append_raw_ending(raw_ending.as_str())
             .add_table_storage_azure_headers(self, None);
 
-        let result = fl_url.get().await.unwrap();
+        let mut result = fl_url.get().await?;
 
         let status_code = result.get_status_code();
 
-        let body = result.receive_body().await.unwrap();
+        let body = result.receive_body().await?;
 
         if status_code == 200 {
             return Ok(Some(TResult::create(JsonFirstLineReader::new(

@@ -1,9 +1,11 @@
 use std::sync::Arc;
 
 use crate::{
+    connection::in_mem,
     sdk_azure::table_storage::{TableEntitiesChunk, TableNamesChunk},
     AzureStorageConnection,
 };
+use my_json::json_reader::JsonFirstLineReader;
 
 use super::{TableStorageEntity, TableStorageError};
 
@@ -22,20 +24,20 @@ impl<TEntity: TableStorageEntity> TableStorage<TEntity> {
         }
     }
 
-    pub async fn crate_table(&self) -> Result<(), TableStorageError> {
+    pub async fn create_table(&self) -> Result<(), TableStorageError> {
         match self.connection.as_ref() {
             AzureStorageConnection::AzureStorage(data) => data.create_table(&self.table_name).await,
             AzureStorageConnection::File(_data) => {
-                todo!("Not implemented yet");
+                crate::sdk_files::table_storage::create_table(_data, &self.table_name).await
             }
-            AzureStorageConnection::InMemory(_data) => {
-                todo!("Not implemented yet");
+            AzureStorageConnection::InMemory(data) => {
+                data.create_table(self.table_name.as_str()).await
             }
         }
     }
 
-    pub async fn crate_table_if_not_exists(&self) -> Result<(), TableStorageError> {
-        match self.crate_table().await {
+    pub async fn create_table_if_not_exists(&self) -> Result<(), TableStorageError> {
+        match self.create_table().await {
             Ok(_) => Ok(()),
             Err(err) => match err {
                 TableStorageError::TableAlreadyExists => Ok(()),
@@ -48,10 +50,16 @@ impl<TEntity: TableStorageEntity> TableStorage<TEntity> {
         match self.connection.as_ref() {
             AzureStorageConnection::AzureStorage(data) => data.get_list_of_tables().await,
             AzureStorageConnection::File(_data) => {
-                todo!("Not implemented yet");
+                let tables = crate::sdk_files::table_storage::list_tables(_data).await?;
+                Ok(tables.map(TableNamesChunk::from_list))
             }
-            AzureStorageConnection::InMemory(_data) => {
-                todo!("Not implemented yet");
+            AzureStorageConnection::InMemory(data) => {
+                let tables = data.get_table_list().await;
+                if tables.is_empty() {
+                    Ok(None)
+                } else {
+                    Ok(Some(TableNamesChunk::from_list(tables)))
+                }
             }
         }
     }
@@ -66,11 +74,21 @@ impl<TEntity: TableStorageEntity> TableStorage<TEntity> {
                 data.get_table_storage_entity(&self.table_name, partition_key, row_key)
                     .await
             }
-            AzureStorageConnection::File(_data) => {
-                todo!("Not implemented yet");
-            }
-            AzureStorageConnection::InMemory(_data) => {
-                todo!("Not implemented yet");
+            AzureStorageConnection::File(_data) => crate::sdk_files::table_storage::get_entity(
+                _data,
+                &self.table_name,
+                partition_key,
+                row_key,
+            ),
+            AzureStorageConnection::InMemory(data) => {
+                let table = in_mem::operations::get_table(data, self.table_name.as_str()).await?;
+                if let Some(payload) = table.get_entity(partition_key, row_key).await {
+                    Ok(Some(TEntity::create(JsonFirstLineReader::new(
+                        payload.as_slice(),
+                    ))))
+                } else {
+                    Ok(None)
+                }
             }
         }
     }
@@ -85,10 +103,30 @@ impl<TEntity: TableStorageEntity> TableStorage<TEntity> {
                     .await
             }
             AzureStorageConnection::File(_data) => {
-                todo!("Not implemented yet");
+                match crate::sdk_files::table_storage::get_by_partition::<_, TEntity>(
+                    _data,
+                    &self.table_name,
+                    partition_key,
+                )
+                .await?
+                {
+                    Some(items) => Ok(Some(TableEntitiesChunk::from_items(items))),
+                    None => Ok(None),
+                }
             }
-            AzureStorageConnection::InMemory(_data) => {
-                todo!("Not implemented yet");
+            AzureStorageConnection::InMemory(data) => {
+                let table = in_mem::operations::get_table(data, self.table_name.as_str()).await?;
+                match table.get_by_partition(partition_key).await {
+                    Some(payloads) => {
+                        let entities = payloads
+                            .into_iter()
+                            .map(|p| TEntity::create(JsonFirstLineReader::new(p.as_slice())))
+                            .collect();
+
+                        Ok(Some(TableEntitiesChunk::from_items(entities)))
+                    }
+                    None => Ok(None),
+                }
             }
         }
     }
@@ -101,10 +139,30 @@ impl<TEntity: TableStorageEntity> TableStorage<TEntity> {
                 data.get_table_storage_all_entities(&self.table_name).await
             }
             AzureStorageConnection::File(_data) => {
-                todo!("Not implemented yet");
+                match crate::sdk_files::table_storage::get_all_entities::<_, TEntity>(
+                    _data,
+                    &self.table_name,
+                )
+                .await?
+                {
+                    Some(items) => Ok(Some(TableEntitiesChunk::from_items(items))),
+                    None => Ok(None),
+                }
             }
-            AzureStorageConnection::InMemory(_data) => {
-                todo!("Not implemented yet");
+            AzureStorageConnection::InMemory(data) => {
+                let table = in_mem::operations::get_table(data, self.table_name.as_str()).await?;
+
+                match table.get_all().await {
+                    Some(payloads) => {
+                        let entities = payloads
+                            .into_iter()
+                            .map(|p| TEntity::create(JsonFirstLineReader::new(p.as_slice())))
+                            .collect();
+
+                        Ok(Some(TableEntitiesChunk::from_items(entities)))
+                    }
+                    None => Ok(None),
+                }
             }
         }
     }
@@ -119,10 +177,19 @@ impl<TEntity: TableStorageEntity> TableStorage<TEntity> {
                     .await
             }
             AzureStorageConnection::File(_data) => {
-                todo!("Not implemented yet");
+                crate::sdk_files::table_storage::insert_or_replace(_data, &self.table_name, entity)
+                    .await
             }
-            AzureStorageConnection::InMemory(_data) => {
-                todo!("Not implemented yet");
+            AzureStorageConnection::InMemory(data) => {
+                let table = in_mem::operations::get_table(data, self.table_name.as_str()).await?;
+
+                let payload = entity.serialize();
+
+                table
+                    .insert_or_replace(entity.get_partition_key(), entity.get_row_key(), payload)
+                    .await;
+
+                Ok(())
             }
         }
     }
@@ -133,10 +200,16 @@ impl<TEntity: TableStorageEntity> TableStorage<TEntity> {
                 data.insert_table_entity(&self.table_name, entity).await
             }
             AzureStorageConnection::File(_data) => {
-                todo!("Not implemented yet");
+                crate::sdk_files::table_storage::insert(_data, &self.table_name, entity).await
             }
-            AzureStorageConnection::InMemory(_data) => {
-                todo!("Not implemented yet");
+            AzureStorageConnection::InMemory(data) => {
+                let table = in_mem::operations::get_table(data, self.table_name.as_str()).await?;
+
+                let payload = entity.serialize();
+
+                table
+                    .insert(entity.get_partition_key(), entity.get_row_key(), payload)
+                    .await
             }
         }
     }
@@ -151,11 +224,16 @@ impl<TEntity: TableStorageEntity> TableStorage<TEntity> {
                 data.delete_table_entity(&self.table_name, partition_key, row_key)
                     .await
             }
-            AzureStorageConnection::File(_data) => {
-                todo!("Not implemented yet");
-            }
-            AzureStorageConnection::InMemory(_data) => {
-                todo!("Not implemented yet");
+            AzureStorageConnection::File(_data) => crate::sdk_files::table_storage::delete_entity(
+                _data,
+                &self.table_name,
+                partition_key,
+                row_key,
+            ),
+            AzureStorageConnection::InMemory(data) => {
+                let table = in_mem::operations::get_table(data, self.table_name.as_str()).await?;
+
+                Ok(table.delete(partition_key, row_key).await)
             }
         }
     }
