@@ -1,6 +1,6 @@
 use std::collections::BTreeMap;
 
-use hmac::{Hmac, Mac};
+use hmac::{Hmac, KeyInit, Mac};
 use rust_extensions::{date_time::DateTimeAsMicroseconds, StrOrString, StringBuilder};
 use sha2::Sha256;
 
